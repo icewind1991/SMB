@@ -28,17 +28,16 @@ class Dir extends Command {
 	protected function parseOutput($lines) {
 		//last line is used space
 		array_pop($lines);
+		$regex = '/^\s*(.*?)\s\s\s\s+(?:([DHARS]*)\s+)?([0-9]+)\s+(.*)$/';
+		//2 spaces, filename, optional type, size, date
 		$content = array();
 		foreach ($lines as $line) {
-			$line = trim($line);
-			if ($line) {
-				list($name, $meta) = explode(" ", $line, 2);
+			if (preg_match($regex,$line,$matches)) {
+				list(,$name, $type, $size, $time)=$matches;
 				if ($name !== '.' and $name !== '..') {
-					list($type, $meta) = explode(" ", trim($meta), 2);
-					list($size, $time) = explode(" ", trim($meta), 2);
 					$content[$name] = array(
 						'size' => intval(trim($size)),
-						'type' => ($type === 'D') ? 'dir' : 'file',
+						'type' => (strpos($type,'D')!==false) ? 'dir' : 'file',
 						'time' => strtotime($time)
 					);
 				}

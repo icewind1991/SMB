@@ -74,4 +74,51 @@ class Test extends PHPUnit_Framework_TestCase {
 		$this->share->del($this->root . '/foo.txt');
 		$this->assertEquals(array(), $this->share->dir($this->root));
 	}
+
+	public function testEscaping() {
+		$names = array('simple', 'with spaces');
+
+		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
+		$tmpFile1 = tempnam('/tmp', 'smb_test_');
+		file_put_contents($tmpFile1, $text);
+
+		foreach ($names as $name) {
+			$this->share->mkdir($this->root . '/' . $name);
+			$dir = $this->share->dir($this->root);
+			$this->assertArrayHasKey($name, $dir);
+			$this->assertEquals('dir', $dir[$name]['type']);
+			$this->assertEquals(array(), $this->share->dir($this->root . '/' . $name));
+
+			$this->share->put($tmpFile1, $this->root . '/' . $name . '/foo.txt');
+			$dir = $this->share->dir($this->root . '/' . $name);
+			$this->assertArrayHasKey('foo.txt', $dir);
+
+			$tmpFile2 = tempnam('/tmp', 'smb_test_');
+			$this->share->get($this->root . '/' . $name . '/foo.txt', $tmpFile2);
+			$this->assertEquals($text, file_get_contents($tmpFile2));
+
+			$this->share->rename($this->root . '/' . $name . '/foo.txt', $this->root . '/' . $name . '/bar.txt');
+			$dir = $this->share->dir($this->root . '/' . $name);
+			$this->assertArrayHasKey('bar.txt', $dir);
+			$this->assertEquals('file', $dir['bar.txt']['type']);
+
+			$this->share->del($this->root . '/' . $name . '/bar.txt');
+			$this->assertEquals(array(), $this->share->dir($this->root . '/' . $name));
+			$this->share->rmdir($this->root . '/' . $name);
+			$this->assertEquals(array(), $this->share->dir($this->root));
+
+			$this->share->put($tmpFile1, $this->root . '/' . $name);
+			$this->assertArrayHasKey($name, $this->share->dir($this->root));
+
+			$tmpFile2 = tempnam('/tmp', 'smb_test_');
+			$this->share->get($this->root . '/' . $name, $tmpFile2);
+			$this->assertEquals($text, file_get_contents($tmpFile2));
+
+			$this->share->del($this->root . '/' . $name);
+
+			$this->assertEquals(array(), $this->share->dir($this->root));
+		}
+
+		unlink($tmpFile1);
+	}
 }
