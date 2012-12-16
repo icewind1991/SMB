@@ -20,10 +20,7 @@ abstract class Double extends Command {
 	public function run($arguments) {
 		$path1 = $this->escapePath($arguments['path1']);
 		$path2 = $this->escapePath($arguments['path2']);
-		$share = $arguments['share'];
-		$postFix = (isset($arguments['postfix'])) ? $arguments['postfix'] : '';
-		$cmd = $this->escape('//' . $this->connection->getHost() . '/' . $share);
-		$cmd .= " -c '" . $this->command . ' ' . $path1 . ' ' . $path2 . $postFix . "'";
+		$cmd = $this->command . ' ' . $path1 . ' ' . $path2;
 		$output = $this->execute($cmd);
 		return $this->parseOutput($output);
 	}

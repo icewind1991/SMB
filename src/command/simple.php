@@ -19,10 +19,7 @@ abstract class Simple extends Command {
 
 	public function run($arguments) {
 		$path = $this->escapePath($arguments['path']);
-		$share = $arguments['share'];
-		$postFix = (isset($arguments['postfix'])) ? $arguments['postfix'] : '';
-		$cmd = $this->escape('//' . $this->connection->getHost() . '/' . $share);
-		$cmd .= " -c '" . $this->command . ' ' . $path . $postFix . "'";
+		$cmd = $this->command . ' ' . $path;
 		$output = $this->execute($cmd);
 		return $this->parseOutput($output);
 	}

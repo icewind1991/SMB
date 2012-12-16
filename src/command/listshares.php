@@ -10,7 +10,9 @@ namespace SMB\Command;
 
 class ListShares extends Command {
 	public function run($arguments) {
-		$output = $this->execute('-gL ' . $this->escape($this->connection->getHost()));
+		$auth = $this->escape($this->connection->getAuthString());
+		$command = self::CLIENT . ' -N -U ' . $auth . ' ' . '-gL ' . $this->escape($this->connection->getHost()) . ' 2> /dev/null';
+		exec($command, $output);
 		return $this->parseOutput($output);
 	}
 

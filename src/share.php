@@ -15,6 +15,19 @@ class Share {
 	private $connection;
 
 	/**
+	 * @var resource $process
+	 */
+	private $process;
+
+	/**
+	 * @var resource[] $pipes
+	 *
+	 * $pipes[0] holds STDIN for smbclient
+	 * $pipes[1] holds STDOUT for smbclient
+	 */
+	private $pipes;
+
+	/**
 	 * @var string $name
 	 */
 	private $name;
@@ -26,6 +39,27 @@ class Share {
 	public function __construct($connection, $name) {
 		$this->connection = $connection;
 		$this->name = $name;
+
+		$descriptorSpec = array(
+			0 => array("pipe", "r"),
+			1 => array("pipe", "w"),
+//			1 => array("file", "/tmp/smbout", 'a'),
+			2 => array("file", "/tmp/smberror", "a")
+		);
+
+		$command = Connection::CLIENT . ' -N -U ' . $this->connection->getAuthString() .
+			' //' . $this->connection->getHost() . '/' . $this->name;
+		$this->process = proc_open($command, $descriptorSpec, $this->pipes, null, array(
+			'CLI_FORCE_INTERACTIVE' => 'y' // Needed or the prompt isn't displayed!!
+		));
+		if (!is_resource($this->process)) {
+			throw new ConnectionError();
+		}
+//		stream_set_blocking($this->pipes[1], 0);
+	}
+
+	public function __destruct() {
+		proc_close($this->process);
 	}
 
 	/**
@@ -35,7 +69,7 @@ class Share {
 	 * @return array
 	 */
 	public function dir($path) {
-		return (new Command\Dir($this->connection))->run(array('path' => $path, 'share' => $this->name));
+		return (new Command\Dir($this))->run(array('path' => $path));
 	}
 
 	/**
@@ -45,7 +79,7 @@ class Share {
 	 * @return bool
 	 */
 	public function mkdir($path) {
-		return (new Command\Mkdir($this->connection))->run(array('path' => $path, 'share' => $this->name));
+		return (new Command\Mkdir($this))->run(array('path' => $path));
 	}
 
 	/**
@@ -55,7 +89,7 @@ class Share {
 	 * @return bool
 	 */
 	public function rmdir($path) {
-		return (new Command\Rmdir($this->connection))->run(array('path' => $path, 'share' => $this->name));
+		return (new Command\Rmdir($this))->run(array('path' => $path));
 	}
 
 	/**
@@ -65,7 +99,7 @@ class Share {
 	 * @return bool
 	 */
 	public function del($path) {
-		return (new Command\Del($this->connection))->run(array('path' => $path, 'share' => $this->name));
+		return (new Command\Del($this))->run(array('path' => $path));
 	}
 
 	/**
@@ -76,7 +110,7 @@ class Share {
 	 * @return bool
 	 */
 	public function rename($from, $to) {
-		return (new Command\Rename($this->connection))->run(array('path1' => $from, 'path2' => $to, 'share' => $this->name));
+		return (new Command\Rename($this))->run(array('path1' => $from, 'path2' => $to));
 	}
 
 	/**
@@ -87,7 +121,7 @@ class Share {
 	 * @return bool
 	 */
 	public function put($source, $target) {
-		return (new Command\Put($this->connection))->run(array('path1' => $source, 'path2' => $target, 'share' => $this->name));
+		return (new Command\Put($this))->run(array('path1' => $source, 'path2' => $target));
 	}
 
 	/**
@@ -98,6 +132,34 @@ class Share {
 	 * @return bool
 	 */
 	public function get($source, $target) {
-		return (new Command\Get($this->connection))->run(array('path1' => $source, 'path2' => $target, 'share' => $this->name));
+		return (new Command\Get($this))->run(array('path1' => $source, 'path2' => $target));
+	}
+
+	/**
+	 * send input to smbclient
+	 *
+	 * @param string $input
+	 */
+	public function write($input) {
+		fwrite($this->pipes[0], $input);
+		fwrite($this->pipes[0], PHP_EOL); //make sure we have a recognizable delimiter
+		fflush($this->pipes[0]);
+	}
+
+	/**
+	 * get all unprocessed output from smbclient
+	 *
+	 * @return array
+	 */
+	public function read() {
+		fgets($this->pipes[1]);//first line is promt
+		$output = array();
+		$line = fgets($this->pipes[1]);
+		while (substr($line, 0, 4) !== 'smb:') { //next prompt functions as delimiter
+			$output[] .= $line;
+			$line = fgets($this->pipes[1]);
+		}
+		return $output;
+//		return explode(PHP_EOL, stream_get_contents($this->pipes[1]));
 	}
 }

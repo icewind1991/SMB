@@ -9,6 +9,8 @@
 namespace SMB;
 
 class Connection {
+	const CLIENT = 'smbclient';
+
 	/**
 	 * @var string $host
 	 */

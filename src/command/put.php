@@ -9,19 +9,10 @@
 namespace SMB\Command;
 
 class Put extends Command {
-	public function __construct($connection) {
-		parent::__construct($connection);
-		$this->command = 'put';
-	}
-
 	public function run($arguments) {
-		$path1 = $this->escape($arguments['path1']); //first path is local, needs different escaping
+		$path1 = $this->escapeLocalPath($arguments['path1']); //first path is local, needs different escaping
 		$path2 = $this->escapePath($arguments['path2']);
-		$share = $arguments['share'];
-		$postFix = (isset($arguments['postfix'])) ? $arguments['postfix'] : '';
-		$cmd = $this->escape('//' . $this->connection->getHost() . '/' . $share);
-		$cmd .= " -c '" . $this->command . ' ' . $path1 . ' ' . $path2 . $postFix . "'";
-		$output = $this->execute($cmd);
+		$output = $this->execute('put ' . $path1 . ' ' . $path2);
 		return $this->parseOutput($output);
 	}
 

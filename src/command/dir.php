@@ -8,15 +8,17 @@
 
 namespace SMB\Command;
 
-class Dir extends Simple {
+class Dir extends Command {
 	public function __construct($connection) {
 		parent::__construct($connection);
-		$this->command = 'cd';
 	}
 
 	public function run($arguments) {
-		$arguments['postfix']=' ; dir';
-		return parent::run($arguments);
+		$path = $this->escapePath($arguments['path']);
+		$this->execute('cd ' . $path);
+		$output = $this->execute('dir');
+		$this->execute('cd /');
+		return $this->parseOutput($output);
 	}
 
 	/**

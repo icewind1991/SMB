@@ -9,18 +9,16 @@
 namespace SMB\Command;
 
 abstract class Command {
-	const CLIENT = 'smbclient';
+	/**
+	 * @var \SMB\Share $connection
+	 */
+	protected $share;
 
 	/**
-	 * @var \SMB\Connection $connection
+	 * @param \SMB\Share $connection
 	 */
-	protected $connection;
-
-	/**
-	 * @param \SMB\Connection $connection
-	 */
-	public function __construct($connection) {
-		$this->connection = $connection;
+	public function __construct($share) {
+		$this->share = $share;
 	}
 
 	/**
@@ -28,9 +26,8 @@ abstract class Command {
 	 * @return array
 	 */
 	protected function execute($command) {
-		$auth = $this->escape($this->connection->getAuthString());
-		$command = self::CLIENT . ' -N -U ' . $auth . ' ' . $command . ' 2> /dev/null';
-		exec($command, $output);
+		$this->share->write($command . PHP_EOL);
+		$output = $this->share->read();
 		return $output;
 	}
 
@@ -56,6 +53,14 @@ abstract class Command {
 	 */
 	public function escapePath($path) {
 		$path = str_replace('/', '\\', $path);
+		return '"' . trim(escapeshellarg($path), "'") . '"';
+	}
+
+	/**
+	 * @param string $path
+	 * @return string
+	 */
+	public function escapeLocalPath($path) {
 		return '"' . trim(escapeshellarg($path), "'") . '"';
 	}
 }

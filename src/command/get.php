@@ -9,19 +9,10 @@
 namespace SMB\Command;
 
 class Get extends Command {
-	public function __construct($connection) {
-		parent::__construct($connection);
-		$this->command = 'get';
-	}
-
 	public function run($arguments) {
 		$path1 = $this->escapePath($arguments['path1']);
-		$path2 = $this->escape($arguments['path2']); //seccond path is local, needs different escaping
-		$share = $arguments['share'];
-		$postFix = (isset($arguments['postfix'])) ? $arguments['postfix'] : '';
-		$cmd = $this->escape('//' . $this->connection->getHost() . '/' . $share);
-		$cmd .= " -c '" . $this->command . ' ' . $path1 . ' ' . $path2 . $postFix . "'";
-		$output = $this->execute($cmd);
+		$path2 = $this->escapeLocalPath($arguments['path2']); //second path is local, needs different escaping
+		$output = $this->execute('get ' . $path1 . ' ' . $path2);
 		return $this->parseOutput($output);
 	}
 

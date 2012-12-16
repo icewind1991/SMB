@@ -16,3 +16,6 @@ class AlreadyExistsException extends \Exception {
 
 class NotEmptyException extends \Exception {
 }
+
+class ConnectionError extends \Exception {
+}
