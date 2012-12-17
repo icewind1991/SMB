@@ -76,7 +76,8 @@ class Test extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testEscaping() {
-		$names = array('simple', 'with spaces');
+		// / ? < > \ : * | ” are illegal characters in path on windows, no use trying to get them working
+		$names = array('simple', 'with spaces', "single'quote'");
 
 		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
 		$tmpFile1 = tempnam('/tmp', 'smb_test_');
@@ -96,6 +97,7 @@ class Test extends PHPUnit_Framework_TestCase {
 			$tmpFile2 = tempnam('/tmp', 'smb_test_');
 			$this->share->get($this->root . '/' . $name . '/foo.txt', $tmpFile2);
 			$this->assertEquals($text, file_get_contents($tmpFile2));
+			unlink($tmpFile2);
 
 			$this->share->rename($this->root . '/' . $name . '/foo.txt', $this->root . '/' . $name . '/bar.txt');
 			$dir = $this->share->dir($this->root . '/' . $name);
@@ -113,8 +115,15 @@ class Test extends PHPUnit_Framework_TestCase {
 			$tmpFile2 = tempnam('/tmp', 'smb_test_');
 			$this->share->get($this->root . '/' . $name, $tmpFile2);
 			$this->assertEquals($text, file_get_contents($tmpFile2));
+			unlink($tmpFile2);
 
 			$this->share->del($this->root . '/' . $name);
+
+			$tmpFile2 = tempnam('/tmp', 'smb_test_' . $name);
+			$this->share->put($tmpFile2, $this->root . '/' . $name);
+			$this->assertArrayHasKey($name, $this->share->dir($this->root));
+			$this->share->del($this->root . '/' . $name);
+			unlink($tmpFile2);
 
 			$this->assertEquals(array(), $this->share->dir($this->root));
 		}

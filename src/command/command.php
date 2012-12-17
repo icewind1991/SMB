@@ -53,7 +53,8 @@ abstract class Command {
 	 */
 	public function escapePath($path) {
 		$path = str_replace('/', '\\', $path);
-		return '"' . trim(escapeshellarg($path), "'") . '"';
+		$path = str_replace('"', '^"', $path);
+		return '"' . $path . '"';
 	}
 
 	/**
@@ -61,6 +62,7 @@ abstract class Command {
 	 * @return string
 	 */
 	public function escapeLocalPath($path) {
-		return '"' . trim(escapeshellarg($path), "'") . '"';
+		$path = str_replace('"', '\"', $path);
+		return '"' . $path . '"';
 	}
 }

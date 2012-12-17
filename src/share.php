@@ -152,7 +152,7 @@ class Share {
 	 * @return array
 	 */
 	public function read() {
-		fgets($this->pipes[1]);//first line is promt
+		fgets($this->pipes[1]);//first line is prompt
 		$output = array();
 		$line = fgets($this->pipes[1]);
 		while (substr($line, 0, 4) !== 'smb:') { //next prompt functions as delimiter
@@ -160,6 +160,5 @@ class Share {
 			$line = fgets($this->pipes[1]);
 		}
 		return $output;
-//		return explode(PHP_EOL, stream_get_contents($this->pipes[1]));
 	}
 }
