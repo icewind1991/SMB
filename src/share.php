@@ -43,10 +43,11 @@ class Share {
 		$descriptorSpec = array(
 			0 => array("pipe", "r"),
 			1 => array("pipe", "w"),
-//			1 => array("file", "/tmp/smbout", 'a'),
 			2 => array("file", "/tmp/smberror", "a")
 		);
 
+		putenv('LC_ALL=' . Connection::LOCALE);
+		setlocale(LC_ALL, Connection::LOCALE);
 		$command = Connection::CLIENT . ' -N -U ' . $this->connection->getAuthString() .
 			' //' . $this->connection->getHost() . '/' . $this->name;
 		$this->process = proc_open($command, $descriptorSpec, $this->pipes, null, array(
@@ -55,7 +56,6 @@ class Share {
 		if (!is_resource($this->process)) {
 			throw new ConnectionError();
 		}
-//		stream_set_blocking($this->pipes[1], 0);
 	}
 
 	public function __destruct() {
@@ -152,7 +152,7 @@ class Share {
 	 * @return array
 	 */
 	public function read() {
-		fgets($this->pipes[1]);//first line is prompt
+		fgets($this->pipes[1]); //first line is prompt
 		$output = array();
 		$line = fgets($this->pipes[1]);
 		while (substr($line, 0, 4) !== 'smb:') { //next prompt functions as delimiter

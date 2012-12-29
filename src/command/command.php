@@ -34,10 +34,30 @@ abstract class Command {
 	abstract public function run($arguments);
 
 	/**
-	 * @param array $lines
-	 * @return mixed
+	 * @param $lines
+	 * @return bool
 	 */
-	abstract protected function parseOutput($lines);
+	protected function parseOutput($lines) {
+		if (count($lines) === 0) {
+			return true;
+		} else {
+			list($error,) = explode(' ', $lines[0]);
+			switch ($error) {
+				case 'NT_STATUS_OBJECT_PATH_NOT_FOUND':
+				case 'NT_STATUS_OBJECT_NAME_NOT_FOUND':
+				case 'NT_STATUS_NO_SUCH_FILE':
+					throw new \SMB\NotFoundException();
+				case 'NT_STATUS_OBJECT_NAME_COLLISION':
+					throw new \SMB\AlreadyExistsException();
+				case 'NT_STATUS_ACCESS_DENIED':
+					throw new \SMB\AccessDeniedException();
+				case 'NT_STATUS_DIRECTORY_NOT_EMPTY':
+					throw new \SMB\NotEmptyException();
+				default:
+					throw new \Exception();
+			}
+		}
+	}
 
 	/**
 	 * @param string $string

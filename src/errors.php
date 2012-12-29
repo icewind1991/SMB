@@ -19,3 +19,6 @@ class NotEmptyException extends \Exception {
 
 class ConnectionError extends \Exception {
 }
+
+class AccessDeniedException extends \Exception {
+}

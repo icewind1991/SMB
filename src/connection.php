@@ -10,6 +10,7 @@ namespace SMB;
 
 class Connection {
 	const CLIENT = 'smbclient';
+	const LOCALE = 'en_US.UTF-8';
 
 	/**
 	 * @var string $host

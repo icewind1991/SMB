@@ -26,14 +26,8 @@ class Put extends Command {
 		} else {
 			if (strpos($lines[0], 'does not exist')) {
 				throw new \SMB\NotFoundException();
-			}
-			list($error,) = explode(' ', $lines[0]);
-			switch ($error) {
-				case 'NT_STATUS_OBJECT_PATH_NOT_FOUND':
-				case 'NT_STATUS_OBJECT_NAME_NOT_FOUND':
-					throw new \SMB\NotFoundException();
-				default:
-					throw new \Exception();
+			} else {
+				parent::parseOutput($lines);
 			}
 		}
 	}
