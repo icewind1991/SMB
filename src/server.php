@@ -46,6 +46,20 @@ class Server {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getUser() {
+		return $this->user;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getPassword(){
+		return $this->password;
+	}
+
+	/**
 	 * return string
 	 */
 	public function getHost() {

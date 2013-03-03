@@ -32,9 +32,10 @@ class Share {
 		$this->server = $server;
 		$this->name = $name;
 
-		$command = Server::CLIENT . ' -N -U ' . $this->server->getAuthString() .
+		$command = Server::CLIENT . ' -U ' . escapeshellarg($this->server->getUser()) .
 			' //' . $this->server->getHost() . '/' . $this->name;
 		$this->connection = new Connection($command);
+		$this->connection->write($this->server->getPassword());
 	}
 
 	public function getName() {
