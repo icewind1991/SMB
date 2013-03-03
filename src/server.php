@@ -8,7 +8,7 @@
 
 namespace SMB;
 
-class Connection {
+class Server {
 	const CLIENT = 'smbclient';
 	const LOCALE = 'en_US.UTF-8';
 

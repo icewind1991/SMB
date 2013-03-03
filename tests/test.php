@@ -2,9 +2,9 @@
 
 class Test extends PHPUnit_Framework_TestCase {
 	/**
-	 * @var SMB\Connection $connection
+	 * @var SMB\Server $server
 	 */
-	private $connection;
+	private $server;
 
 	/**
 	 * @var SMB\Share $share
@@ -17,14 +17,14 @@ class Test extends PHPUnit_Framework_TestCase {
 	private $root;
 
 	public function setUp() {
-		$this->connection = new SMB\Connection('localhost', 'test', 'test');
-		$this->share = $this->connection->getShare('test');
+		$this->server = new SMB\Server('localhost', 'test', 'test');
+		$this->share = $this->server->getShare('test');
 		$this->root = '/' . uniqid();
 		$this->share->mkdir($this->root);
 	}
 
 	public function tearDown() {
-		$this->share->rmdir($this->root);
+//		$this->share->rmdir($this->root);
 	}
 
 	public function testDirectory() {
@@ -77,7 +77,7 @@ class Test extends PHPUnit_Framework_TestCase {
 
 	public function testEscaping() {
 		// / ? < > \ : * | ” are illegal characters in path on windows, no use trying to get them working
-		$names = array('simple', 'with spaces', "single'quote'");
+		$names = array('simple', 'with spaces', "single'quote'", '$as#d');
 
 		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
 		$tmpFile1 = tempnam('/tmp', 'smb_test_');

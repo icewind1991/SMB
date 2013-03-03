@@ -10,9 +10,9 @@ namespace SMB;
 
 class Share {
 	/**
-	 * @var Connection $connection
+	 * @var Server $server
 	 */
-	private $connection;
+	private $server;
 
 	/**
 	 * @var resource $process
@@ -33,23 +33,23 @@ class Share {
 	private $name;
 
 	/**
-	 * @param Connection $connection
+	 * @param Server $server
 	 * @param string $share
 	 */
-	public function __construct($connection, $name) {
-		$this->connection = $connection;
+	public function __construct($server, $name) {
+		$this->server = $server;
 		$this->name = $name;
 
 		$descriptorSpec = array(
 			0 => array("pipe", "r"),
 			1 => array("pipe", "w"),
-			2 => array("file", "/tmp/smberror", "a")
+//			2 => array("file", "/tmp/smberror", "a")
 		);
 
-		putenv('LC_ALL=' . Connection::LOCALE);
-		setlocale(LC_ALL, Connection::LOCALE);
-		$command = Connection::CLIENT . ' -N -U ' . $this->connection->getAuthString() .
-			' //' . $this->connection->getHost() . '/' . $this->name;
+		putenv('LC_ALL=' . Server::LOCALE);
+		setlocale(LC_ALL, Server::LOCALE);
+		$command = Server::CLIENT . ' -N -U ' . $this->server->getAuthString() .
+			' //' . $this->server->getHost() . '/' . $this->name;
 		$this->process = proc_open($command, $descriptorSpec, $this->pipes, null, array(
 			'CLI_FORCE_INTERACTIVE' => 'y' // Needed or the prompt isn't displayed!!
 		));
@@ -160,5 +160,12 @@ class Share {
 			$line = fgets($this->pipes[1]);
 		}
 		return $output;
+	}
+
+	/**
+	 * @return Server
+	 */
+	public function getServer(){
+		return $this->server;
 	}
 }

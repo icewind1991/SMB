@@ -10,12 +10,12 @@ namespace SMB\Command;
 
 abstract class Command {
 	/**
-	 * @var \SMB\Share $connection
+	 * @var \SMB\Share $share
 	 */
 	protected $share;
 
 	/**
-	 * @param \SMB\Share $connection
+	 * @param \SMB\Share $share
 	 */
 	public function __construct($share) {
 		$this->share = $share;

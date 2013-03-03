@@ -8,10 +8,23 @@
 
 namespace SMB\Command;
 
-class ListShares extends Command {
-	public function run($arguments) {
-		$auth = $this->escape($this->connection->getAuthString());
-		$command = self::CLIENT . ' -N -U ' . $auth . ' ' . '-gL ' . $this->escape($this->connection->getHost()) . ' 2> /dev/null';
+class ListShares {
+
+	/**
+	 * @var \SMB\Server $server
+	 */
+	private $server;
+
+	/**
+	 * @param \SMB\Server $server
+	 */
+	public function __construct($server){
+		$this->server=$server;
+	}
+
+	public function run() {
+		$auth = escapeshellarg($this->server->getAuthString());
+		$command = \SMB\Server::CLIENT . ' -N -U ' . $auth . ' ' . '-gL ' . escapeshellarg($this->server->getHost()) . ' 2> /dev/null';
 		exec($command, $output);
 		return $this->parseOutput($output);
 	}

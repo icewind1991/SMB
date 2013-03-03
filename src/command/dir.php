@@ -9,8 +9,8 @@
 namespace SMB\Command;
 
 class Dir extends Command {
-	public function __construct($connection) {
-		parent::__construct($connection);
+	public function __construct($share) {
+		parent::__construct($share);
 	}
 
 	public function run($arguments) {

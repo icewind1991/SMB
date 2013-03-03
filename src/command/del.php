@@ -9,8 +9,8 @@
 namespace SMB\Command;
 
 class Del extends Simple {
-	public function __construct($connection) {
-		parent::__construct($connection);
+	public function __construct($share) {
+		parent::__construct($share);
 		$this->command = 'del';
 	}
 }
