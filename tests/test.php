@@ -87,7 +87,7 @@ class Test extends PHPUnit_Framework_TestCase {
 
 	public function testEscaping() {
 		// / ? < > \ : * | ” are illegal characters in path on windows, no use trying to get them working
-		$names = array('simple', 'with spaces', "single'quote'", '$as#d');
+		$names = array('simple', 'with spaces', "single'quote'", '$as#d', '€', '££Ö€ßœĚęĘĞĜΣΥΦΩΫΫ');
 
 		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
 		$tmpFile1 = tempnam('/tmp', 'smb_test_');
@@ -95,6 +95,7 @@ class Test extends PHPUnit_Framework_TestCase {
 
 		foreach ($names as $name) {
 			$this->share->mkdir($this->root . '/' . $name);
+			$this->share->connect();
 			$dir = $this->share->dir($this->root);
 			$this->assertArrayHasKey($name, $dir);
 			$this->assertEquals('dir', $dir[$name]['type']);

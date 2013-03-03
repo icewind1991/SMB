@@ -38,6 +38,13 @@ class Share {
 		$this->connection->write($this->server->getPassword());
 	}
 
+	public function connect() {
+		$command = Server::CLIENT . ' -U ' . escapeshellarg($this->server->getUser()) .
+			' //' . $this->server->getHost() . '/' . $this->name;
+		$this->connection = new Connection($command);
+		$this->connection->write($this->server->getPassword());
+	}
+
 	public function getName() {
 		return $this->name;
 	}

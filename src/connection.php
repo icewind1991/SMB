@@ -9,6 +9,9 @@
 namespace SMB;
 
 class Connection {
+
+	const DELIMITER = 'smb:';
+
 	/**
 	 * @var resource[] $pipes
 	 *
@@ -26,12 +29,12 @@ class Connection {
 	public function __construct($command) {
 		$descriptorSpec = array(
 			0 => array("pipe", "r"),
-			1 => array("pipe", "w"),
+			1 => array("pipe", "w")
 		);
-		putenv('LC_ALL=' . Server::LOCALE);
 		setlocale(LC_ALL, Server::LOCALE);
 		$this->process = proc_open($command, $descriptorSpec, $this->pipes, null, array(
-			'CLI_FORCE_INTERACTIVE' => 'y' // Needed or the prompt isn't displayed!!
+			'CLI_FORCE_INTERACTIVE' => 'y', // Needed or the prompt isn't displayed!!
+			'LC_ALL' => Server::LOCALE
 		));
 		if (!is_resource($this->process)) {
 			throw new ConnectionError();
@@ -58,7 +61,8 @@ class Connection {
 		fgets($this->pipes[1]); //first line is prompt
 		$output = array();
 		$line = fgets($this->pipes[1]);
-		while (substr($line, 0, 4) !== 'smb:') { //next prompt functions as delimiter
+		$length = strlen(self::DELIMITER);
+		while (substr($line, 0, $length) !== self::DELIMITER) { //next prompt functions as delimiter
 			$output[] .= $line;
 			$line = fgets($this->pipes[1]);
 		}
