@@ -27,6 +27,16 @@ class Test extends PHPUnit_Framework_TestCase {
 		$this->share->rmdir($this->root);
 	}
 
+	public function testListShares() {
+		$shares = $this->server->listShares();
+		foreach ($shares as $share) {
+			if ($share->getName() === 'test') {
+				return;
+			}
+		}
+		$this->fail('Share "test" not found');
+	}
+
 	public function testDirectory() {
 		$this->assertEquals(array(), $this->share->dir($this->root));
 

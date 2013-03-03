@@ -37,6 +37,10 @@ class Share {
 		$this->connection = new Connection($command);
 	}
 
+	public function getName() {
+		return $this->name;
+	}
+
 	/**
 	 * List the content of a remote folder
 	 *
