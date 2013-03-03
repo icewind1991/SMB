@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2012 Robin Appelman <icewind@owncloud.com>
+ * Copyright (c) 2013 Robin Appelman <icewind@owncloud.com>
  * This file is licensed under the Affero General Public License version 3 or
  * later.
  * See the COPYING-README file.
@@ -15,22 +15,14 @@ class Share {
 	private $server;
 
 	/**
-	 * @var resource $process
-	 */
-	private $process;
-
-	/**
-	 * @var resource[] $pipes
-	 *
-	 * $pipes[0] holds STDIN for smbclient
-	 * $pipes[1] holds STDOUT for smbclient
-	 */
-	private $pipes;
-
-	/**
 	 * @var string $name
 	 */
 	private $name;
+
+	/**
+	 * @var Connection $connection
+	 */
+	private $connection;
 
 	/**
 	 * @param Server $server
@@ -40,26 +32,9 @@ class Share {
 		$this->server = $server;
 		$this->name = $name;
 
-		$descriptorSpec = array(
-			0 => array("pipe", "r"),
-			1 => array("pipe", "w"),
-//			2 => array("file", "/tmp/smberror", "a")
-		);
-
-		putenv('LC_ALL=' . Server::LOCALE);
-		setlocale(LC_ALL, Server::LOCALE);
 		$command = Server::CLIENT . ' -N -U ' . $this->server->getAuthString() .
 			' //' . $this->server->getHost() . '/' . $this->name;
-		$this->process = proc_open($command, $descriptorSpec, $this->pipes, null, array(
-			'CLI_FORCE_INTERACTIVE' => 'y' // Needed or the prompt isn't displayed!!
-		));
-		if (!is_resource($this->process)) {
-			throw new ConnectionError();
-		}
-	}
-
-	public function __destruct() {
-		proc_close($this->process);
+		$this->connection = new Connection($command);
 	}
 
 	/**
@@ -141,9 +116,7 @@ class Share {
 	 * @param string $input
 	 */
 	public function write($input) {
-		fwrite($this->pipes[0], $input);
-		fwrite($this->pipes[0], PHP_EOL); //make sure we have a recognizable delimiter
-		fflush($this->pipes[0]);
+		$this->connection->write($input);
 	}
 
 	/**
@@ -152,20 +125,13 @@ class Share {
 	 * @return array
 	 */
 	public function read() {
-		fgets($this->pipes[1]); //first line is prompt
-		$output = array();
-		$line = fgets($this->pipes[1]);
-		while (substr($line, 0, 4) !== 'smb:') { //next prompt functions as delimiter
-			$output[] .= $line;
-			$line = fgets($this->pipes[1]);
-		}
-		return $output;
+		return $this->connection->read();
 	}
 
 	/**
 	 * @return Server
 	 */
-	public function getServer(){
+	public function getServer() {
 		return $this->server;
 	}
 }

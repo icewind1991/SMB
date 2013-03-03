@@ -24,7 +24,7 @@ class Test extends PHPUnit_Framework_TestCase {
 	}
 
 	public function tearDown() {
-//		$this->share->rmdir($this->root);
+		$this->share->rmdir($this->root);
 	}
 
 	public function testDirectory() {
