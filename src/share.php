@@ -56,7 +56,7 @@ class Share {
 	 * @return array
 	 */
 	public function dir($path) {
-		return (new Command\Dir($this))->run(array('path' => $path));
+		return (new Command\Dir($this->connection))->run(array('path' => $path));
 	}
 
 	/**
@@ -66,7 +66,7 @@ class Share {
 	 * @return bool
 	 */
 	public function mkdir($path) {
-		return (new Command\Mkdir($this))->run(array('path' => $path));
+		return (new Command\Mkdir($this->connection))->run(array('path' => $path));
 	}
 
 	/**
@@ -76,7 +76,7 @@ class Share {
 	 * @return bool
 	 */
 	public function rmdir($path) {
-		return (new Command\Rmdir($this))->run(array('path' => $path));
+		return (new Command\Rmdir($this->connection))->run(array('path' => $path));
 	}
 
 	/**
@@ -86,7 +86,7 @@ class Share {
 	 * @return bool
 	 */
 	public function del($path) {
-		return (new Command\Del($this))->run(array('path' => $path));
+		return (new Command\Del($this->connection))->run(array('path' => $path));
 	}
 
 	/**
@@ -97,7 +97,7 @@ class Share {
 	 * @return bool
 	 */
 	public function rename($from, $to) {
-		return (new Command\Rename($this))->run(array('path1' => $from, 'path2' => $to));
+		return (new Command\Rename($this->connection))->run(array('path1' => $from, 'path2' => $to));
 	}
 
 	/**
@@ -108,7 +108,7 @@ class Share {
 	 * @return bool
 	 */
 	public function put($source, $target) {
-		return (new Command\Put($this))->run(array('path1' => $source, 'path2' => $target));
+		return (new Command\Put($this->connection))->run(array('path1' => $source, 'path2' => $target));
 	}
 
 	/**
@@ -119,25 +119,7 @@ class Share {
 	 * @return bool
 	 */
 	public function get($source, $target) {
-		return (new Command\Get($this))->run(array('path1' => $source, 'path2' => $target));
-	}
-
-	/**
-	 * send input to smbclient
-	 *
-	 * @param string $input
-	 */
-	public function write($input) {
-		$this->connection->write($input);
-	}
-
-	/**
-	 * get all unprocessed output from smbclient
-	 *
-	 * @return array
-	 */
-	public function read() {
-		return $this->connection->read();
+		return (new Command\Get($this->connection))->run(array('path1' => $source, 'path2' => $target));
 	}
 
 	/**

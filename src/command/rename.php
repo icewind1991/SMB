@@ -9,8 +9,8 @@
 namespace SMB\Command;
 
 class Rename extends Double {
-	public function __construct($share) {
-		parent::__construct($share);
+	public function __construct($connection) {
+		parent::__construct($connection);
 		$this->command = 'rename';
 	}
 }

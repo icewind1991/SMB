@@ -10,15 +10,15 @@ namespace SMB\Command;
 
 abstract class Command {
 	/**
-	 * @var \SMB\Share $share
+	 * @var \SMB\Connection $connection
 	 */
-	protected $share;
+	protected $connection;
 
 	/**
-	 * @param \SMB\Share $share
+	 * @param \SMB\Connection $connection
 	 */
-	public function __construct($share) {
-		$this->share = $share;
+	public function __construct($connection) {
+		$this->connection = $connection;
 	}
 
 	/**
@@ -26,8 +26,8 @@ abstract class Command {
 	 * @return array
 	 */
 	protected function execute($command) {
-		$this->share->write($command . PHP_EOL);
-		$output = $this->share->read();
+		$this->connection->write($command . PHP_EOL);
+		$output = $this->connection->read();
 		return $output;
 	}
 
