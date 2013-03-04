@@ -13,7 +13,7 @@ class Server {
 	const LOCALE = 'en_US.UTF-8';
 
 	const CACHING_ENABLED = true;
-	const CACHING_DISABLED = true;
+	const CACHING_DISABLED = false;
 
 	/**
 	 * @var string $host
