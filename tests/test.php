@@ -16,25 +16,30 @@ class Test extends PHPUnit_Framework_TestCase {
 	 */
 	private $root;
 
+	private $config;
+
 	public function setUp() {
-		$this->server = new SMB\Server('localhost', 'test', 'test');
-		$this->share = $this->server->getShare('test');
+		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
+		$this->server = new SMB\Server($this->config->host, $this->config->user, $this->config->password);
+		$this->share = $this->server->getShare($this->config->share);
 		$this->root = '/' . uniqid();
 		$this->share->mkdir($this->root);
 	}
 
 	public function tearDown() {
-		$this->share->rmdir($this->root);
+		if ($this->share) {
+			$this->share->rmdir($this->root);
+		}
 	}
 
 	public function testListShares() {
 		$shares = $this->server->listShares();
 		foreach ($shares as $share) {
-			if ($share->getName() === 'test') {
+			if ($share->getName() === $this->config->share) {
 				return;
 			}
 		}
-		$this->fail('Share "test" not found');
+		$this->fail('Share "' . $this->config->share . '" not found');
 	}
 
 	public function testDirectory() {
