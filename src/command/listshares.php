@@ -23,7 +23,7 @@ class ListShares {
 	}
 
 	public function run() {
-		$auth = escapeshellarg($this->server->getAuthString());
+		$auth = escapeshellarg($this->server->getAuthString()); //TODO: don't pass password as shell argument
 		$command = \SMB\Server::CLIENT . ' -N -U ' . $auth . ' ' . '-gL ' . escapeshellarg($this->server->getHost()) . ' 2> /dev/null';
 		exec($command, $output);
 		return $this->parseOutput($output);

@@ -26,7 +26,8 @@ class Share {
 
 	/**
 	 * @param Server $server
-	 * @param string $share
+	 * @param string $name
+	 * @throws ConnectionError
 	 */
 	public function __construct($server, $name) {
 		$this->server = $server;
@@ -36,6 +37,9 @@ class Share {
 			' //' . $this->server->getHost() . '/' . $this->name;
 		$this->connection = new Connection($command);
 		$this->connection->write($this->server->getPassword());
+		if (!$this->connection->isValid()) {
+			throw new ConnectionError();
+		}
 	}
 
 	public function connect() {

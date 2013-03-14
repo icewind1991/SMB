@@ -36,8 +36,22 @@ class Connection {
 			'CLI_FORCE_INTERACTIVE' => 'y', // Needed or the prompt isn't displayed!!
 			'LC_ALL' => Server::LOCALE
 		));
-		if (!is_resource($this->process)) {
+		if (!$this->isValid()) {
 			throw new ConnectionError();
+		}
+	}
+
+	/**
+	 * check if the connection is still active
+	 *
+	 * @return bool
+	 */
+	public function isValid() {
+		if (is_resource($this->process)) {
+			$status = proc_get_status($this->process);
+			return $status['running'];
+		} else {
+			return false;
 		}
 	}
 
@@ -55,10 +69,16 @@ class Connection {
 	/**
 	 * get all unprocessed output from smbclient
 	 *
+	 * @throws ConnectionError
 	 * @return array
 	 */
 	public function read() {
-		fgets($this->pipes[1]); //first line is prompt
+		if (!$this->isValid()) {
+			throw new ConnectionError();
+		}
+		$line = trim(fgets($this->pipes[1])); //first line is prompt
+		$this->checkConnectionError($line);
+
 		$output = array();
 		$line = fgets($this->pipes[1]);
 		$length = strlen(self::DELIMITER);
@@ -67,6 +87,27 @@ class Connection {
 			$line = fgets($this->pipes[1]);
 		}
 		return $output;
+	}
+
+	/**
+	 * check if the first line holds a connection failure
+	 *
+	 * @param $line
+	 * @throws AuthenticationException
+	 * @throws InvalidHostException
+	 */
+	private function checkConnectionError($line) {
+		$line = rtrim($line, ')');
+		$authError = 'NT_STATUS_LOGON_FAILURE';
+		if (substr($line, -23) === $authError) {
+			$this->pipes = array(null, null);
+			throw new AuthenticationException();
+		}
+		$addressError = 'NT_STATUS_BAD_NETWORK_NAME';
+		if (substr($line, -26) === $addressError) {
+			$this->pipes = array(null, null);
+			throw new InvalidHostException();
+		}
 	}
 
 	public function __destruct() {
