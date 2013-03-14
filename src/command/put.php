@@ -18,6 +18,8 @@ class Put extends Command {
 
 	/**
 	 * @param $lines
+	 *
+	 * @throws \SMB\NotFoundException
 	 * @return bool
 	 */
 	protected function parseOutput($lines) {
@@ -29,6 +31,7 @@ class Put extends Command {
 			} else {
 				parent::parseOutput($lines);
 			}
+			return false;
 		}
 	}
 }

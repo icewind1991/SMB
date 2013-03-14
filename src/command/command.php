@@ -35,6 +35,12 @@ abstract class Command {
 
 	/**
 	 * @param $lines
+	 *
+	 * @throws \SMB\NotFoundException
+	 * @throws \SMB\AlreadyExistsException
+	 * @throws \SMB\AccessDeniedException
+	 * @throws \SMB\NotEmptyException
+	 * @throws \Exception
 	 * @return bool
 	 */
 	protected function parseOutput($lines) {
