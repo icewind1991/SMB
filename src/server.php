@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2012 Robin Appelman <icewind@owncloud.com>
+ * Copyright (c) 2013 Robin Appelman <icewind@owncloud.com>
  * This file is licensed under the Affero General Public License version 3 or
  * later.
  * See the COPYING-README file.
@@ -39,8 +39,9 @@ class Server {
 	 * @param string $host
 	 * @param string $user
 	 * @param string $password
+	 * @param bool $caching
 	 */
-	public function __construct($host, $user, $password, $caching = self::CACHING_ENABLED) {
+	public function __construct($host, $user, $password, $caching = self::CACHING_DISABLED) {
 		$this->host = $host;
 		$this->user = $user;
 		$this->password = $password;
@@ -79,8 +80,20 @@ class Server {
 	 * @return Share[]
 	 */
 	public function listShares() {
-		$cmd = new Command\ListShares($this);
-		$shareNames = $cmd->run(null);
+		$auth = escapeshellarg($this->getAuthString()); //TODO: don't pass password as shell argument
+		$command = self::CLIENT . ' -N -U ' . $auth . ' ' . '-gL ' . escapeshellarg($this->getHost());// . ' 2> /dev/null';
+		exec($command, $output);
+
+		$shareNames = array();
+		foreach ($output as $line) {
+			if (strpos($line, '|')) {
+				list($type, $name, $description) = explode('|', $line);
+				if (strtolower($type) === 'disk') {
+					$shareNames[$name] = $description;
+				}
+			}
+		}
+
 		$shares = array();
 		foreach ($shareNames as $name => $description) {
 			$shares[] = $this->getShare($name);

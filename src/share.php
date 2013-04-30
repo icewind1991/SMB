@@ -32,7 +32,12 @@ class Share {
 	public function __construct($server, $name) {
 		$this->server = $server;
 		$this->name = $name;
+	}
 
+	public function connect() {
+		if ($this->connection and $this->connection->isValid()) {
+			return;
+		}
 		$command = Server::CLIENT . ' -U ' . escapeshellarg($this->server->getUser()) .
 			' //' . $this->server->getHost() . '/' . $this->name;
 		$this->connection = new Connection($command);
@@ -42,15 +47,15 @@ class Share {
 		}
 	}
 
-	public function connect() {
-		$command = Server::CLIENT . ' -U ' . escapeshellarg($this->server->getUser()) .
-			' //' . $this->server->getHost() . '/' . $this->name;
-		$this->connection = new Connection($command);
-		$this->connection->write($this->server->getPassword());
-	}
-
 	public function getName() {
 		return $this->name;
+	}
+
+	protected function simpleCommand($command, $path) {
+		$path = $this->escapePath($path);
+		$cmd = $command . ' ' . $path;
+		$output = $this->execute($cmd);
+		return $this->parseOutput($output);
 	}
 
 	/**
@@ -60,7 +65,29 @@ class Share {
 	 * @return array
 	 */
 	public function dir($path) {
-		return (new Command\Dir($this->connection))->run(array('path' => $path));
+		$path = $this->escapePath($path);
+		$this->execute('cd ' . $path);
+		$output = $this->execute('dir');
+		$this->execute('cd /');
+
+		//last line is used space
+		array_pop($output);
+		$regex = '/^\s*(.*?)\s\s\s\s+(?:([DHARS]*)\s+)?([0-9]+)\s+(.*)$/';
+		//2 spaces, filename, optional type, size, date
+		$content = array();
+		foreach ($output as $line) {
+			if (preg_match($regex, $line, $matches)) {
+				list(, $name, $type, $size, $time) = $matches;
+				if ($name !== '.' and $name !== '..') {
+					$content[$name] = array(
+						'size' => intval(trim($size)),
+						'type' => (strpos($type, 'D') !== false) ? 'dir' : 'file',
+						'time' => strtotime($time)
+					);
+				}
+			}
+		}
+		return $content;
 	}
 
 	/**
@@ -70,7 +97,7 @@ class Share {
 	 * @return bool
 	 */
 	public function mkdir($path) {
-		return (new Command\Mkdir($this->connection))->run(array('path' => $path));
+		return $this->simpleCommand('mkdir', $path);
 	}
 
 	/**
@@ -80,7 +107,7 @@ class Share {
 	 * @return bool
 	 */
 	public function rmdir($path) {
-		return (new Command\Rmdir($this->connection))->run(array('path' => $path));
+		return $this->simpleCommand('rmdir', $path);
 	}
 
 	/**
@@ -90,7 +117,7 @@ class Share {
 	 * @return bool
 	 */
 	public function del($path) {
-		return (new Command\Del($this->connection))->run(array('path' => $path));
+		return $this->simpleCommand('del', $path);
 	}
 
 	/**
@@ -101,7 +128,11 @@ class Share {
 	 * @return bool
 	 */
 	public function rename($from, $to) {
-		return (new Command\Rename($this->connection))->run(array('path1' => $from, 'path2' => $to));
+		$path1 = $this->escapePath($from);
+		$path2 = $this->escapePath($to);
+		$cmd = 'rename ' . $path1 . ' ' . $path2;
+		$output = $this->execute($cmd);
+		return $this->parseOutput($output);
 	}
 
 	/**
@@ -112,7 +143,10 @@ class Share {
 	 * @return bool
 	 */
 	public function put($source, $target) {
-		return (new Command\Put($this->connection))->run(array('path1' => $source, 'path2' => $target));
+		$path1 = $this->escapeLocalPath($source); //first path is local, needs different escaping
+		$path2 = $this->escapePath($target);
+		$output = $this->execute('put ' . $path1 . ' ' . $path2);
+		return $this->parseOutput($output);
 	}
 
 	/**
@@ -123,7 +157,10 @@ class Share {
 	 * @return bool
 	 */
 	public function get($source, $target) {
-		return (new Command\Get($this->connection))->run(array('path1' => $source, 'path2' => $target));
+		$path1 = $this->escapePath($source);
+		$path2 = $this->escapeLocalPath($target); //second path is local, needs different escaping
+		$output = $this->execute('get ' . $path1 . ' ' . $path2);
+		return $this->parseOutput($output);
 	}
 
 	/**
@@ -131,5 +168,82 @@ class Share {
 	 */
 	public function getServer() {
 		return $this->server;
+	}
+
+	/**
+	 * @param string $command
+	 * @return array
+	 */
+	protected function execute($command) {
+		$this->connect();
+		$this->connection->write($command . PHP_EOL);
+		$output = $this->connection->read();
+		return $output;
+	}
+
+	/**
+	 * @param $lines
+	 *
+	 * @throws \SMB\NotFoundException
+	 * @throws \SMB\AlreadyExistsException
+	 * @throws \SMB\AccessDeniedException
+	 * @throws \SMB\NotEmptyException
+	 * @throws \Exception
+	 * @return bool
+	 */
+	protected function parseOutput($lines) {
+		if (count($lines) === 0) {
+			return true;
+		} else {
+			if (strpos($lines[0], 'does not exist')) {
+				throw new NotFoundException();
+			}
+			list($error,) = explode(' ', $lines[0]);
+			switch ($error) {
+				case 'NT_STATUS_OBJECT_PATH_NOT_FOUND':
+				case 'NT_STATUS_OBJECT_NAME_NOT_FOUND':
+				case 'NT_STATUS_NO_SUCH_FILE':
+					throw new NotFoundException();
+				case 'NT_STATUS_OBJECT_NAME_COLLISION':
+					throw new AlreadyExistsException();
+				case 'NT_STATUS_ACCESS_DENIED':
+					throw new AccessDeniedException();
+				case 'NT_STATUS_DIRECTORY_NOT_EMPTY':
+					throw new NotEmptyException();
+				default:
+					throw new \Exception();
+			}
+		}
+	}
+
+	/**
+	 * @param string $string
+	 * @return string
+	 */
+	protected function escape($string) {
+		return escapeshellarg($string);
+	}
+
+	/**
+	 * @param string $path
+	 * @return string
+	 */
+	protected function escapePath($path) {
+		$path = str_replace('/', '\\', $path);
+		$path = str_replace('"', '^"', $path);
+		return '"' . $path . '"';
+	}
+
+	/**
+	 * @param string $path
+	 * @return string
+	 */
+	protected function escapeLocalPath($path) {
+		$path = str_replace('"', '\"', $path);
+		return '"' . $path . '"';
+	}
+
+	public function __destruct() {
+		unset($this->connection);
 	}
 }

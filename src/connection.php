@@ -110,7 +110,13 @@ class Connection {
 		}
 	}
 
+	public function close() {
+		$this->write('close' . PHP_EOL);
+	}
+
 	public function __destruct() {
+		$this->close();
+		proc_terminate($this->process);
 		proc_close($this->process);
 	}
 }
