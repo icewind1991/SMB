@@ -78,11 +78,25 @@ class Server {
 
 	/**
 	 * @return Share[]
+	 * @throws AuthenticationException
+	 * @throws InvalidHostException
 	 */
 	public function listShares() {
 		$auth = escapeshellarg($this->getAuthString()); //TODO: don't pass password as shell argument
-		$command = self::CLIENT . ' -N -U ' . $auth . ' ' . '-gL ' . escapeshellarg($this->getHost());// . ' 2> /dev/null';
+		$command = self::CLIENT . ' -N -U ' . $auth . ' ' . '-gL ' . escapeshellarg($this->getHost()); // . ' 2> /dev/null';
 		exec($command, $output);
+
+		$line = $output[0];
+		$authError = 'NT_STATUS_LOGON_FAILURE';
+		if (substr($line, -23) === $authError) {
+			$this->pipes = array(null, null);
+			throw new AuthenticationException();
+		}
+		$addressError = 'NT_STATUS_BAD_NETWORK_NAME';
+		if (substr($line, -26) === $addressError) {
+			$this->pipes = array(null, null);
+			throw new InvalidHostException();
+		}
 
 		$shareNames = array();
 		foreach ($output as $line) {

@@ -1,13 +1,15 @@
 <?php
 
-class Test extends PHPUnit_Framework_TestCase {
+namespace SMB\Test;
+
+class Share extends \PHPUnit_Framework_TestCase {
 	/**
-	 * @var SMB\Server $server
+	 * @var \SMB\Server $server
 	 */
 	private $server;
 
 	/**
-	 * @var SMB\Share $share
+	 * @var \SMB\Share $share
 	 */
 	private $share;
 
@@ -18,17 +20,16 @@ class Test extends PHPUnit_Framework_TestCase {
 
 	private $config;
 
-	private $needsCleanup = false;
-
 	public function setUp() {
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
-		$this->server = new SMB\Server($this->config->host, $this->config->user, $this->config->password);
+		$this->server = new \SMB\Server($this->config->host, $this->config->user, $this->config->password);
 		$this->share = $this->server->getShare($this->config->share);
 		$this->root = '/' . uniqid();
+		$this->share->mkdir($this->root);
 	}
 
 	public function tearDown() {
-		if ($this->share and $this->needsCleanup) {
+		if ($this->share) {
 			$this->share->rmdir($this->root);
 		}
 		unset($this->share);
@@ -45,8 +46,6 @@ class Test extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testDirectory() {
-		$this->share->mkdir($this->root);
-		$this->needsCleanup = true;
 		$this->assertEquals(array(), $this->share->dir($this->root));
 
 		$this->share->mkdir($this->root . '/foo');
@@ -65,8 +64,6 @@ class Test extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testFile() {
-		$this->share->mkdir($this->root);
-		$this->needsCleanup = true;
 		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
 		$size = strlen($text);
 		$tmpFile1 = tempnam('/tmp', 'smb_test_');
@@ -97,8 +94,6 @@ class Test extends PHPUnit_Framework_TestCase {
 	}
 
 	public function testEscaping() {
-		$this->share->mkdir($this->root);
-		$this->needsCleanup = true;
 		// / ? < > \ : * | ” are illegal characters in path on windows, no use trying to get them working
 		$names = array('simple', 'with spaces', "single'quote'", '$as#d', '€', '££Ö€ßœĚęĘĞĜΣΥΦΩΫΫ');
 

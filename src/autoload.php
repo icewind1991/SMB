@@ -14,6 +14,6 @@ spl_autoload_register(function ($class) {
 	if (substr($class, 0, 4) == 'SMB\\') {
 		$class = strtolower($class);
 		$file = str_replace('\\', '/', substr($class, 4));
-		include $file . '.php';
+		include __DIR__ . '/' . $file . '.php';
 	}
 });
