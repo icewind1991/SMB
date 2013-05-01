@@ -30,9 +30,28 @@ class Share extends \PHPUnit_Framework_TestCase {
 
 	public function tearDown() {
 		if ($this->share) {
-			$this->share->rmdir($this->root);
+			$this->cleanDir($this->root);
 		}
 		unset($this->share);
+	}
+
+	public function cleanDir($dir) {
+		$content = $this->share->dir($dir);
+		foreach ($content as $name => $metadata) {
+			if ($metadata['type'] === 'dir') {
+				$this->cleanDir($dir . '/' . $name);
+			} else {
+				$this->share->del($dir . '/' . $name);
+			}
+		}
+		$this->share->rmdir($dir);
+	}
+
+	private function getTextFile() {
+		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
+		$file = tempnam('/tmp', 'smb_test_');
+		file_put_contents($file, $text);
+		return $file;
 	}
 
 	public function testListShares() {
@@ -148,5 +167,92 @@ class Share extends \PHPUnit_Framework_TestCase {
 		}
 
 		unlink($tmpFile1);
+	}
+
+	/**
+	 * @expectedException \SMB\NotFoundException
+	 */
+	public function testCreateFolderInNonExistingFolder() {
+		$this->share->mkdir($this->root . '/foo/bar');
+	}
+
+	/**
+	 * @expectedException \SMB\NotFoundException
+	 */
+	public function testRemoveFolderInNonExistingFolder() {
+		$this->share->rmdir($this->root . '/foo/bar');
+	}
+
+	/**
+	 * @expectedException \SMB\NotFoundException
+	 */
+	public function testRemoveNonExistingFolder() {
+		$this->share->rmdir($this->root . '/foo');
+	}
+
+	/**
+	 * @expectedException \SMB\AlreadyExistsException
+	 */
+	public function testCreateExistingFolder() {
+		$this->share->mkdir($this->root . '/bar');
+		$this->share->mkdir($this->root . '/bar');
+		$this->share->rmdir($this->root . '/bar');
+	}
+
+	/**
+	 * @expectedException \SMB\InvalidTypeException
+	 */
+	public function testCreateFileExistingFolder() {
+		$this->share->mkdir($this->root . '/bar');
+		$this->share->put($this->getTextFile(), $this->root . '/bar');
+		$this->share->rmdir($this->root . '/bar');
+	}
+
+	/**
+	 * @expectedException \SMB\NotFoundException
+	 */
+	public function testCreateFileInNonExistingFolder() {
+		$this->share->put($this->getTextFile(), $this->root . '/foo/bar');
+	}
+
+	/**
+	 * @expectedException \SMB\NotFoundException
+	 */
+	public function testTestRemoveNonExistingFile() {
+		$this->share->del($this->root . '/foo');
+	}
+
+	/**
+	 * @expectedException \SMB\NotFoundException
+	 */
+	public function testDownloadNonExistingFile() {
+		$this->share->get($this->root . '/foo', '/dev/null');
+	}
+
+	/**
+	 * @expectedException \SMB\InvalidTypeException
+	 */
+	public function testDownloadFolder() {
+		$this->share->mkdir($this->root . '/foobar');
+		$this->share->get($this->root . '/foobar', '/dev/null');
+		$this->share->rmdir($this->root . '/foobar');
+	}
+
+	/**
+	 * @expectedException \SMB\NotFoundException
+	 */
+	public function testDelFolder() {
+		$this->share->mkdir($this->root . '/foobar');
+		$this->share->del($this->root . '/foobar');
+		$this->share->rmdir($this->root . '/foobar');
+	}
+
+	/**
+	 * @expectedException \SMB\InvalidTypeException
+	 */
+	public function testRmdirFile() {
+		$this->share->put($this->getTextFile(), $this->root . '/foobar');
+		$this->share->rmdir($this->root . '/foobar');
+		$this->share->del($this->root . '/foobar');
 	}
 }

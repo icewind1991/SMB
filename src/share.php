@@ -184,10 +184,11 @@ class Share {
 	/**
 	 * @param $lines
 	 *
-	 * @throws \SMB\NotFoundException
-	 * @throws \SMB\AlreadyExistsException
-	 * @throws \SMB\AccessDeniedException
-	 * @throws \SMB\NotEmptyException
+	 * @throws NotFoundException
+	 * @throws AlreadyExistsException
+	 * @throws AccessDeniedException
+	 * @throws NotEmptyException
+	 * @throws InvalidTypeException
 	 * @throws \Exception
 	 * @return bool
 	 */
@@ -210,6 +211,9 @@ class Share {
 					throw new AccessDeniedException();
 				case ErrorCodes::DirectoryNotEmpty:
 					throw new NotEmptyException();
+				case ErrorCodes::FileIsADirectory:
+				case ErrorCodes::NotADirectory:
+					throw new InvalidTypeException();
 				default:
 					throw new \Exception();
 			}

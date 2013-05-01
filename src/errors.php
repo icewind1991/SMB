@@ -29,6 +29,9 @@ class InvalidHostException extends \Exception {
 class AccessDeniedException extends \Exception {
 }
 
+class InvalidTypeException extends \Exception {
+}
+
 class ErrorCodes {
 	/**
 	 * connection errors
@@ -44,4 +47,6 @@ class ErrorCodes {
 	const NameCollision = 'NT_STATUS_OBJECT_NAME_COLLISION';
 	const AccessDenied = 'NT_STATUS_ACCESS_DENIED';
 	const DirectoryNotEmpty = 'NT_STATUS_DIRECTORY_NOT_EMPTY';
+	const FileIsADirectory = 'NT_STATUS_FILE_IS_A_DIRECTORY';
+	const NotADirectory = 'NT_STATUS_NOT_A_DIRECTORY';
 }
