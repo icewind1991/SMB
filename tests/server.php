@@ -32,4 +32,20 @@ class Server extends \PHPUnit_Framework_TestCase {
 		$server = new \SMB\Server($this->config->host, uniqid(), $this->config->password);
 		$server->listShares();
 	}
+
+	/**
+	 * @expectedException \SMB\AuthenticationException
+	 */
+	public function testWrongPassword() {
+		$server = new \SMB\Server($this->config->host, $this->config->user, uniqid());
+		$server->listShares();
+	}
+
+	/**
+	 * @expectedException \SMB\InvalidHostException
+	 */
+	public function testWrongHost() {
+		$server = new \SMB\Server(uniqid(), $this->config->user, $this->config->password);
+		$server->listShares();
+	}
 }

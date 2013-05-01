@@ -87,14 +87,17 @@ class Server {
 		exec($command, $output);
 
 		$line = $output[0];
-		$authError = 'NT_STATUS_LOGON_FAILURE';
-		if (substr($line, -23) === $authError) {
-			$this->pipes = array(null, null);
+		$line = rtrim($line, ')');
+		if (substr($line, -23) === 'NT_STATUS_LOGON_FAILURE') {
 			throw new AuthenticationException();
 		}
-		$addressError = 'NT_STATUS_BAD_NETWORK_NAME';
-		if (substr($line, -26) === $addressError) {
-			$this->pipes = array(null, null);
+		if (substr($line, -26) === 'NT_STATUS_BAD_NETWORK_NAME') {
+			throw new InvalidHostException();
+		}
+		if (substr($line, -22) === 'NT_STATUS_UNSUCCESSFUL') {
+			throw new InvalidHostException();
+		}
+		if (substr($line, -28) === 'NT_STATUS_CONNECTION_REFUSED') {
 			throw new InvalidHostException();
 		}
 
