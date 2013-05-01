@@ -200,15 +200,15 @@ class Share {
 			}
 			list($error,) = explode(' ', $lines[0]);
 			switch ($error) {
-				case 'NT_STATUS_OBJECT_PATH_NOT_FOUND':
-				case 'NT_STATUS_OBJECT_NAME_NOT_FOUND':
-				case 'NT_STATUS_NO_SUCH_FILE':
+				case ErrorCodes::PathNotFound:
+				case ErrorCodes::ObjectNotFound:
+				case ErrorCodes::NoSuchFile:
 					throw new NotFoundException();
-				case 'NT_STATUS_OBJECT_NAME_COLLISION':
+				case ErrorCodes::NameCollision:
 					throw new AlreadyExistsException();
-				case 'NT_STATUS_ACCESS_DENIED':
+				case ErrorCodes::AccessDenied:
 					throw new AccessDeniedException();
-				case 'NT_STATUS_DIRECTORY_NOT_EMPTY':
+				case ErrorCodes::DirectoryNotEmpty:
 					throw new NotEmptyException();
 				default:
 					throw new \Exception();

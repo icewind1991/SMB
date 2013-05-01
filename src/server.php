@@ -78,26 +78,27 @@ class Server {
 
 	/**
 	 * @return Share[]
-	 * @throws AuthenticationException
-	 * @throws InvalidHostException
 	 */
 	public function listShares() {
-		$auth = escapeshellarg($this->getAuthString()); //TODO: don't pass password as shell argument
-		$command = self::CLIENT . ' -N -U ' . $auth . ' ' . '-gL ' . escapeshellarg($this->getHost()); // . ' 2> /dev/null';
-		exec($command, $output);
+		$user = escapeshellarg($this->getUser());
+		$command = self::CLIENT . ' -U ' . $user . ' ' . '-gL ' . escapeshellarg($this->getHost());
+		$connection = new RawConnection($command);
+		$connection->write($this->getPassword() . PHP_EOL);
+		$output = $connection->readAll();
 
 		$line = $output[0];
+
 		$line = rtrim($line, ')');
-		if (substr($line, -23) === 'NT_STATUS_LOGON_FAILURE') {
+		if (substr($line, -23) === ErrorCodes::LogonFailure) {
 			throw new AuthenticationException();
 		}
-		if (substr($line, -26) === 'NT_STATUS_BAD_NETWORK_NAME') {
+		if (substr($line, -26) === ErrorCodes::BadHostName) {
 			throw new InvalidHostException();
 		}
-		if (substr($line, -22) === 'NT_STATUS_UNSUCCESSFUL') {
+		if (substr($line, -22) === ErrorCodes::Unsuccessful) {
 			throw new InvalidHostException();
 		}
-		if (substr($line, -28) === 'NT_STATUS_CONNECTION_REFUSED') {
+		if (substr($line, -28) === ErrorCodes::ConnectionRefused) {
 			throw new InvalidHostException();
 		}
 
