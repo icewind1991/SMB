@@ -255,4 +255,11 @@ class Share extends \PHPUnit_Framework_TestCase {
 		$this->share->rmdir($this->root . '/foobar');
 		$this->share->del($this->root . '/foobar');
 	}
+
+	/**
+	 * @expectedException \SMB\NotFoundException
+	 */
+	public function testDirNonExisting() {
+		$this->share->dir('/foobar/asd');
+	}
 }

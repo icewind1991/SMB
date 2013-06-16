@@ -66,7 +66,9 @@ class Share {
 	 */
 	public function dir($path) {
 		$path = $this->escapePath($path);
-		$this->execute('cd ' . $path);
+		$output = $this->execute('cd ' . $path);
+		//check output for errors
+		$this->parseOutput($output);
 		$output = $this->execute('dir');
 		$this->execute('cd /');
 
@@ -199,7 +201,8 @@ class Share {
 			if (strpos($lines[0], 'does not exist')) {
 				throw new NotFoundException();
 			}
-			list($error,) = explode(' ', $lines[0]);
+			$parts = explode(' ', $lines[0]);
+			$error = array_pop($parts);
 			switch ($error) {
 				case ErrorCodes::PathNotFound:
 				case ErrorCodes::ObjectNotFound:
