@@ -184,6 +184,8 @@ class Share {
 	}
 
 	/**
+	 * check output for errors
+	 *
 	 * @param $lines
 	 *
 	 * @throws NotFoundException
@@ -202,7 +204,12 @@ class Share {
 				throw new NotFoundException();
 			}
 			$parts = explode(' ', $lines[0]);
-			$error = array_pop($parts);
+			$error = false;
+			foreach ($parts as $part) {
+				if (substr($part, 0, 9) === 'NT_STATUS') {
+					$error = $part;
+				}
+			}
 			switch ($error) {
 				case ErrorCodes::PathNotFound:
 				case ErrorCodes::ObjectNotFound:
