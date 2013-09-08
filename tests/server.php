@@ -48,4 +48,9 @@ class Server extends \PHPUnit_Framework_TestCase {
 		$server = new \SMB\Server(uniqid(), $this->config->user, $this->config->password);
 		$server->listShares();
 	}
+
+	public function testGetTimeZone() {
+		$timeZone = $this->server->getTimeZone();
+		$this->assertEquals('+0200', $timeZone);
+	}
 }

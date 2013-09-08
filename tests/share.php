@@ -266,7 +266,16 @@ class Share extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @expectedException \SMB\NotFoundException
 	 */
-	public function testRmDirNonExisting(){
+	public function testRmDirNonExisting() {
 		$this->share->rmdir('/foobar/asd');
+	}
+
+	public function testModifiedDate() {
+		$now = time();
+		$this->share->put($this->getTextFile(), $this->root . '/foo.txt');
+		$dir = $this->share->dir($this->root);
+		$mtime = $dir['foo.txt']['time'];
+		$this->assertTrue(abs($now - $mtime) <= 1, 'Modified time differs by ' . abs($now - $mtime) . ' seconds');
+		$this->share->del($this->root . '/foo.txt');
 	}
 }

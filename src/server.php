@@ -130,4 +130,12 @@ class Server {
 			return new Share($this, $name);
 		}
 	}
+
+	/**
+	 * @return string
+	 */
+	public function getTimeZone() {
+		$command = 'net time zone -S ' . escapeshellarg($this->getHost());
+		return exec($command);
+	}
 }

@@ -24,6 +24,8 @@ class Share {
 	 */
 	private $connection;
 
+	private $serverTimezone;
+
 	/**
 	 * @param Server $server
 	 * @param string $name
@@ -58,6 +60,13 @@ class Share {
 		return $this->parseOutput($output);
 	}
 
+	private function getServerTimeZone() {
+		if (!$this->serverTimezone) {
+			$this->serverTimezone = $this->server->getTimeZone();
+		}
+		return $this->serverTimezone;
+	}
+
 	/**
 	 * List the content of a remote folder
 	 *
@@ -84,7 +93,7 @@ class Share {
 					$content[$name] = array(
 						'size' => intval(trim($size)),
 						'type' => (strpos($type, 'D') !== false) ? 'dir' : 'file',
-						'time' => strtotime($time)
+						'time' => strtotime($time . ' ' . $this->getServerTimeZone())
 					);
 				}
 			}
