@@ -51,6 +51,6 @@ class Server extends \PHPUnit_Framework_TestCase {
 
 	public function testGetTimeZone() {
 		$timeZone = $this->server->getTimeZone();
-		$this->assertEquals('+0200', $timeZone);
+		$this->assertEquals('+0100', $timeZone);
 	}
 }
