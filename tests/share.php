@@ -24,7 +24,11 @@ class Share extends \PHPUnit_Framework_TestCase {
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
 		$this->server = new \SMB\Server($this->config->host, $this->config->user, $this->config->password);
 		$this->share = $this->server->getShare($this->config->share);
-		$this->root = '/' . uniqid();
+		if ($this->config->root) {
+			$this->root = '/' . $this->config->root . '/' . uniqid();
+		} else {
+			$this->root = '/' . uniqid();
+		}
 		$this->share->mkdir($this->root);
 	}
 

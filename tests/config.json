@@ -1,6 +1,7 @@
 {
-	"host": "localhost",
-	"user": "test",
+	"host": "VM",
+	"user": "VM\\test",
 	"password": "test",
-	"share": "test"
+	"share": "Users",
+	"root": "test"
 }
