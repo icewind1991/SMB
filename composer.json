@@ -1,0 +1,17 @@
+{
+	"name"             : "Icewind/SMB",
+	"description"      : "php wrapper from smbclient",
+	"minimum-stability": "stable",
+	"license"          : "AGPL 3",
+	"authors"          : [
+		{
+			"name" : "Robin Appelman",
+			"email": "icewind@owncloud.com"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"Icewind\\SMB\\": "src/"
+		}
+	}
+}

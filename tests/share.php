@@ -4,12 +4,12 @@ namespace SMB\Test;
 
 class Share extends \PHPUnit_Framework_TestCase {
 	/**
-	 * @var \SMB\Server $server
+	 * @var \Icewind\SMB\Server $server
 	 */
 	private $server;
 
 	/**
-	 * @var \SMB\Share $share
+	 * @var \Icewind\SMB\Share $share
 	 */
 	private $share;
 
@@ -22,7 +22,7 @@ class Share extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
-		$this->server = new \SMB\Server($this->config->host, $this->config->user, $this->config->password);
+		$this->server = new \Icewind\SMB\Server($this->config->host, $this->config->user, $this->config->password);
 		$this->share = $this->server->getShare($this->config->share);
 		if ($this->config->root) {
 			$this->root = '/' . $this->config->root . '/' . uniqid();
@@ -118,7 +118,7 @@ class Share extends \PHPUnit_Framework_TestCase {
 
 	public function testEscaping() {
 		// / ? < > \ : * | ” are illegal characters in path on windows, no use trying to get them working
-		$names = array('simple', 'with spaces', "single'quote'", '$as#d', '€', '££Ö€ßœĚęĘĞĜΣΥΦΩΫΫ');
+		$names = array('simple', 'with spaces', "single'quote'", '$as#d', '€', '££Ö€ßœĚęĘĞĜΣΥΦΩΫΫ', '_under - score');
 
 		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
 		$tmpFile1 = tempnam('/tmp', 'smb_test_');
@@ -174,28 +174,28 @@ class Share extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\NotFoundException
 	 */
 	public function testCreateFolderInNonExistingFolder() {
 		$this->share->mkdir($this->root . '/foo/bar');
 	}
 
 	/**
-	 * @expectedException \SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\NotFoundException
 	 */
 	public function testRemoveFolderInNonExistingFolder() {
 		$this->share->rmdir($this->root . '/foo/bar');
 	}
 
 	/**
-	 * @expectedException \SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\NotFoundException
 	 */
 	public function testRemoveNonExistingFolder() {
 		$this->share->rmdir($this->root . '/foo');
 	}
 
 	/**
-	 * @expectedException \SMB\AlreadyExistsException
+	 * @expectedException \Icewind\SMB\AlreadyExistsException
 	 */
 	public function testCreateExistingFolder() {
 		$this->share->mkdir($this->root . '/bar');
@@ -204,7 +204,7 @@ class Share extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \SMB\InvalidTypeException
+	 * @expectedException \Icewind\SMB\InvalidTypeException
 	 */
 	public function testCreateFileExistingFolder() {
 		$this->share->mkdir($this->root . '/bar');
@@ -213,28 +213,28 @@ class Share extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\NotFoundException
 	 */
 	public function testCreateFileInNonExistingFolder() {
 		$this->share->put($this->getTextFile(), $this->root . '/foo/bar');
 	}
 
 	/**
-	 * @expectedException \SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\NotFoundException
 	 */
 	public function testTestRemoveNonExistingFile() {
 		$this->share->del($this->root . '/foo');
 	}
 
 	/**
-	 * @expectedException \SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\NotFoundException
 	 */
 	public function testDownloadNonExistingFile() {
 		$this->share->get($this->root . '/foo', '/dev/null');
 	}
 
 	/**
-	 * @expectedException \SMB\InvalidTypeException
+	 * @expectedException \Icewind\SMB\InvalidTypeException
 	 */
 	public function testDownloadFolder() {
 		$this->share->mkdir($this->root . '/foobar');
@@ -243,7 +243,7 @@ class Share extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\NotFoundException
 	 */
 	public function testDelFolder() {
 		$this->share->mkdir($this->root . '/foobar');
@@ -252,7 +252,7 @@ class Share extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \SMB\InvalidTypeException
+	 * @expectedException \Icewind\SMB\InvalidTypeException
 	 */
 	public function testRmdirFile() {
 		$this->share->put($this->getTextFile(), $this->root . '/foobar');
@@ -261,14 +261,14 @@ class Share extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\NotFoundException
 	 */
 	public function testDirNonExisting() {
 		$this->share->dir('/foobar/asd');
 	}
 
 	/**
-	 * @expectedException \SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\NotFoundException
 	 */
 	public function testRmDirNonExisting() {
 		$this->share->rmdir('/foobar/asd');
