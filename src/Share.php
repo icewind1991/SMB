@@ -71,8 +71,18 @@ class Share {
 	/**
 	 * List the content of a remote folder
 	 *
+	 * Returns a nested array in the format of
+	 * [
+	 *    $name => [
+	 *        'size' => $size,
+	 *        'type' => $type,
+	 *        'time' => $mtime
+	 *    ],
+	 *    ...
+	 * ]
+	 *
 	 * @param $path
-	 * @return array
+	 * @return array[]
 	 */
 	public function dir($path) {
 		$path = $this->escapePath($path);
