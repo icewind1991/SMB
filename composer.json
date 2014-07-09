@@ -9,7 +9,10 @@
 			"email": "icewind@owncloud.com"
 		}
 	],
-	"autoload": {
+	"require"          : {
+		"php": ">=5.3"
+	},
+	"autoload"         : {
 		"psr-4": {
 			"Icewind\\SMB\\": "src/"
 		}
