@@ -282,4 +282,19 @@ class Share extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue(abs($now - $mtime) <= 1, 'Modified time differs by ' . abs($now - $mtime) . ' seconds');
 		$this->share->del($this->root . '/foo.txt');
 	}
+
+	public function testListRoot() {
+		$files = $this->share->dir('');
+		$this->assertGreaterThan(0, count($files));
+	}
+
+	public function testReadStream() {
+		$sourceFile = $this->getTextFile();
+		$this->share->put($sourceFile, $this->root . '/foobar');
+		$fh = $this->share->read($this->root . '/foobar');
+		$content = stream_get_contents($fh);
+		$this->share->del($this->root . '/foobar');
+
+		$this->assertEquals(file_get_contents($sourceFile), $content);
+	}
 }

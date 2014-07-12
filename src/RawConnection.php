@@ -85,6 +85,14 @@ class RawConnection {
 		return $output;
 	}
 
+	public function getOutputStream() {
+		return $this->pipes[1];
+	}
+
+	public function getInputStream() {
+		return $this->pipes[0];
+	}
+
 	public function __destruct() {
 		proc_terminate($this->process);
 		proc_close($this->process);

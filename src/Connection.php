@@ -76,7 +76,9 @@ class Connection extends RawConnection {
 	}
 
 	public function close() {
-		$this->write('close' . PHP_EOL);
+		if (is_resource($this->getInputStream())) {
+			$this->write('close' . PHP_EOL);
+		}
 	}
 
 	public function __destruct() {

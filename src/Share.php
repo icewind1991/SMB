@@ -50,6 +50,11 @@ class Share {
 		}
 	}
 
+	/**
+	 * Get the name of the share
+	 *
+	 * @return string
+	 */
 	public function getName() {
 		return $this->name;
 	}
@@ -183,6 +188,28 @@ class Share {
 		$path2 = $this->escapeLocalPath($target); //second path is local, needs different escaping
 		$output = $this->execute('get ' . $path1 . ' ' . $path2);
 		return $this->parseOutput($output);
+	}
+
+	/**
+	 * Open a readable stream top a remote file
+	 *
+	 * @param string $source
+	 * @return resource a read only stream with the contents of the remote file
+	 */
+	public function read($source) {
+		$source = $this->escapePath($source);
+		// since we do binary transfer over STDOUT we create a new connection
+		$command = Server::CLIENT . ' -U ' . escapeshellarg($this->server->getUser()) .
+			' //' . $this->server->getHost() . '/' . $this->name
+			. ' -c \'get ' . $source . ' -\'';
+		$connection = new Connection($command, array(
+			'PASSWD' => $this->server->getPassword()
+		));
+		$fh = $connection->getOutputStream();
+
+		//save the connection as context of the stream to prevent it going out of scope and cleaning up the resource
+		stream_context_set_option($fh, 'file', 'connection', $connection);
+		return $fh;
 	}
 
 	/**
