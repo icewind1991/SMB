@@ -15,17 +15,26 @@ class Server {
 	/**
 	 * @var string $host
 	 */
-	private $host;
+	protected $host;
 
 	/**
 	 * @var string $user
 	 */
-	private $user;
+	protected $user;
 
 	/**
 	 * @var string $password
 	 */
-	private $password;
+	protected $password;
+
+	/**
+	 * Check if the smblcient php extension is available
+	 *
+	 * @return bool
+	 */
+	public static function NativeAvailable() {
+		return function_exists('smbclient_state_new');
+	}
 
 	/**
 	 * @param string $host

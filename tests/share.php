@@ -6,24 +6,24 @@ class Share extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @var \Icewind\SMB\Server $server
 	 */
-	private $server;
+	protected $server;
 
 	/**
 	 * @var \Icewind\SMB\Share $share
 	 */
-	private $share;
+	protected $share;
 
 	/**
 	 * @var string $root
 	 */
-	private $root;
+	protected $root;
 
-	private $config;
+	protected $config;
 
 	public function setUp() {
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
 		$this->server = new \Icewind\SMB\Server($this->config->host, $this->config->user, $this->config->password);
-		$this->share = $this->server->getShare($this->config->share);
+		$this->share= new \Icewind\SMB\Share($this->server, $this->config->share);
 		if ($this->config->root) {
 			$this->root = '/' . $this->config->root . '/' . uniqid();
 		} else {
@@ -243,7 +243,7 @@ class Share extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\InvalidTypeException
 	 */
 	public function testDelFolder() {
 		$this->share->mkdir($this->root . '/foobar');
@@ -293,6 +293,7 @@ class Share extends \PHPUnit_Framework_TestCase {
 		$this->share->put($sourceFile, $this->root . '/foobar');
 		$fh = $this->share->read($this->root . '/foobar');
 		$content = stream_get_contents($fh);
+		fclose($fh);
 		$this->share->del($this->root . '/foobar');
 
 		$this->assertEquals(file_get_contents($sourceFile), $content);
