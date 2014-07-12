@@ -8,7 +8,7 @@
 
 namespace Icewind\SMB;
 
-class Share {
+class Share implements IShare {
 	/**
 	 * @var Server $server
 	 */

@@ -67,7 +67,7 @@ class Server {
 	}
 
 	/**
-	 * @return Share[]
+	 * @return \Icewind\SMB\IShare[]
 	 * @throws \Icewind\SMB\AuthenticationException
 	 * @throws \Icewind\SMB\InvalidHostException
 	 */
@@ -118,7 +118,7 @@ class Server {
 
 	/**
 	 * @param string $name
-	 * @return Share
+	 * @return \Icewind\SMB\IShare
 	 */
 	public function getShare($name) {
 		return new Share($this, $name);
