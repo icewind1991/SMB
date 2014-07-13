@@ -202,11 +202,11 @@ class Share implements IShare {
 		$command = Server::CLIENT . ' -U ' . escapeshellarg($this->server->getUser()) .
 			' //' . $this->server->getHost() . '/' . $this->name
 			. ' -c \'get ' . $source . ' -\'';
+		// because we're piping the files content over STOUT using the password prompt is no option here
 		$connection = new Connection($command, array(
 			'PASSWD' => $this->server->getPassword()
 		));
 		$fh = $connection->getOutputStream();
-
 		//save the connection as context of the stream to prevent it going out of scope and cleaning up the resource
 		stream_context_set_option($fh, 'file', 'connection', $connection);
 		return $fh;
