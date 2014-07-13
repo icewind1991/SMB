@@ -23,17 +23,18 @@ class RawConnection {
 	private $process;
 
 
-	public function __construct($command) {
+	public function __construct($command, $env = array()) {
 		$descriptorSpec = array(
 			0 => array("pipe", "r"),
 			1 => array("pipe", "w"),
 			2 => array('file', '/dev/null', 'w')
 		);
 		setlocale(LC_ALL, Server::LOCALE);
-		$this->process = proc_open($command, $descriptorSpec, $this->pipes, null, array(
+		$env = array_merge($env, array(
 			'CLI_FORCE_INTERACTIVE' => 'y', // Needed or the prompt isn't displayed!!
 			'LC_ALL' => Server::LOCALE
 		));
+		$this->process = proc_open($command, $descriptorSpec, $this->pipes, null, $env);
 		if (!$this->isValid()) {
 			throw new ConnectionError();
 		}
