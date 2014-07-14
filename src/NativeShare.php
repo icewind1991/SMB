@@ -96,7 +96,7 @@ class NativeShare implements IShare {
 			throw new AlreadyExistsException($errstr);
 		} else if (strpos($errstr, 'Can\'t write to a directory') or
 			strpos($errstr, 'use rmdir instead') or
-			$errno = 20 // 20: ENOTDIR
+			$errno === 20 // 20: ENOTDIR
 		) {
 			throw new InvalidTypeException($errstr);
 		} else if (strpos($errstr, 'Workgroup not found') or
