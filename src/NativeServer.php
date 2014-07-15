@@ -25,7 +25,7 @@ class NativeServer extends Server {
 			list($workgroup, $user) = explode($user, '/');
 		}
 		$this->state = smbclient_state_new();
-		$result = smbclient_state_init($this->state, $workgroup, $this->getPassword(), $user);
+		$result = smbclient_state_init($this->state, $workgroup, $user, $this->getPassword());
 		if (!$result) {
 			throw new ConnectionError();
 		}

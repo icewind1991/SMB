@@ -65,7 +65,7 @@ class NativeShare implements IShare {
 			list($workgroup, $user) = explode($user, '/');
 		}
 		$this->state = smbclient_state_new();
-		$result = smbclient_state_init($this->state, $workgroup, $this->server->getPassword(), $user);
+		$result = smbclient_state_init($this->state, $workgroup, $user, $this->server->getPassword());
 		if (!$result) {
 			throw new ConnectionError();
 		}
