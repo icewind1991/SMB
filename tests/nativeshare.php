@@ -6,7 +6,6 @@ require_once 'share.php';
 
 class NativeShare extends Share {
 
-
 	/**
 	 * @var \Icewind\SMB\NativeShare $share
 	 */
@@ -25,5 +24,18 @@ class NativeShare extends Share {
 			$this->root = '/' . uniqid();
 		}
 		$this->share->mkdir($this->root);
+	}
+
+	public function testRestoreErrorHandler() {
+		$handlerCalled = false;
+		set_error_handler(function () use (&$handlerCalled) {
+			$handlerCalled = true;
+		});
+
+		$this->share->dir($this->root);
+
+		trigger_error('dummy');
+		$this->assertTrue($handlerCalled);
+		restore_error_handler();
 	}
 }

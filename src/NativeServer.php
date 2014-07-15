@@ -18,14 +18,15 @@ class NativeServer extends Server {
 		if ($this->state and is_resource($this->state)) {
 			return;
 		}
-		set_error_handler(array('Icewind\SMB\NativeShare', 'errorHandler'));
 		$user = $this->getUser();
 		$workgroup = null;
 		if (strpos($user, '/')) {
 			list($workgroup, $user) = explode($user, '/');
 		}
+		NativeShare::registerErrorHandler();
 		$this->state = smbclient_state_new();
 		$result = smbclient_state_init($this->state, $workgroup, $user, $this->getPassword());
+		NativeShare::restoreErrorHandler();
 		if (!$result) {
 			throw new ConnectionError();
 		}
@@ -39,12 +40,14 @@ class NativeServer extends Server {
 	public function listShares() {
 		$this->connect();
 		$shares = array();
+		NativeShare::registerErrorHandler();
 		$dh = smbclient_opendir($this->state, 'smb://' . $this->getHost());
 		while ($share = smbclient_readdir($this->state, $dh)) {
 			if ($share['type'] === 'file share') {
 				$shares[] = $this->getShare($share['name']);
 			}
 		}
+		NativeShare::restoreErrorHandler();
 		smbclient_closedir($this->state, $dh);
 		return $shares;
 	}
@@ -59,7 +62,9 @@ class NativeServer extends Server {
 
 	public function __destruct() {
 		if ($this->state and is_resource($this->state)) {
+			NativeShare::registerErrorHandler();
 			smbclient_state_free($this->state);
+			NativeShare::restoreErrorHandler();
 		}
 		unset($this->state);
 	}
