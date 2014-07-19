@@ -8,28 +8,37 @@
 
 namespace Icewind\SMB;
 
-class NotFoundException extends \Exception {
+class Exception extends \Exception {
 }
 
-class AlreadyExistsException extends \Exception {
+class ConnectException extends Exception {
 }
 
-class NotEmptyException extends \Exception {
+class ConnectionError extends ConnectException {
 }
 
-class ConnectionError extends \Exception {
+class AuthenticationException extends ConnectException {
 }
 
-class AuthenticationException extends \Exception {
+class InvalidHostException extends ConnectException {
 }
 
-class InvalidHostException extends \Exception {
+class AccessDeniedException extends ConnectException {
 }
 
-class AccessDeniedException extends \Exception {
+class InvalidRequestException extends Exception {
 }
 
-class InvalidTypeException extends \Exception {
+class NotFoundException extends InvalidRequestException {
+}
+
+class AlreadyExistsException extends InvalidRequestException {
+}
+
+class NotEmptyException extends InvalidRequestException {
+}
+
+class InvalidTypeException extends InvalidRequestException {
 }
 
 class ErrorCodes {
