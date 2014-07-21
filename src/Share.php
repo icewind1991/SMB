@@ -144,7 +144,20 @@ class Share implements IShare {
 	 * @return bool
 	 */
 	public function del($path) {
-		return $this->simpleCommand('del', $path);
+		//del return a file not found error when trying to delete a folder
+		//we catch it so we can check if $path doesn't exist or is of invalid type
+		try {
+			return $this->simpleCommand('del', $path);
+		} catch (NotFoundException $e) {
+			//no need to do anything with the result, we just check if this throws the not found error
+			try {
+				$this->simpleCommand('ls', $path);
+			} catch (NotFoundException $e2) {
+				throw $e;
+			} catch (\Exception $e2) {
+				throw new InvalidTypeException();
+			}
+		}
 	}
 
 	/**
@@ -272,7 +285,7 @@ class Share implements IShare {
 				case ErrorCodes::NotADirectory:
 					throw new InvalidTypeException();
 				default:
-					throw new \Exception();
+					throw new Exception();
 			}
 		}
 	}
