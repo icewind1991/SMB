@@ -22,19 +22,21 @@ class RawConnection {
 	 */
 	private $process;
 
-
 	public function __construct($command, $env = array()) {
 		$descriptorSpec = array(
-			0 => array("pipe", "r"),
-			1 => array("pipe", "w"),
-			2 => array('file', '/dev/null', 'w')
+			0 => array('pipe', 'r'), // child reads from stdin
+			1 => array('pipe', 'w'), // child writes to stdout
+			2 => array('pipe', 'w'), // child writes to stderr
+			3 => array('pipe', 'r'), // child reads from fd#3
+			4 => array('pipe', 'r'), // child reads from fd#4
+			5 => array('pipe', 'w')  // child writes to fd#5
 		);
 		setlocale(LC_ALL, Server::LOCALE);
 		$env = array_merge($env, array(
 			'CLI_FORCE_INTERACTIVE' => 'y', // Needed or the prompt isn't displayed!!
 			'LC_ALL' => Server::LOCALE
 		));
-		$this->process = proc_open($command, $descriptorSpec, $this->pipes, null, $env);
+		$this->process = proc_open($command, $descriptorSpec, $this->pipes, '/', $env);
 		if (!$this->isValid()) {
 			throw new ConnectionError();
 		}
@@ -92,6 +94,19 @@ class RawConnection {
 
 	public function getInputStream() {
 		return $this->pipes[0];
+	}
+
+	public function writeAuthentication($user, $password) {
+		$auth = ($password === false)
+			? "username=$user"
+			: "username=$user\npassword=$password";
+
+		if (fwrite($this->pipes[3], $auth) === false) {
+			fclose($this->pipes[3]);
+			return false;
+		}
+		fclose($this->pipes[3]);
+		return true;
 	}
 
 	public function __destruct() {

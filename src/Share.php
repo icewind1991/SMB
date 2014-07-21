@@ -40,11 +40,10 @@ class Share implements IShare {
 		if ($this->connection and $this->connection->isValid()) {
 			return;
 		}
-		$command = Server::CLIENT . ' -U ' . escapeshellarg($this->server->getUser()) .
+		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
 			' //' . $this->server->getHost() . '/' . $this->name;
 		$this->connection = new Connection($command);
-		$this->connection->write($this->server->getPassword());
-		$this->connection->readLine(); // discard password prompt
+		$this->connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		if (!$this->connection->isValid()) {
 			throw new ConnectionError();
 		}
@@ -212,13 +211,11 @@ class Share implements IShare {
 	public function read($source) {
 		$source = $this->escapePath($source);
 		// since we do binary transfer over STDOUT we create a new connection
-		$command = Server::CLIENT . ' -U ' . escapeshellarg($this->server->getUser()) .
+		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
 			' //' . $this->server->getHost() . '/' . $this->name
 			. ' -c \'get ' . $source . ' -\'';
-		// because we're piping the files content over STOUT using the password prompt is no option here
-		$connection = new Connection($command, array(
-			'PASSWD' => $this->server->getPassword()
-		));
+		$connection = new Connection($command);
+		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		$fh = $connection->getOutputStream();
 		//save the connection as context of the stream to prevent it going out of scope and cleaning up the resource
 		stream_context_set_option($fh, 'file', 'connection', $connection);

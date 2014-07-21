@@ -81,18 +81,13 @@ class Server {
 	 * @throws \Icewind\SMB\InvalidHostException
 	 */
 	public function listShares() {
-		$user = escapeshellarg($this->getUser());
-		$command = self::CLIENT . ' -U ' . $user . ' ' . '-gL ' . escapeshellarg($this->getHost());
+		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
+			' -gL ' . escapeshellarg($this->getHost());
 		$connection = new RawConnection($command);
-		$connection->write($this->getPassword() . PHP_EOL);
+		$connection->writeAuthentication($this->getUser(), $this->getPassword());
 		$output = $connection->readAll();
 
 		$line = $output[0];
-
-		// disregard password prompt
-		if (substr($line, 0, 6) == 'Enter ' and count($output) > 1) {
-			$line = $output[1];
-		}
 
 		$line = rtrim($line, ')');
 		if (substr($line, -23) === ErrorCodes::LogonFailure) {
