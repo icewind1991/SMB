@@ -29,7 +29,7 @@ class Server extends \PHPUnit_Framework_TestCase {
 	 * @expectedException \Icewind\SMB\AuthenticationException
 	 */
 	public function testWrongUserName() {
-		$server = new \Icewind\SMB\Server($this->config->host, uniqid(), $this->config->password);
+		$server = new \Icewind\SMB\Server($this->config->host, uniqid(), uniqid());
 		$server->listShares();
 	}
 
@@ -47,10 +47,5 @@ class Server extends \PHPUnit_Framework_TestCase {
 	public function testWrongHost() {
 		$server = new \Icewind\SMB\Server(uniqid(), $this->config->user, $this->config->password);
 		$server->listShares();
-	}
-
-	public function testGetTimeZone() {
-		$timeZone = $this->server->getTimeZone();
-		$this->assertEquals('+0200', $timeZone);
 	}
 }
