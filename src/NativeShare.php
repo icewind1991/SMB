@@ -304,18 +304,26 @@ class NativeShare implements IShare {
 	}
 
 	/**
+	 * Open a readable stream top a remote file
+	 *
+	 * @param string $source
+	 * @return resource a read only stream with the contents of the remote file
+	 */
+	public function write($source) {
+		$handle = $this->create($source);
+		$context = stream_context_create(array(
+			'nativesmb' => array(
+				'state' => $this->state,
+				'handle' => $handle
+			)
+		));
+		return fopen('nativesmb://dummy', 'w', false, $context);
+	}
+
+	/**
 	 * @return Server
 	 */
 	public function getServer() {
 		return $this->server;
-	}
-
-	public function __destruct() {
-		if ($this->state and is_resource($this->state)) {
-			self::registerErrorHandler();
-			smbclient_state_free($this->state);
-			restore_error_handler();
-		}
-		unset($this->state);
 	}
 }
