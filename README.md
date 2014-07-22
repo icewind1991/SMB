@@ -1,6 +1,9 @@
 SMB
 ===
 
+[![Coverage Status](https://img.shields.io/coveralls/icewind1991/SMB.svg)](https://coveralls.io/r/icewind1991/SMB?branch=master)
+[![Build Status](https://travis-ci.org/icewind1991/SMB.svg?branch=master)](https://travis-ci.org/icewind1991/SMB)
+
 PHP wrapper for `smbclient` and [`libsmbclient-php`](https://github.com/eduardok/libsmbclient-php)
 
 - Reuses a single `smbclient` instance for multiple requests
