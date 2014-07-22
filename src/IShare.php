@@ -53,11 +53,6 @@ interface IShare {
 	public function put($source, $target);
 
 	/**
-	 * @return Server
-	 */
-	public function getServer();
-
-	/**
 	 * List the content of a remote folder
 	 *
 	 * Returns a nested array in the format of

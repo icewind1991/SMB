@@ -223,13 +223,6 @@ class Share implements IShare {
 	}
 
 	/**
-	 * @return Server
-	 */
-	public function getServer() {
-		return $this->server;
-	}
-
-	/**
 	 * @param string $command
 	 * @return array
 	 */

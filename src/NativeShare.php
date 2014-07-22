@@ -73,11 +73,8 @@ class NativeShare implements IShare {
 		}
 		self::registerErrorHandler();
 		$this->state = smbclient_state_new();
-		$result = smbclient_state_init($this->state, $workgroup, $user, $this->server->getPassword());
+		smbclient_state_init($this->state, $workgroup, $user, $this->server->getPassword());
 		self::restoreErrorHandler();
-		if (!$result) {
-			throw new ConnectionError();
-		}
 	}
 
 	/**
@@ -318,12 +315,5 @@ class NativeShare implements IShare {
 			)
 		));
 		return fopen('nativesmb://dummy', 'w', false, $context);
-	}
-
-	/**
-	 * @return Server
-	 */
-	public function getServer() {
-		return $this->server;
 	}
 }
