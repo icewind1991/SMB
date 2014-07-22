@@ -31,14 +31,14 @@ class NativeStream {
 		if (isset($context['nativesmb'])) {
 			$context = $context['nativesmb'];
 		} else {
-			throw new \Exception('Invalid context');
+			throw new Exception('Invalid context');
 		}
 		if (isset($context['state']) and isset($context['handle'])) {
 			$this->state = $context['state'];
 			$this->handle = $context['handle'];
 			return true;
 		} else {
-			throw new \Exception('Invalid context');
+			throw new Exception('Invalid context');
 		}
 	}
 

@@ -79,6 +79,15 @@ class NativeStream extends \PHPUnit_Framework_TestCase {
 		unlink($tmpFile1);
 	}
 
+	public function testStat() {
+		$sourceFile = $this->getTextFile();
+		$this->share->put($sourceFile, $this->root . '/foobar');
+		$fh = $this->share->read($this->root . '/foobar');
+		$stat = fstat($fh);
+		$this->assertEquals(filesize($sourceFile), $stat['size']);
+		unlink($sourceFile);
+	}
+
 	public function tearDown() {
 		if ($this->share) {
 			$this->cleanDir($this->root);
@@ -96,5 +105,24 @@ class NativeStream extends \PHPUnit_Framework_TestCase {
 			}
 		}
 		$this->share->rmdir($dir);
+	}
+
+	/**
+	 * @expectedException \Icewind\SMB\Exception
+	 */
+	public function testNoContext() {
+		return fopen('nativesmb://dummy', 'r');
+	}
+
+	/**
+	 * @expectedException \Icewind\SMB\Exception
+	 */
+	public function testInvalidContext() {
+		$context = stream_context_create(array(
+			'nativesmb' => array(
+				'foo' => 'bar'
+			)
+		));
+		return fopen('nativesmb://dummy', 'r', false, $context);
 	}
 }
