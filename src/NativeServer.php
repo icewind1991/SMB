@@ -59,13 +59,4 @@ class NativeServer extends Server {
 	public function getShare($name) {
 		return new NativeShare($this, $name);
 	}
-
-	public function __destruct() {
-		if ($this->state and is_resource($this->state)) {
-			NativeShare::registerErrorHandler();
-			smbclient_state_free($this->state);
-			NativeShare::restoreErrorHandler();
-		}
-		unset($this->state);
-	}
 }
