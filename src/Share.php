@@ -250,24 +250,6 @@ class Share implements IShare {
 	}
 
 	/**
-	 * @param resource $source
-	 * @param callable $callback
-	 * @return resource
-	 */
-	protected function addCloseCallback($source, $callback) {
-		$context = stream_context_create(array(
-			'callback' => array(
-				'source' => $source,
-				'close' => $callback
-			)
-		));
-		stream_wrapper_register('callback', '\Icewind\Streams\CallbackWrapper');
-		$stream = fopen('callback://', 'r+', false, $context);
-		stream_wrapper_unregister('callback');
-		return $stream;
-	}
-
-	/**
 	 * @param string $command
 	 * @return array
 	 */
