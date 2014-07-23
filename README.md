@@ -9,6 +9,7 @@ PHP wrapper for `smbclient` and [`libsmbclient-php`](https://github.com/eduardok
 - Reuses a single `smbclient` instance for multiple requests
 - Doesn't leak the password to the process list
 - Simple 1-on-1 mapping of SMB commands
+- A stream-based api to remove the need for temporary files
 - Support for using libsmbclient directly trough [`libsmbclient-php`](https://github.com/eduardok/libsmbclient-php)
 
 Examples
@@ -76,6 +77,38 @@ foreach ($content as $name => $info) {
 	echo $name . "\n";
 	echo "\tsize :" . $info['size'] . "\n";
 }
+```
+
+### Using read streams
+
+```php
+<?php
+use Icewind\SMB\Server;
+
+require('vendor/autoload.php');
+
+$server = new Server('localhost', 'test', 'test');
+$share = $server->getShare('test');
+
+$fh = $share->read('test.txt');
+echo fread($fh, 4086);
+fclose($fh);
+```
+
+### Using write streams
+
+```php
+<?php
+use Icewind\SMB\Server;
+
+require('vendor/autoload.php');
+
+$server = new Server('localhost', 'test', 'test');
+$share = $server->getShare('test');
+
+$fh = $share->write('test.txt');
+fwrite($fh, 'bar');
+fclose($fh);
 ```
 
 ### Using [libsmbclient-php](https://github.com/eduardok/libsmbclient-php) ###
