@@ -75,14 +75,10 @@ class Connection extends RawConnection {
 		}
 	}
 
-	public function close() {
+	public function close($terminate = true) {
 		if (is_resource($this->getInputStream())) {
 			$this->write('close' . PHP_EOL);
 		}
-	}
-
-	public function __destruct() {
-		$this->close();
-		parent::__destruct();
+		parent::close($terminate);
 	}
 }

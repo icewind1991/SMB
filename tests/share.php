@@ -23,7 +23,7 @@ class Share extends \PHPUnit_Framework_TestCase {
 	public function setUp() {
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
 		$this->server = new \Icewind\SMB\Server($this->config->host, $this->config->user, $this->config->password);
-		$this->share= new \Icewind\SMB\Share($this->server, $this->config->share);
+		$this->share = new \Icewind\SMB\Share($this->server, $this->config->share);
 		if ($this->config->root) {
 			$this->root = '/' . $this->config->root . '/' . uniqid();
 		} else {
@@ -297,5 +297,18 @@ class Share extends \PHPUnit_Framework_TestCase {
 		$this->share->del($this->root . '/foobar');
 
 		$this->assertEquals(file_get_contents($sourceFile), $content);
+	}
+
+	public function testWriteStream() {
+		$fh = $this->share->write($this->root . '/foobar', 'qwerty');
+		fwrite($fh, 'qwerty');
+		fclose($fh);
+//		sleep(5);
+
+
+		$tmpFile1 = tempnam('/tmp', 'smb_test_');
+		$this->share->get($this->root . '/foobar', $tmpFile1);
+		$this->assertEquals('qwerty', file_get_contents($tmpFile1));
+		unlink($tmpFile1);
 	}
 }

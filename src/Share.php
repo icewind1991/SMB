@@ -8,6 +8,8 @@
 
 namespace Icewind\SMB;
 
+use Icewind\Streams\CallbackWrapper;
+
 class Share implements IShare {
 	/**
 	 * @var Server $server
@@ -22,7 +24,7 @@ class Share implements IShare {
 	/**
 	 * @var Connection $connection
 	 */
-	private $connection;
+	public $connection;
 
 	private $serverTimezone;
 
@@ -203,23 +205,66 @@ class Share implements IShare {
 	}
 
 	/**
-	 * Open a readable stream top a remote file
+	 * Open a readable stream to a remote file
 	 *
 	 * @param string $source
 	 * @return resource a read only stream with the contents of the remote file
 	 */
 	public function read($source) {
 		$source = $this->escapePath($source);
-		// since we do binary transfer over STDOUT we create a new connection
+		// since returned stream is closed by the caller we need to create a new instance
+		// since we can't re-use the same file descriptor over multiple calls
 		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
 			' //' . $this->server->getHost() . '/' . $this->name
-			. ' -c \'get ' . $source . ' -\'';
+			. ' -c \'get ' . $source . ' /proc/self/fd/5\'';
 		$connection = new Connection($command);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
-		$fh = $connection->getOutputStream();
+		$fh = $connection->getFileOutputStream();
 		//save the connection as context of the stream to prevent it going out of scope and cleaning up the resource
 		stream_context_set_option($fh, 'file', 'connection', $connection);
 		return $fh;
+	}
+
+	/**
+	 * Open a writable stream to a remote file
+	 *
+	 * @param string $target
+	 * @return resource a write only stream to upload a remote file
+	 */
+	public function write($target) {
+		$target = $this->escapePath($target);
+		// since returned stream is closed by the caller we need to create a new instance
+		// since we can't re-use the same file descriptor over multiple calls
+		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
+			' //' . $this->server->getHost() . '/' . $this->name
+			. ' -c \'put /proc/self/fd/4 ' . $target . '\'';
+		$connection = new RawConnection($command);
+		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
+		$fh = $connection->getFileInputStream();
+
+		// use a close callback to ensure the upload is finished before continuing
+		// this also serves as a way to keep the connection in scope
+		return CallbackWrapper::wrap($fh, null, null, function () use ($connection) {
+			$connection->close(false); // dont terminate, give the upload some time
+		});
+	}
+
+	/**
+	 * @param resource $source
+	 * @param callable $callback
+	 * @return resource
+	 */
+	protected function addCloseCallback($source, $callback) {
+		$context = stream_context_create(array(
+			'callback' => array(
+				'source' => $source,
+				'close' => $callback
+			)
+		));
+		stream_wrapper_register('callback', '\Icewind\Streams\CallbackWrapper');
+		$stream = fopen('callback://', 'r+', false, $context);
+		stream_wrapper_unregister('callback');
+		return $stream;
 	}
 
 	/**

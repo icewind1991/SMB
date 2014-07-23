@@ -93,4 +93,12 @@ interface IShare {
 	 * @return resource a read only stream with the contents of the remote file
 	 */
 	public function read($source);
+
+	/**
+	 * Open a writable stream to a remote file
+	 *
+	 * @param string $target
+	 * @return resource a write only stream to upload a remote file
+	 */
+	public function write($target);
 }

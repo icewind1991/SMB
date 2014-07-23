@@ -10,7 +10,8 @@
 		}
 	],
 	"require"          : {
-		"php": ">=5.3"
+		"php": ">=5.3",
+		"icewind/streams": "0.1.x"
 	},
 	"require-dev": {
 		"satooshi/php-coveralls"  : "dev-master"

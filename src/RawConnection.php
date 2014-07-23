@@ -29,7 +29,7 @@ class RawConnection {
 			2 => array('pipe', 'w'), // child writes to stderr
 			3 => array('pipe', 'r'), // child reads from fd#3
 			4 => array('pipe', 'r'), // child reads from fd#4
-			5 => array('pipe', 'w')  // child writes to fd#5
+			5 => array('pipe', 'w') // child writes to fd#5
 		);
 		setlocale(LC_ALL, Server::LOCALE);
 		$env = array_merge($env, array(
@@ -62,8 +62,8 @@ class RawConnection {
 	 * @param string $input
 	 */
 	public function write($input) {
-		fwrite($this->pipes[0], $input);
-		fflush($this->pipes[0]);
+		fwrite($this->getInputStream(), $input);
+		fflush($this->getInputStream());
 	}
 
 	/**
@@ -72,7 +72,7 @@ class RawConnection {
 	 * @return string
 	 */
 	public function read() {
-		return trim(fgets($this->pipes[1]));
+		return trim(fgets($this->getOutputStream()));
 	}
 
 	/**
@@ -88,12 +88,28 @@ class RawConnection {
 		return $output;
 	}
 
+	public function getInputStream() {
+		return $this->pipes[0];
+	}
+
 	public function getOutputStream() {
 		return $this->pipes[1];
 	}
 
-	public function getInputStream() {
-		return $this->pipes[0];
+	public function getErrorStream() {
+		return $this->pipes[2];
+	}
+
+	public function getAuthStream() {
+		return $this->pipes[3];
+	}
+
+	public function getFileInputStream() {
+		return $this->pipes[4];
+	}
+
+	public function getFileOutputStream() {
+		return $this->pipes[5];
 	}
 
 	public function writeAuthentication($user, $password) {
@@ -101,16 +117,25 @@ class RawConnection {
 			? "username=$user"
 			: "username=$user\npassword=$password";
 
-		if (fwrite($this->pipes[3], $auth) === false) {
-			fclose($this->pipes[3]);
+		if (fwrite($this->getAuthStream(), $auth) === false) {
+			fclose($this->getAuthStream());
 			return false;
 		}
-		fclose($this->pipes[3]);
+		fclose($this->getAuthStream());
 		return true;
 	}
 
-	public function __destruct() {
-		proc_terminate($this->process);
+	public function close($terminate = true) {
+		if (!is_resource($this->process)) {
+			return;
+		}
+		if ($terminate) {
+			proc_terminate($this->process);
+		}
 		proc_close($this->process);
+	}
+
+	public function __destruct() {
+		$this->close();
 	}
 }

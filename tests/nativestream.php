@@ -68,17 +68,6 @@ class NativeStream extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(120, ftell($fh));
 	}
 
-	public function testWrite() {
-		$fh = $this->share->write($this->root . '/foobar');
-		fwrite($fh, 'qwerty');
-		fclose($fh);
-
-		$tmpFile1 = tempnam('/tmp', 'smb_test_');
-		$this->share->get($this->root . '/foobar', $tmpFile1);
-		$this->assertEquals('qwerty', file_get_contents($tmpFile1));
-		unlink($tmpFile1);
-	}
-
 	public function testStat() {
 		$sourceFile = $this->getTextFile();
 		$this->share->put($sourceFile, $this->root . '/foobar');
