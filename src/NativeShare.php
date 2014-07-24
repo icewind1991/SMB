@@ -111,6 +111,13 @@ class NativeShare implements IShare {
 			throw new InvalidHostException($errstr);
 		} else if (strpos($errstr, 'Permission denied')) {
 			throw new AccessDeniedException($errstr);
+		} else if (strpos($errstr, 'unknown error (110)') or
+			strpos($errstr, 'unknown error (111)') or
+			strpos($errstr, 'unknown error (112)') or
+			strpos($errstr, 'unknown error (113)')) {
+			// errors for connection timeout, connection refused, host is down and
+			// no route to host, respectively
+			throw new ConnectionError($errstr);
 		} else {
 			throw new \Exception($errstr);
 		}
