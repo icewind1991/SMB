@@ -8,34 +8,6 @@
 namespace Icewind\SMB;
 
 interface IShare {
-	public function connect();
-
-	/**
-	 * Create a folder on the share
-	 *
-	 * @param string $path
-	 * @return bool
-	 */
-	public function mkdir($path);
-
-	/**
-	 * Download a remote file
-	 *
-	 * @param string $source remove file
-	 * @param string $target local file
-	 * @return bool
-	 */
-	public function get($source, $target);
-
-	/**
-	 * Rename a remote file
-	 *
-	 * @param string $from
-	 * @param string $to
-	 * @return bool
-	 */
-	public function rename($from, $to);
-
 	/**
 	 * Get the name of the share
 	 *
@@ -44,13 +16,73 @@ interface IShare {
 	public function getName();
 
 	/**
+	 * Download a remote file
+	 *
+	 * @param string $source remove file
+	 * @param string $target local file
+	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
+	 */
+	public function get($source, $target);
+
+	/**
 	 * Upload a local file
 	 *
 	 * @param string $source local file
 	 * @param string $target remove file
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function put($source, $target);
+
+	/**
+	 * Open a readable stream top a remote file
+	 *
+	 * @param string $source
+	 * @return resource a read only stream with the contents of the remote file
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
+	 */
+	public function read($source);
+
+	/**
+	 * Open a writable stream to a remote file
+	 *
+	 * @param string $target
+	 * @return resource a write only stream to upload a remote file
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
+	 */
+	public function write($target);
+
+	/**
+	 * Rename a remote file
+	 *
+	 * @param string $from
+	 * @param string $to
+	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\AlreadyExistsException
+	 */
+	public function rename($from, $to);
+
+	/**
+	 * Delete a file on the share
+	 *
+	 * @param string $path
+	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
+	 */
+	public function del($path);
 
 	/**
 	 * List the content of a remote folder
@@ -67,38 +99,31 @@ interface IShare {
 	 *
 	 * @param $path
 	 * @return array[]
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function dir($path);
+
+	/**
+	 * Create a folder on the share
+	 *
+	 * @param string $path
+	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\AlreadyExistsException
+	 */
+	public function mkdir($path);
 
 	/**
 	 * Remove a folder on the share
 	 *
 	 * @param string $path
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function rmdir($path);
-
-	/**
-	 * Delete a file on the share
-	 *
-	 * @param string $path
-	 * @return bool
-	 */
-	public function del($path);
-
-	/**
-	 * Open a readable stream top a remote file
-	 *
-	 * @param string $source
-	 * @return resource a read only stream with the contents of the remote file
-	 */
-	public function read($source);
-
-	/**
-	 * Open a writable stream to a remote file
-	 *
-	 * @param string $target
-	 * @return resource a write only stream to upload a remote file
-	 */
-	public function write($target);
 }

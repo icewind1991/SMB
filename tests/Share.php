@@ -133,7 +133,6 @@ class Share extends \PHPUnit_Framework_TestCase {
 
 		foreach ($names as $name) {
 			$this->share->mkdir($this->root . '/' . $name);
-			$this->share->connect();
 			$dir = $this->share->dir($this->root);
 			$this->assertArrayHasKey($name, $dir);
 			$this->assertEquals('dir', $dir[$name]['type']);

@@ -27,7 +27,7 @@ class Server {
 	protected $password;
 
 	/**
-	 * Check if the smblcient php extension is available
+	 * Check if the smbclient php extension is available
 	 *
 	 * @return bool
 	 */
@@ -76,6 +76,7 @@ class Server {
 
 	/**
 	 * @return \Icewind\SMB\IShare[]
+	 *
 	 * @throws \Icewind\SMB\AuthenticationException
 	 * @throws \Icewind\SMB\InvalidHostException
 	 */

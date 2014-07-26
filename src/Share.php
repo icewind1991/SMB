@@ -30,14 +30,18 @@ class Share implements IShare {
 	/**
 	 * @param Server $server
 	 * @param string $name
-	 * @throws ConnectionError
 	 */
 	public function __construct($server, $name) {
 		$this->server = $server;
 		$this->name = $name;
 	}
 
-	public function connect() {
+	/**
+	 * @throws \Icewind\SMB\ConnectionError
+	 * @throws \Icewind\SMB\AuthenticationException
+	 * @throws \Icewind\SMB\InvalidHostException
+	 */
+	protected function connect() {
 		if ($this->connection and $this->connection->isValid()) {
 			return;
 		}
@@ -88,6 +92,9 @@ class Share implements IShare {
 	 *
 	 * @param $path
 	 * @return array[]
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function dir($path) {
 		$path = $this->escapePath($path);
@@ -122,6 +129,9 @@ class Share implements IShare {
 	 *
 	 * @param string $path
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\AlreadyExistsException
 	 */
 	public function mkdir($path) {
 		return $this->simpleCommand('mkdir', $path);
@@ -132,6 +142,9 @@ class Share implements IShare {
 	 *
 	 * @param string $path
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function rmdir($path) {
 		return $this->simpleCommand('rmdir', $path);
@@ -142,6 +155,9 @@ class Share implements IShare {
 	 *
 	 * @param string $path
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function del($path) {
 		//del return a file not found error when trying to delete a folder
@@ -167,6 +183,9 @@ class Share implements IShare {
 	 * @param string $from
 	 * @param string $to
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\AlreadyExistsException
 	 */
 	public function rename($from, $to) {
 		$path1 = $this->escapePath($from);
@@ -182,6 +201,9 @@ class Share implements IShare {
 	 * @param string $source local file
 	 * @param string $target remove file
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function put($source, $target) {
 		$path1 = $this->escapeLocalPath($source); //first path is local, needs different escaping
@@ -196,6 +218,9 @@ class Share implements IShare {
 	 * @param string $source remove file
 	 * @param string $target local file
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function get($source, $target) {
 		$path1 = $this->escapePath($source);
@@ -209,6 +234,9 @@ class Share implements IShare {
 	 *
 	 * @param string $source
 	 * @return resource a read only stream with the contents of the remote file
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function read($source) {
 		$source = $this->escapePath($source);
@@ -230,6 +258,9 @@ class Share implements IShare {
 	 *
 	 * @param string $target
 	 * @return resource a write only stream to upload a remote file
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function write($target) {
 		$target = $this->escapePath($target);

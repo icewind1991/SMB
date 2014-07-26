@@ -58,9 +58,11 @@ class NativeShare implements IShare {
 	}
 
 	/**
-	 * @throws ConnectionError
+	 * @throws \Icewind\SMB\ConnectionError
+	 * @throws \Icewind\SMB\AuthenticationException
+	 * @throws \Icewind\SMB\InvalidHostException
 	 */
-	public function connect() {
+	protected function connect() {
 		if ($this->state and is_resource($this->state)) {
 			return;
 		}
@@ -130,6 +132,9 @@ class NativeShare implements IShare {
 	 *
 	 * @param $path
 	 * @return array[]
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function dir($path) {
 		$this->connect();
@@ -166,6 +171,9 @@ class NativeShare implements IShare {
 	 *
 	 * @param string $path
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\AlreadyExistsException
 	 */
 	public function mkdir($path) {
 		$this->connect();
@@ -180,6 +188,9 @@ class NativeShare implements IShare {
 	 *
 	 * @param string $path
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function rmdir($path) {
 		$this->connect();
@@ -194,6 +205,9 @@ class NativeShare implements IShare {
 	 *
 	 * @param string $path
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function del($path) {
 		$this->connect();
@@ -209,6 +223,9 @@ class NativeShare implements IShare {
 	 * @param string $from
 	 * @param string $to
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\AlreadyExistsException
 	 */
 	public function rename($from, $to) {
 		$this->connect();
@@ -249,6 +266,9 @@ class NativeShare implements IShare {
 	 * @param string $source local file
 	 * @param string $target remove file
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function put($source, $target) {
 		$sourceHandle = fopen($source, 'rb');
@@ -269,6 +289,9 @@ class NativeShare implements IShare {
 	 * @param string $source remove file
 	 * @param string $target local file
 	 * @return bool
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function get($source, $target) {
 		$sourceHandle = $this->fopen($source, 'r');
@@ -287,6 +310,9 @@ class NativeShare implements IShare {
 	 *
 	 * @param string $source
 	 * @return resource a read only stream with the contents of the remote file
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function read($source) {
 		$handle = $this->fopen($source, 'r');
@@ -304,6 +330,9 @@ class NativeShare implements IShare {
 	 *
 	 * @param string $source
 	 * @return resource a read only stream with the contents of the remote file
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function write($source) {
 		$handle = $this->create($source);
