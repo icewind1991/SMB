@@ -1,7 +1,6 @@
 {
-	"name"             : "Icewind/SMB",
-	"description"      : "php wrapper from smbclient",
-	"minimum-stability": "stable",
+	"name"             : "icewind/smb",
+	"description"      : "php wrapper for smbclient and libsmbclient-php",
 	"license"          : "MIT",
 	"authors"          : [
 		{
