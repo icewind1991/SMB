@@ -14,6 +14,27 @@ class NativeStream {
 
 	private $handle;
 
+	/**
+	 * Wrap a stream from libsmbclient-php into a regular php stream
+	 *
+	 * @param resource $state
+	 * @param resource $smbStream
+	 * @param string $mode
+	 * @return resource
+	 */
+	public static function wrap($state, $smbStream, $mode) {
+		stream_wrapper_register('nativesmb', '\Icewind\SMB\NativeStream');
+		$context = stream_context_create(array(
+			'nativesmb' => array(
+				'state' => $state,
+				'handle' => $smbStream
+			)
+		));
+		$fh = fopen('nativesmb://', $mode, false, $context);
+		stream_wrapper_unregister('nativesmb');
+		return $fh;
+	}
+
 	public function stream_close() {
 		return smbclient_close($this->state, $this->handle);
 	}
@@ -27,18 +48,9 @@ class NativeStream {
 
 	public function stream_open() {
 		$context = stream_context_get_options($this->context);
-		if (isset($context['nativesmb'])) {
-			$context = $context['nativesmb'];
-		} else {
-			throw new Exception('Invalid context');
-		}
-		if (isset($context['state']) and isset($context['handle'])) {
-			$this->state = $context['state'];
-			$this->handle = $context['handle'];
-			return true;
-		} else {
-			throw new Exception('Invalid context');
-		}
+		$this->state = $context['nativesmb']['state'];
+		$this->handle = $context['nativesmb']['handle'];
+		return true;
 	}
 
 	public function stream_read($count) {

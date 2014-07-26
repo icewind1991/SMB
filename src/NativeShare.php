@@ -26,11 +26,6 @@ class NativeShare implements IShare {
 	private $state;
 
 	/**
-	 * @var bool
-	 */
-	private static $registed = false;
-
-	/**
 	 * @param Server $server
 	 * @param string $name
 	 * @throws ConnectionError
@@ -38,15 +33,6 @@ class NativeShare implements IShare {
 	public function __construct($server, $name) {
 		$this->server = $server;
 		$this->name = $name;
-		self::registerHandlers();
-	}
-
-	private static function registerHandlers() {
-		if (self::$registed) {
-			return;
-		}
-		self::$registed = true;
-		stream_wrapper_register('nativesmb', '\Icewind\SMB\NativeStream');
 	}
 
 	public static function registerErrorHandler() {
@@ -316,13 +302,7 @@ class NativeShare implements IShare {
 	 */
 	public function read($source) {
 		$handle = $this->fopen($source, 'r');
-		$context = stream_context_create(array(
-			'nativesmb' => array(
-				'state' => $this->state,
-				'handle' => $handle
-			)
-		));
-		return fopen('nativesmb://dummy', 'r', false, $context);
+		return NativeStream::wrap($this->state, $handle, 'r');
 	}
 
 	/**
@@ -336,12 +316,6 @@ class NativeShare implements IShare {
 	 */
 	public function write($source) {
 		$handle = $this->create($source);
-		$context = stream_context_create(array(
-			'nativesmb' => array(
-				'state' => $this->state,
-				'handle' => $handle
-			)
-		));
-		return fopen('nativesmb://dummy', 'w', false, $context);
+		return NativeStream::wrap($this->state, $handle, 'w');
 	}
 }
