@@ -111,7 +111,7 @@ fwrite($fh, 'bar');
 fclose($fh);
 ```
 
-### Using [libsmbclient-php](https://github.com/eduardok/libsmbclient-php) ###
+### Using libsmbclient-php ###
 
 Install [libsmbclient-php](https://github.com/eduardok/libsmbclient-php)
 

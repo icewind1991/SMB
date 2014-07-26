@@ -1,9 +1,8 @@
 <?php
 /**
  * Copyright (c) 2014 Robin Appelman <icewind@owncloud.com>
- * This file is licensed under the Affero General Public License version 3 or
- * later.
- * See the COPYING-README file.
+ * This file is licensed under the Licensed under the MIT license:
+ * http://opensource.org/licenses/MIT
  */
 
 namespace Icewind\SMB;
@@ -95,24 +94,24 @@ class NativeShare implements IShare {
 		return $url;
 	}
 
-	public static function errorHandler($errno, $errstr, $errfile, $errline, array $errcontext) {
-		if (strpos($errstr, 'Path does not exist') or strpos($errstr, 'path doesn\'t exist')) {
-			throw new NotFoundException($errstr);
-		} else if (strpos($errstr, 'already exists')) {
-			throw new AlreadyExistsException($errstr);
-		} else if (strpos($errstr, 'Can\'t write to a directory') or
-			strpos($errstr, 'use rmdir instead') or
-			strpos($errstr, 'unknown error (20)') // 20: ENOTDIR
+	public static function errorHandler($errno, $errorString) {
+		if (strpos($errorString, 'Path does not exist') or strpos($errorString, 'path doesn\'t exist')) {
+			throw new NotFoundException($errorString);
+		} else if (strpos($errorString, 'already exists')) {
+			throw new AlreadyExistsException($errorString);
+		} else if (strpos($errorString, 'Can\'t write to a directory') or
+			strpos($errorString, 'use rmdir instead') or
+			strpos($errorString, 'unknown error (20)') // 20: ENOTDIR
 		) {
-			throw new InvalidTypeException($errstr);
-		} else if (strpos($errstr, 'Workgroup not found') or
-			strpos($errstr, 'Workgroup or server not found')
+			throw new InvalidTypeException($errorString);
+		} else if (strpos($errorString, 'Workgroup not found') or
+			strpos($errorString, 'Workgroup or server not found')
 		) {
-			throw new InvalidHostException($errstr);
-		} else if (strpos($errstr, 'Permission denied')) {
-			throw new AccessDeniedException($errstr);
+			throw new InvalidHostException($errorString);
+		} else if (strpos($errorString, 'Permission denied')) {
+			throw new AccessDeniedException($errorString);
 		} else {
-			throw new \Exception($errstr);
+			throw new \Exception($errorString);
 		}
 	}
 

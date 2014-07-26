@@ -1,9 +1,8 @@
 <?php
 /**
- * Copyright (c) 2013 Robin Appelman <icewind@owncloud.com>
- * This file is licensed under the Affero General Public License version 3 or
- * later.
- * See the COPYING-README file.
+ * Copyright (c) 2014 Robin Appelman <icewind@owncloud.com>
+ * This file is licensed under the Licensed under the MIT license:
+ * http://opensource.org/licenses/MIT
  */
 
 namespace Icewind\SMB;
@@ -158,6 +157,7 @@ class Share implements IShare {
 			} catch (\Exception $e2) {
 				throw new InvalidTypeException();
 			}
+			throw $e;
 		}
 	}
 

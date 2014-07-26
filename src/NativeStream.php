@@ -1,9 +1,8 @@
 <?php
 /**
  * Copyright (c) 2014 Robin Appelman <icewind@owncloud.com>
- * This file is licensed under the Affero General Public License version 3 or
- * later.
- * See the COPYING-README file.
+ * This file is licensed under the Licensed under the MIT license:
+ * http://opensource.org/licenses/MIT
  */
 
 namespace Icewind\SMB;
@@ -26,7 +25,7 @@ class NativeStream {
 	}
 
 
-	public function stream_open($path, $mode, $options, &$opened_path) {
+	public function stream_open() {
 		$context = stream_context_get_options($this->context);
 		if (isset($context['nativesmb'])) {
 			$context = $context['nativesmb'];
