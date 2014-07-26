@@ -1,8 +1,6 @@
 <?php
 
-namespace SMB\Test;
-
-require_once 'share.php';
+namespace Icewind\SMB\Test;
 
 class NativeShare extends Share {
 

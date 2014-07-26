@@ -1,6 +1,6 @@
 <?php
 
-namespace SMB\Test;
+namespace Icewind\SMB\Test;
 
 class Server extends \PHPUnit_Framework_TestCase {
 	/**

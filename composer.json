@@ -18,7 +18,8 @@
 	},
 	"autoload"         : {
 		"psr-4": {
-			"Icewind\\SMB\\": "src/"
+			"Icewind\\SMB\\": "src/",
+			"Icewind\\SMB\\Test\\": "tests/"
 		}
 	}
 }

@@ -1,6 +1,8 @@
 <?php
 
-namespace SMB\Test;
+namespace Icewind\SMB\Test;
+
+use Icewind\SMB\Server;
 
 class Share extends \PHPUnit_Framework_TestCase {
 	/**
@@ -22,8 +24,8 @@ class Share extends \PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
-		$this->server = new \Icewind\SMB\Server($this->config->host, $this->config->user, $this->config->password);
-		$this->share = new \Icewind\SMB\Share($this->server, $this->config->share);
+		$this->server = new Server($this->config->host, $this->config->user, $this->config->password);
+		$this->share = $this->server->getShare($this->config->share);
 		if ($this->config->root) {
 			$this->root = '/' . $this->config->root . '/' . uniqid();
 		} else {

@@ -1,6 +1,8 @@
 <?php
 
-namespace SMB\Test;
+namespace Icewind\SMB\Test;
+
+use Icewind\SMB\NativeServer;
 
 class NativeStream extends \PHPUnit_Framework_TestCase {
 	/**
@@ -25,8 +27,8 @@ class NativeStream extends \PHPUnit_Framework_TestCase {
 			$this->markTestSkipped('libsmbclient php extension not installed');
 		}
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
-		$this->server = new \Icewind\SMB\NativeServer($this->config->host, $this->config->user, $this->config->password);
-		$this->share = new \Icewind\SMB\NativeShare($this->server, $this->config->share);
+		$this->server = new NativeServer($this->config->host, $this->config->user, $this->config->password);
+		$this->share = $this->server->getShare($this->config->share);
 		if ($this->config->root) {
 			$this->root = '/' . $this->config->root . '/' . uniqid();
 		} else {
