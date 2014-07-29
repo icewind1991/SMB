@@ -9,13 +9,7 @@ namespace Icewind\SMB\Test;
 
 use Icewind\SMB\NativeServer;
 
-class NativeShare extends Share {
-
-	/**
-	 * @var \Icewind\SMB\NativeShare $share
-	 */
-	protected $share;
-
+class NativeShare extends AbstractShare {
 	public function setUp() {
 		if (!function_exists('smbclient_state_new')) {
 			$this->markTestSkipped('libsmbclient php extension not installed');
@@ -29,18 +23,5 @@ class NativeShare extends Share {
 			$this->root = '/' . uniqid();
 		}
 		$this->share->mkdir($this->root);
-	}
-
-	public function testRestoreErrorHandler() {
-		$handlerCalled = false;
-		set_error_handler(function () use (&$handlerCalled) {
-			$handlerCalled = true;
-		});
-
-		$this->share->dir($this->root);
-
-		trigger_error('dummy');
-		$this->assertTrue($handlerCalled);
-		restore_error_handler();
 	}
 }
