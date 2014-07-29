@@ -46,6 +46,35 @@ class Share extends \PHPUnit_Framework_TestCase {
 		unset($this->share);
 	}
 
+	public function nameProvider() {
+		// / ? < > \ : * | " are illegal characters in path on windows, no use trying to get them working
+		return array(
+			array('simple'),
+			array('with spaces_and-underscores'),
+			array("single'quote'"),
+			array('$as#d€££Ö€ßœĚęĘĞĜΣΥΦΩΫΫ')
+		);
+	}
+
+	public function fileDataProvider() {
+		return array(
+			array('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'),
+			array('Mixed language, 日本語　が　わからか and Various _/* characters \\|” €')
+		);
+	}
+
+	public function nameAndDataProvider() {
+		$names = $this->nameProvider();
+		$data = $this->fileDataProvider();
+		$result = array();
+		foreach ($names as $name) {
+			foreach ($data as $text) {
+				$result[] = array($name[0], $text[0]);
+			}
+		}
+		return $result;
+	}
+
 	public function cleanDir($dir) {
 		$content = $this->share->dir($dir);
 		foreach ($content as $name => $metadata) {
@@ -58,8 +87,10 @@ class Share extends \PHPUnit_Framework_TestCase {
 		$this->share->rmdir($dir);
 	}
 
-	private function getTextFile() {
-		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
+	private function getTextFile($text = '') {
+		if (!$text) {
+			$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
+		}
 		$file = tempnam('/tmp', 'smb_test_');
 		file_put_contents($file, $text);
 		return $file;
@@ -93,8 +124,10 @@ class Share extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(array(), $this->share->dir($this->root));
 	}
 
-	public function testFile() {
-		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
+	/**
+	 * @dataProvider fileDataProvider
+	 */
+	public function testFile($text) {
 		$size = strlen($text);
 		$tmpFile1 = tempnam('/tmp', 'smb_test_');
 		file_put_contents($tmpFile1, $text);
@@ -123,58 +156,56 @@ class Share extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(array(), $this->share->dir($this->root));
 	}
 
-	public function testEscaping() {
-		// / ? < > \ : * | ” are illegal characters in path on windows, no use trying to get them working
-		$names = array('simple', 'with spaces', "single'quote'", '$as#d', '€', '££Ö€ßœĚęĘĞĜΣΥΦΩΫΫ', '_under - score');
-
+	/**
+	 * @dataProvider nameProvider
+	 */
+	public function testEscaping($name) {
 		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
 		$tmpFile1 = tempnam('/tmp', 'smb_test_');
 		file_put_contents($tmpFile1, $text);
 
-		foreach ($names as $name) {
-			$this->share->mkdir($this->root . '/' . $name);
-			$dir = $this->share->dir($this->root);
-			$this->assertArrayHasKey($name, $dir);
-			$this->assertEquals('dir', $dir[$name]['type']);
-			$this->assertEquals(array(), $this->share->dir($this->root . '/' . $name));
+		$this->share->mkdir($this->root . '/' . $name);
+		$dir = $this->share->dir($this->root);
+		$this->assertArrayHasKey($name, $dir);
+		$this->assertEquals('dir', $dir[$name]['type']);
+		$this->assertEquals(array(), $this->share->dir($this->root . '/' . $name));
 
-			$this->share->put($tmpFile1, $this->root . '/' . $name . '/foo.txt');
-			$dir = $this->share->dir($this->root . '/' . $name);
-			$this->assertArrayHasKey('foo.txt', $dir);
+		$this->share->put($tmpFile1, $this->root . '/' . $name . '/foo.txt');
+		$dir = $this->share->dir($this->root . '/' . $name);
+		$this->assertArrayHasKey('foo.txt', $dir);
 
-			$tmpFile2 = tempnam('/tmp', 'smb_test_');
-			$this->share->get($this->root . '/' . $name . '/foo.txt', $tmpFile2);
-			$this->assertEquals($text, file_get_contents($tmpFile2));
-			unlink($tmpFile2);
+		$tmpFile2 = tempnam('/tmp', 'smb_test_');
+		$this->share->get($this->root . '/' . $name . '/foo.txt', $tmpFile2);
+		$this->assertEquals($text, file_get_contents($tmpFile2));
+		unlink($tmpFile2);
 
-			$this->share->rename($this->root . '/' . $name . '/foo.txt', $this->root . '/' . $name . '/bar.txt');
-			$dir = $this->share->dir($this->root . '/' . $name);
-			$this->assertArrayHasKey('bar.txt', $dir);
-			$this->assertEquals('file', $dir['bar.txt']['type']);
+		$this->share->rename($this->root . '/' . $name . '/foo.txt', $this->root . '/' . $name . '/bar.txt');
+		$dir = $this->share->dir($this->root . '/' . $name);
+		$this->assertArrayHasKey('bar.txt', $dir);
+		$this->assertEquals('file', $dir['bar.txt']['type']);
 
-			$this->share->del($this->root . '/' . $name . '/bar.txt');
-			$this->assertEquals(array(), $this->share->dir($this->root . '/' . $name));
-			$this->share->rmdir($this->root . '/' . $name);
-			$this->assertEquals(array(), $this->share->dir($this->root));
+		$this->share->del($this->root . '/' . $name . '/bar.txt');
+		$this->assertEquals(array(), $this->share->dir($this->root . '/' . $name));
+		$this->share->rmdir($this->root . '/' . $name);
+		$this->assertEquals(array(), $this->share->dir($this->root));
 
-			$this->share->put($tmpFile1, $this->root . '/' . $name);
-			$this->assertArrayHasKey($name, $this->share->dir($this->root));
+		$this->share->put($tmpFile1, $this->root . '/' . $name);
+		$this->assertArrayHasKey($name, $this->share->dir($this->root));
 
-			$tmpFile2 = tempnam('/tmp', 'smb_test_');
-			$this->share->get($this->root . '/' . $name, $tmpFile2);
-			$this->assertEquals($text, file_get_contents($tmpFile2));
-			unlink($tmpFile2);
+		$tmpFile2 = tempnam('/tmp', 'smb_test_');
+		$this->share->get($this->root . '/' . $name, $tmpFile2);
+		$this->assertEquals($text, file_get_contents($tmpFile2));
+		unlink($tmpFile2);
 
-			$this->share->del($this->root . '/' . $name);
+		$this->share->del($this->root . '/' . $name);
 
-			$tmpFile2 = tempnam('/tmp', 'smb_test_' . $name);
-			$this->share->put($tmpFile2, $this->root . '/' . $name);
-			$this->assertArrayHasKey($name, $this->share->dir($this->root));
-			$this->share->del($this->root . '/' . $name);
-			unlink($tmpFile2);
+		$tmpFile2 = tempnam('/tmp', 'smb_test_' . $name);
+		$this->share->put($tmpFile2, $this->root . '/' . $name);
+		$this->assertArrayHasKey($name, $this->share->dir($this->root));
+		$this->share->del($this->root . '/' . $name);
+		unlink($tmpFile2);
 
-			$this->assertEquals(array(), $this->share->dir($this->root));
-		}
+		$this->assertEquals(array(), $this->share->dir($this->root));
 
 		unlink($tmpFile1);
 	}
@@ -294,27 +325,32 @@ class Share extends \PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan(0, count($files));
 	}
 
-	public function testReadStream() {
-		$sourceFile = $this->getTextFile();
-		$this->share->put($sourceFile, $this->root . '/foobar');
-		$fh = $this->share->read($this->root . '/foobar');
+	/**
+	 * @dataProvider nameAndDataProvider
+	 */
+	public function testReadStream($name, $text) {
+		$sourceFile = $this->getTextFile($text);
+		$this->share->put($sourceFile, $this->root . '/' . $name);
+		$fh = $this->share->read($this->root . '/' . $name);
 		$content = stream_get_contents($fh);
 		fclose($fh);
-		$this->share->del($this->root . '/foobar');
+		$this->share->del($this->root . '/' . $name);
 
 		$this->assertEquals(file_get_contents($sourceFile), $content);
 	}
 
-	public function testWriteStream() {
-		$fh = $this->share->write($this->root . '/foobar', 'qwerty');
-		fwrite($fh, 'qwerty');
+	/**
+	 * @dataProvider nameAndDataProvider
+	 */
+	public function testWriteStream($name, $text) {
+		$fh = $this->share->write($this->root . '/' . $name);
+		fwrite($fh, $text);
 		fclose($fh);
-//		sleep(5);
-
 
 		$tmpFile1 = tempnam('/tmp', 'smb_test_');
-		$this->share->get($this->root . '/foobar', $tmpFile1);
-		$this->assertEquals('qwerty', file_get_contents($tmpFile1));
+		$this->share->get($this->root . '/' . $name, $tmpFile1);
+		$this->assertEquals($text, file_get_contents($tmpFile1));
+		$this->share->del($this->root . '/' . $name);
 		unlink($tmpFile1);
 	}
 }
