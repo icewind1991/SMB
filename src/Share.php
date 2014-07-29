@@ -240,6 +240,8 @@ class Share implements IShare {
 	 */
 	public function read($source) {
 		$source = $this->escapePath($source);
+		// close the single quote, open a double quote where we put the single quote...
+		$source = str_replace('\'', '\'"\'"\'', $source);
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
 		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
@@ -264,6 +266,8 @@ class Share implements IShare {
 	 */
 	public function write($target) {
 		$target = $this->escapePath($target);
+		// close the single quote, open a double quote where we put the single quote...
+		$target = str_replace('\'', '\'"\'"\'', $target);
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
 		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
