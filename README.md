@@ -73,9 +73,9 @@ $server = new Server('localhost', 'test', 'test');
 $share = $server->getShare('test');
 $content = $share->dir('test');
 
-foreach ($content as $name => $info) {
-	echo $name . "\n";
-	echo "\tsize :" . $info['size'] . "\n";
+foreach ($content as $info) {
+	echo $name->getName() . "\n";
+	echo "\tsize :" . $info->getSize() . "\n";
 }
 ```
 
