@@ -114,18 +114,8 @@ class NativeShare implements IShare {
 	/**
 	 * List the content of a remote folder
 	 *
-	 * Returns a nested array in the format of
-	 * [
-	 *    $name => [
-	 *        'size' => $size,
-	 *        'type' => $type,
-	 *        'time' => $mtime
-	 *    ],
-	 *    ...
-	 * ]
-	 *
-	 * @param $path
-	 * @return array[]
+	 * @param string $path
+	 * @return \Icewind\SMB\IFileInfo[]
 	 *
 	 * @throws \Icewind\SMB\NotFoundException
 	 * @throws \Icewind\SMB\InvalidTypeException

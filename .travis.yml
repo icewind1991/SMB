@@ -29,7 +29,6 @@ before_install:
     path = /home/test
     guest ok = yes
     writeable = yes
-    ea support = yes
     inherit permissions = yes" | sudo tee -a /etc/samba/smb.conf
   - sudo service smbd restart
   - testparm -s

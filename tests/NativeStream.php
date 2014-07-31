@@ -93,11 +93,11 @@ class NativeStream extends \PHPUnit_Framework_TestCase {
 
 	public function cleanDir($dir) {
 		$content = $this->share->dir($dir);
-		foreach ($content as $name => $metadata) {
-			if ($metadata['type'] === 'dir') {
-				$this->cleanDir($dir . '/' . $name);
+		foreach ($content as $metadata) {
+			if ($metadata->isDirectory()) {
+				$this->cleanDir($metadata->getPath());
 			} else {
-				$this->share->del($dir . '/' . $name);
+				$this->share->del($metadata->getPath());
 			}
 		}
 		$this->share->rmdir($dir);
