@@ -272,35 +272,6 @@ class Share implements IShare {
 	}
 
 	/**
-	 * @param string $path
-	 * @return array
-	 */
-	protected function getAttributes($path) {
-		$path = $this->escapePath($path);
-		$output = $this->execute('allinfo ' . $path);
-		$attributes = array();
-		foreach ($output as $line) {
-			list($name, $value) = explode($line, ':', 2);
-			$value = trim($value);
-			switch ($name) {
-				case 'create_time':
-					$attributes['system.dos_attr.c_time'] = strtotime($value . ' ' . $this->getServerTimeZone());
-					break;
-				case 'access_time':
-					$attributes['system.dos_attr.a_time'] = strtotime($value . ' ' . $this->getServerTimeZone());
-					break;
-				case 'change_time':
-					$attributes['system.dos_attr.m_time'] = strtotime($value . ' ' . $this->getServerTimeZone());
-					break;
-				case 'attributes':
-					$attributes['system.dos_attr.mode'] = $this->parseMode($value);
-					break;
-			}
-		}
-		return $attributes;
-	}
-
-	/**
 	 * @param string $mode
 	 * @return string
 	 */
@@ -319,32 +290,6 @@ class Share implements IShare {
 			}
 		}
 		return $result;
-	}
-
-	/**
-	 * List the available extended attributes for the path (returns a fixed list)
-	 *
-	 * @param string $path
-	 * @return array list the available attributes for the path
-	 */
-	public function listAttributes($path) {
-		return array_keys($this->getAttributes($path));
-	}
-
-	/**
-	 * Get extended attributes for the path
-	 *
-	 * @param string $path
-	 * @param string $attribute attribute to get the info
-	 * @return string the attribute value
-	 */
-	public function getAttribute($path, $attribute) {
-		$attributes = $this->getAttributes($path);
-		if (isset($attributes[$attribute])) {
-			return $attributes[$attribute];
-		} else {
-			return null;
-		}
 	}
 
 	/**

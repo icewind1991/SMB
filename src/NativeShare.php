@@ -313,20 +313,6 @@ class NativeShare implements IShare {
 	}
 
 	/**
-	 * List the available extended attributes for the path (returns a fixed list)
-	 *
-	 * @param string $path
-	 * @return array list the available attributes for the path
-	 */
-	public function listAttributes($path) {
-		$this->connect();
-		self::registerErrorHandler();
-		$result = smbclient_listxattr($this->state, $this->buildUrl($path));
-		self::restoreErrorHandler();
-		return $result;
-	}
-
-	/**
 	 * Get extended attributes for the path
 	 *
 	 * @param string $path
