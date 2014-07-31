@@ -101,7 +101,8 @@ class NativeShare implements IShare {
 		} else if (strpos($errorString, 'unknown error (110)') or
 			strpos($errorString, 'unknown error (111)') or
 			strpos($errorString, 'unknown error (112)') or
-			strpos($errorString, 'unknown error (113)')) {
+			strpos($errorString, 'unknown error (113)')
+		) {
 			// errors for connection timeout, connection refused, host is down and
 			// no route to host, respectively
 			throw new ConnectionError($errorString);
@@ -138,12 +139,7 @@ class NativeShare implements IShare {
 		while ($file = smbclient_readdir($this->state, $dh)) {
 			$name = $file['name'];
 			if ($name !== '.' and $name !== '..') {
-				$stat = $this->stat($path . '/' . $name);
-				$files[$name] = array(
-					'type' => ($file['type'] === 'directory') ? 'dir' : 'file',
-					'size' => $stat['size'],
-					'time' => $stat['mtime']
-				);
+				$files [] = new NativeFileInfo($this, $path . '/' . $name, $name);
 			}
 		}
 		smbclient_closedir($this->state, $dh);
@@ -151,7 +147,7 @@ class NativeShare implements IShare {
 		return $files;
 	}
 
-	protected function stat($path) {
+	public function stat($path) {
 		$this->connect();
 		self::registerErrorHandler();
 		$stat = smbclient_stat($this->state, $this->buildUrl($path));
@@ -324,5 +320,38 @@ class NativeShare implements IShare {
 	public function write($source) {
 		$handle = $this->create($source);
 		return NativeStream::wrap($this->state, $handle, 'w');
+	}
+
+	/**
+	 * List the available extended attributes for the path (returns a fixed list)
+	 *
+	 * @param string $path
+	 * @return array list the available attributes for the path
+	 */
+	public function listAttributes($path) {
+		$this->connect();
+		self::registerErrorHandler();
+		$result = smbclient_listxattr($this->state, $this->buildUrl($path));
+		self::restoreErrorHandler();
+		return $result;
+	}
+
+	/**
+	 * Get extended attributes for the path
+	 *
+	 * @param string $path
+	 * @param string $attribute attribute to get the info
+	 * @return string the attribute value
+	 */
+	public function getAttribute($path, $attribute) {
+		$this->connect();
+		self::registerErrorHandler();
+		$result = smbclient_getxattr($this->state, $this->buildUrl($path), $attribute);
+		self::restoreErrorHandler();
+		// parse hex string
+		if ($attribute === 'system.dos_attr.mode') {
+			$result = hexdec(substr($result, 2));
+		}
+		return $result;
 	}
 }

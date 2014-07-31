@@ -80,25 +80,15 @@ class Share implements IShare {
 	/**
 	 * List the content of a remote folder
 	 *
-	 * Returns a nested array in the format of
-	 * [
-	 *    $name => [
-	 *        'size' => $size,
-	 *        'type' => $type,
-	 *        'time' => $mtime
-	 *    ],
-	 *    ...
-	 * ]
-	 *
 	 * @param $path
-	 * @return array[]
+	 * @return \Icewind\SMB\IFileInfo[]
 	 *
 	 * @throws \Icewind\SMB\NotFoundException
 	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function dir($path) {
-		$path = $this->escapePath($path);
-		$output = $this->execute('cd ' . $path);
+		$escapedPath = $this->escapePath($path);
+		$output = $this->execute('cd ' . $escapedPath);
 		//check output for errors
 		$this->parseOutput($output);
 		$output = $this->execute('dir');
@@ -111,13 +101,11 @@ class Share implements IShare {
 		$content = array();
 		foreach ($output as $line) {
 			if (preg_match($regex, $line, $matches)) {
-				list(, $name, $type, $size, $time) = $matches;
+				list(, $name, $mode, $size, $time) = $matches;
 				if ($name !== '.' and $name !== '..') {
-					$content[$name] = array(
-						'size' => intval(trim($size)),
-						'type' => (strpos($type, 'D') !== false) ? 'dir' : 'file',
-						'time' => strtotime($time . ' ' . $this->getServerTimeZone())
-					);
+					$mode = $this->parseMode($mode);
+					$time = strtotime($time . ' ' . $this->getServerTimeZone());
+					$content[] = new FileInfo($path . '/' . $name, $name, $size, $time, $mode);
 				}
 			}
 		}
@@ -250,7 +238,6 @@ class Share implements IShare {
 		$connection = new Connection($command);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		$fh = $connection->getFileOutputStream();
-		//save the connection as context of the stream to prevent it going out of scope and cleaning up the resource
 		stream_context_set_option($fh, 'file', 'connection', $connection);
 		return $fh;
 	}
@@ -282,6 +269,82 @@ class Share implements IShare {
 		return CallbackWrapper::wrap($fh, null, null, function () use ($connection) {
 			$connection->close(false); // dont terminate, give the upload some time
 		});
+	}
+
+	/**
+	 * @param string $path
+	 * @return array
+	 */
+	protected function getAttributes($path) {
+		$path = $this->escapePath($path);
+		$output = $this->execute('allinfo ' . $path);
+		$attributes = array();
+		foreach ($output as $line) {
+			list($name, $value) = explode($line, ':', 2);
+			$value = trim($value);
+			switch ($name) {
+				case 'create_time':
+					$attributes['system.dos_attr.c_time'] = strtotime($value . ' ' . $this->getServerTimeZone());
+					break;
+				case 'access_time':
+					$attributes['system.dos_attr.a_time'] = strtotime($value . ' ' . $this->getServerTimeZone());
+					break;
+				case 'change_time':
+					$attributes['system.dos_attr.m_time'] = strtotime($value . ' ' . $this->getServerTimeZone());
+					break;
+				case 'attributes':
+					$attributes['system.dos_attr.mode'] = $this->parseMode($value);
+					break;
+			}
+		}
+		return $attributes;
+	}
+
+	/**
+	 * @param string $mode
+	 * @return string
+	 */
+	protected function parseMode($mode) {
+		$result = 0;
+		$modeStrings = array(
+			'R' => FileInfo::MODE_READONLY,
+			'H' => FileInfo::MODE_HIDDEN,
+			'S' => FileInfo::MODE_SYSTEM,
+			'D' => FileInfo::MODE_DIRECTORY,
+			'A' => FileInfo::MODE_ARCHIVE
+		);
+		foreach ($modeStrings as $char => $val) {
+			if (strpos($mode, $char) !== false) {
+				$result |= $val;
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * List the available extended attributes for the path (returns a fixed list)
+	 *
+	 * @param string $path
+	 * @return array list the available attributes for the path
+	 */
+	public function listAttributes($path) {
+		return array_keys($this->getAttributes($path));
+	}
+
+	/**
+	 * Get extended attributes for the path
+	 *
+	 * @param string $path
+	 * @param string $attribute attribute to get the info
+	 * @return string the attribute value
+	 */
+	public function getAttribute($path, $attribute) {
+		$attributes = $this->getAttributes($path);
+		if (isset($attributes[$attribute])) {
+			return $attributes[$attribute];
+		} else {
+			return null;
+		}
 	}
 
 	/**

@@ -98,7 +98,7 @@ interface IShare {
 	 * ]
 	 *
 	 * @param $path
-	 * @return array[]
+	 * @return \Icewind\SMB\IFileInfo[]
 	 *
 	 * @throws \Icewind\SMB\NotFoundException
 	 * @throws \Icewind\SMB\InvalidTypeException

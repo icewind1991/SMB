@@ -63,11 +63,11 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 
 	public function cleanDir($dir) {
 		$content = $this->share->dir($dir);
-		foreach ($content as $name => $metadata) {
-			if ($metadata['type'] === 'dir') {
-				$this->cleanDir($dir . '/' . $name);
+		foreach ($content as $metadata) {
+			if ($metadata->isDirectory()) {
+				$this->cleanDir($metadata->getPath());
 			} else {
-				$this->share->del($dir . '/' . $name);
+				$this->share->del($metadata->getPath());
 			}
 		}
 		$this->share->rmdir($dir);
@@ -97,17 +97,17 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 
 		$this->share->mkdir($this->root . '/foo');
 		$dirs = $this->share->dir($this->root);
-		$this->assertEquals(1, count($dirs));
-		$this->assertArrayHasKey('foo', $dirs);
+		$this->assertCount(1, $dirs);
+		$this->assertEquals('foo', $dirs[0]->getName());
 
 		$this->share->rename($this->root . '/foo', $this->root . '/bar');
 
 		$dirs = $this->share->dir($this->root);
 		$this->assertEquals(1, count($dirs));
-		$this->assertArrayHasKey('bar', $dirs);
+		$this->assertEquals('bar', $dirs[0]->getName());
 
 		$this->share->rmdir($this->root . '/bar');
-		$this->assertEquals(array(), $this->share->dir($this->root));
+		$this->assertCount(0, $this->share->dir($this->root));
 	}
 
 	/**
@@ -122,15 +122,15 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 		unlink($tmpFile1);
 
 		$files = $this->share->dir($this->root);
-		$this->assertEquals(1, count($files));
-		$this->assertArrayHasKey('lorem.txt', $files);
-		$this->assertEquals($files['lorem.txt']['size'], $size);
+		$this->assertCount(1, $files);
+		$this->assertEquals('lorem.txt', $files[0]->getName());
+		$this->assertEquals($size, $files[0]->getSize());
 
 		$this->share->rename($this->root . '/lorem.txt', $this->root . '/foo.txt');
 
 		$files = $this->share->dir($this->root);
 		$this->assertEquals(1, count($files));
-		$this->assertArrayHasKey('foo.txt', $files);
+		$this->assertEquals('foo.txt', $files[0]->getName());
 
 		$tmpFile2 = tempnam('/tmp', 'smb_test_');
 		$this->share->get($this->root . '/foo.txt', $tmpFile2);
@@ -139,7 +139,7 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 		unlink($tmpFile2);
 
 		$this->share->del($this->root . '/foo.txt');
-		$this->assertEquals(array(), $this->share->dir($this->root));
+		$this->assertCount(0, $this->share->dir($this->root));
 	}
 
 	/**
@@ -152,13 +152,13 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 
 		$this->share->mkdir($this->root . '/' . $name);
 		$dir = $this->share->dir($this->root);
-		$this->assertArrayHasKey($name, $dir);
-		$this->assertEquals('dir', $dir[$name]['type']);
-		$this->assertEquals(array(), $this->share->dir($this->root . '/' . $name));
+		$this->assertEquals($name, $dir[0]->getName());
+		$this->assertTrue($dir[0]->isDirectory());
+		$this->assertCount(0, $this->share->dir($this->root . '/' . $name));
 
 		$this->share->put($tmpFile1, $this->root . '/' . $name . '/foo.txt');
 		$dir = $this->share->dir($this->root . '/' . $name);
-		$this->assertArrayHasKey('foo.txt', $dir);
+		$this->assertEquals('foo.txt', $dir[0]->getName());
 
 		$tmpFile2 = tempnam('/tmp', 'smb_test_');
 		$this->share->get($this->root . '/' . $name . '/foo.txt', $tmpFile2);
@@ -167,16 +167,17 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 
 		$this->share->rename($this->root . '/' . $name . '/foo.txt', $this->root . '/' . $name . '/bar.txt');
 		$dir = $this->share->dir($this->root . '/' . $name);
-		$this->assertArrayHasKey('bar.txt', $dir);
-		$this->assertEquals('file', $dir['bar.txt']['type']);
+		$this->assertEquals('bar.txt', $dir[0]->getName());
+		$this->assertFalse($dir[0]->isDirectory());
 
 		$this->share->del($this->root . '/' . $name . '/bar.txt');
-		$this->assertEquals(array(), $this->share->dir($this->root . '/' . $name));
+		$this->assertCount(0, $this->share->dir($this->root . '/' . $name));
 		$this->share->rmdir($this->root . '/' . $name);
-		$this->assertEquals(array(), $this->share->dir($this->root));
+		$this->assertCount(0, $this->share->dir($this->root));
 
 		$this->share->put($tmpFile1, $this->root . '/' . $name);
-		$this->assertArrayHasKey($name, $this->share->dir($this->root));
+		$dir = $this->share->dir($this->root);
+		$this->assertEquals($name, $dir[0]->getName());
 
 		$tmpFile2 = tempnam('/tmp', 'smb_test_');
 		$this->share->get($this->root . '/' . $name, $tmpFile2);
@@ -187,7 +188,8 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 
 		$tmpFile2 = tempnam('/tmp', 'smb_test_' . $name);
 		$this->share->put($tmpFile2, $this->root . '/' . $name);
-		$this->assertArrayHasKey($name, $this->share->dir($this->root));
+		$dir = $this->share->dir($this->root);
+		$this->assertEquals($name, $dir[0]->getName());
 		$this->share->del($this->root . '/' . $name);
 		unlink($tmpFile2);
 
@@ -301,7 +303,7 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 		$now = time();
 		$this->share->put($this->getTextFile(), $this->root . '/foo.txt');
 		$dir = $this->share->dir($this->root);
-		$mtime = $dir['foo.txt']['time'];
+		$mtime = $dir[0]->getMTime();
 		$this->assertTrue(abs($now - $mtime) <= 1, 'Modified time differs by ' . abs($now - $mtime) . ' seconds');
 		$this->share->del($this->root . '/foo.txt');
 	}
@@ -338,5 +340,32 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($text, file_get_contents($tmpFile1));
 		$this->share->del($this->root . '/' . $name);
 		unlink($tmpFile1);
+	}
+
+	public function testDir() {
+		$txtFile = $this->getTextFile();
+
+		$this->share->mkdir($this->root . '/dir');
+		$this->share->put($txtFile, $this->root . '/file.txt');
+		unlink($txtFile);
+
+		$dir = $this->share->dir($this->root);
+		if ($dir[0]->getName() === 'dir') {
+			$dirEntry = $dir[0];
+		} else {
+			$dirEntry = $dir[1];
+		}
+		$this->assertTrue($dirEntry->isDirectory());
+		$this->assertFalse($dirEntry->isReadOnly());
+		$this->assertFalse($dirEntry->isReadOnly());
+
+		if ($dir[0]->getName() === 'file.txt') {
+			$fileEntry = $dir[0];
+		} else {
+			$fileEntry = $dir[1];
+		}
+		$this->assertFalse($fileEntry->isDirectory());
+		$this->assertFalse($fileEntry->isReadOnly());
+		$this->assertFalse($fileEntry->isReadOnly());
 	}
 }
