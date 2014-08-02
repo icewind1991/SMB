@@ -21,26 +21,18 @@ class NativeShare implements IShare {
 	private $name;
 
 	/**
-	 * @var resource $state
+	 * @var \Icewind\SMB\NativeState $state
 	 */
 	private $state;
 
 	/**
 	 * @param Server $server
 	 * @param string $name
-	 * @throws ConnectionError
 	 */
 	public function __construct($server, $name) {
 		$this->server = $server;
 		$this->name = $name;
-	}
-
-	public static function registerErrorHandler() {
-		set_error_handler(array('Icewind\SMB\NativeShare', 'errorHandler'));
-	}
-
-	public static function restoreErrorHandler() {
-		restore_error_handler();
+		$this->state = new NativeState();
 	}
 
 	/**
@@ -58,10 +50,7 @@ class NativeShare implements IShare {
 		if (strpos($user, '/')) {
 			list($workgroup, $user) = explode($user, '/');
 		}
-		self::registerErrorHandler();
-		$this->state = smbclient_state_new();
-		smbclient_state_init($this->state, $workgroup, $user, $this->server->getPassword());
-		self::restoreErrorHandler();
+		$this->state->init($workgroup, $user, $this->server->getPassword());
 	}
 
 	/**
@@ -82,35 +71,6 @@ class NativeShare implements IShare {
 		return $url;
 	}
 
-	public static function errorHandler($errno, $errorString) {
-		if (strpos($errorString, 'Path does not exist') or strpos($errorString, 'path doesn\'t exist')) {
-			throw new NotFoundException($errorString);
-		} else if (strpos($errorString, 'already exists')) {
-			throw new AlreadyExistsException($errorString);
-		} else if (strpos($errorString, 'Can\'t write to a directory') or
-			strpos($errorString, 'use rmdir instead') or
-			strpos($errorString, 'unknown error (20)') // 20: ENOTDIR
-		) {
-			throw new InvalidTypeException($errorString);
-		} else if (strpos($errorString, 'Workgroup not found') or
-			strpos($errorString, 'Workgroup or server not found')
-		) {
-			throw new InvalidHostException($errorString);
-		} else if (strpos($errorString, 'Permission denied')) {
-			throw new AccessDeniedException($errorString);
-		} else if (strpos($errorString, 'unknown error (110)') or
-			strpos($errorString, 'unknown error (111)') or
-			strpos($errorString, 'unknown error (112)') or
-			strpos($errorString, 'unknown error (113)')
-		) {
-			// errors for connection timeout, connection refused, host is down and
-			// no route to host, respectively
-			throw new ConnectionError($errorString);
-		} else {
-			throw new \Exception($errorString);
-		}
-	}
-
 	/**
 	 * List the content of a remote folder
 	 *
@@ -124,25 +84,21 @@ class NativeShare implements IShare {
 		$this->connect();
 		$files = array();
 
-		self::registerErrorHandler();
-		$dh = smbclient_opendir($this->state, $this->buildUrl($path));
-		while ($file = smbclient_readdir($this->state, $dh)) {
+		$dh = $this->state->opendir($this->buildUrl($path));
+		while ($file = $this->state->readdir($dh)) {
 			$name = $file['name'];
 			if ($name !== '.' and $name !== '..') {
 				$files [] = new NativeFileInfo($this, $path . '/' . $name, $name);
 			}
 		}
-		smbclient_closedir($this->state, $dh);
-		self::restoreErrorHandler();
+
+		$this->state->closedir($dh);
 		return $files;
 	}
 
 	public function stat($path) {
 		$this->connect();
-		self::registerErrorHandler();
-		$stat = smbclient_stat($this->state, $this->buildUrl($path));
-		self::restoreErrorHandler();
-		return $stat;
+		return $this->state->stat($this->buildUrl($path));
 	}
 
 	/**
@@ -156,10 +112,7 @@ class NativeShare implements IShare {
 	 */
 	public function mkdir($path) {
 		$this->connect();
-		self::registerErrorHandler();
-		$result = smbclient_mkdir($this->state, $this->buildUrl($path));
-		self::restoreErrorHandler();
-		return $result;
+		return $this->state->mkdir($this->buildUrl($path));
 	}
 
 	/**
@@ -173,10 +126,7 @@ class NativeShare implements IShare {
 	 */
 	public function rmdir($path) {
 		$this->connect();
-		self::registerErrorHandler();
-		$result = smbclient_rmdir($this->state, $this->buildUrl($path));
-		self::restoreErrorHandler();
-		return $result;
+		return $this->state->rmdir($this->buildUrl($path));
 	}
 
 	/**
@@ -189,11 +139,7 @@ class NativeShare implements IShare {
 	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function del($path) {
-		$this->connect();
-		self::registerErrorHandler();
-		$result = smbclient_unlink($this->state, $this->buildUrl($path));
-		self::restoreErrorHandler();
-		return $result;
+		return $this->state->unlink($this->buildUrl($path));
 	}
 
 	/**
@@ -208,35 +154,7 @@ class NativeShare implements IShare {
 	 */
 	public function rename($from, $to) {
 		$this->connect();
-		self::registerErrorHandler();
-		$result = smbclient_rename($this->state, $this->buildUrl($from), $this->state, $this->buildUrl($to));
-		self::restoreErrorHandler();
-		return $result;
-	}
-
-	/**
-	 * @param string $path
-	 * @param string $mode
-	 * @return resource
-	 */
-	protected function fopen($path, $mode) {
-		$this->connect();
-		self::registerErrorHandler();
-		$result = smbclient_open($this->state, $this->buildUrl($path), $mode);
-		self::restoreErrorHandler();
-		return $result;
-	}
-
-	/**
-	 * @param string $path
-	 * @return resource
-	 */
-	protected function create($path) {
-		$this->connect();
-		self::registerErrorHandler();
-		$result = smbclient_creat($this->state, $this->buildUrl($path));
-		self::restoreErrorHandler();
-		return $result;
+		return $this->state->rename($this->buildUrl($from), $this->buildUrl($to));
 	}
 
 	/**
@@ -250,14 +168,14 @@ class NativeShare implements IShare {
 	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function put($source, $target) {
+		$this->connect();
 		$sourceHandle = fopen($source, 'rb');
-		$targetHandle = $this->create($target);
+		$targetHandle = $this->state->create($this->buildUrl($target));
 
-		self::registerErrorHandler();
 		while ($data = fread($sourceHandle, 4096)) {
-			smbclient_write($this->state, $targetHandle, $data);
+			$this->state->write($targetHandle, $data);
 		}
-		smbclient_close($this->state, $targetHandle);
+		$this->state->close($targetHandle);
 		restore_error_handler();
 		return true;
 	}
@@ -273,15 +191,15 @@ class NativeShare implements IShare {
 	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function get($source, $target) {
-		$sourceHandle = $this->fopen($source, 'r');
+		$this->connect();
+		$sourceHandle = $this->state->open($this->buildUrl($source), 'r');
 		$targetHandle = fopen($target, 'wb');
 
-		self::registerErrorHandler();
-		while ($data = smbclient_read($this->state, $sourceHandle, 4096)) {
+		while ($data = $this->state->read($sourceHandle, 4096)) {
 			fwrite($targetHandle, $data);
 		}
-		smbclient_close($this->state, $sourceHandle);
-		restore_error_handler();
+		$this->state->close($sourceHandle);
+		return true;
 	}
 
 	/**
@@ -294,8 +212,9 @@ class NativeShare implements IShare {
 	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function read($source) {
-		$handle = $this->fopen($source, 'r');
-		return NativeStream::wrap($this->state, $handle, 'r');
+		$this->connect();
+		$handle = $this->state->open($this->buildUrl($source), 'r');
+		return NativeStream::wrap($this->state->getState(), $handle, 'r');
 	}
 
 	/**
@@ -308,8 +227,9 @@ class NativeShare implements IShare {
 	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function write($source) {
-		$handle = $this->create($source);
-		return NativeStream::wrap($this->state, $handle, 'w');
+		$this->connect();
+		$handle = $this->state->create($this->buildUrl($source));
+		return NativeStream::wrap($this->state->getState(), $handle, 'w');
 	}
 
 	/**
@@ -321,13 +241,16 @@ class NativeShare implements IShare {
 	 */
 	public function getAttribute($path, $attribute) {
 		$this->connect();
-		self::registerErrorHandler();
-		$result = smbclient_getxattr($this->state, $this->buildUrl($path), $attribute);
-		self::restoreErrorHandler();
+
+		$result = $this->state->getxattr($this->buildUrl($path), $attribute);
 		// parse hex string
 		if ($attribute === 'system.dos_attr.mode') {
 			$result = hexdec(substr($result, 2));
 		}
 		return $result;
+	}
+
+	public function __destruct() {
+		unset($this->state);
 	}
 }

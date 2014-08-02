@@ -9,9 +9,19 @@ namespace Icewind\SMB;
 
 class NativeServer extends Server {
 	/**
-	 * @var resource
+	 * @var \Icewind\SMB\NativeState
 	 */
 	protected $state;
+
+	/**
+	 * @param string $host
+	 * @param string $user
+	 * @param string $password
+	 */
+	public function __construct($host, $user, $password) {
+		parent::__construct($host, $user, $password);
+		$this->state = new NativeState();
+	}
 
 	protected function connect() {
 		if ($this->state and is_resource($this->state)) {
@@ -22,13 +32,7 @@ class NativeServer extends Server {
 		if (strpos($user, '/')) {
 			list($workgroup, $user) = explode($user, '/');
 		}
-		NativeShare::registerErrorHandler();
-		$this->state = smbclient_state_new();
-		$result = smbclient_state_init($this->state, $workgroup, $user, $this->getPassword());
-		NativeShare::restoreErrorHandler();
-		if (!$result) {
-			throw new ConnectionError();
-		}
+		$this->state->init($workgroup, $user, $this->getPassword());
 	}
 
 	/**
@@ -39,15 +43,13 @@ class NativeServer extends Server {
 	public function listShares() {
 		$this->connect();
 		$shares = array();
-		NativeShare::registerErrorHandler();
-		$dh = smbclient_opendir($this->state, 'smb://' . $this->getHost());
-		while ($share = smbclient_readdir($this->state, $dh)) {
+		$dh = $this->state->opendir('smb://' . $this->getHost());
+		while ($share = $this->state->readdir($dh)) {
 			if ($share['type'] === 'file share') {
 				$shares[] = $this->getShare($share['name']);
 			}
 		}
-		NativeShare::restoreErrorHandler();
-		smbclient_closedir($this->state, $dh);
+		$this->state->closedir($dh);
 		return $shares;
 	}
 

@@ -40,6 +40,10 @@ class NotEmptyException extends InvalidRequestException {
 class InvalidTypeException extends InvalidRequestException {
 }
 
+class ForbiddenException extends InvalidRequestException {
+}
+
+
 class ErrorCodes {
 	/**
 	 * connection errors
