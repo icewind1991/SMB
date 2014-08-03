@@ -32,13 +32,7 @@ class NativeState {
 			return;
 		}
 		$this->handlerSet = true;
-		$state = $this;
-		set_error_handler(function ($errorNumber, $errorString) use ($state) {
-			/**
-			 * @var \Icewind\SMB\NativeState $state
-			 */
-			$state->handleError($errorString);
-		});
+		set_error_handler(array($this, 'handleError'));
 	}
 
 	protected function restoreErrorHandler() {
@@ -49,7 +43,7 @@ class NativeState {
 		restore_error_handler();
 	}
 
-	protected function handleError($errorString = '') {
+	protected function handleError($errorNumber = 0, $errorString = '') {
 		$error = smbclient_state_errno($this->state);
 		switch ($error) {
 			// see error.h
@@ -345,60 +339,6 @@ class NativeState {
 
 	/**
 	 * @param string $uri
-	 * @param string $mode
-	 * @return bool
-	 */
-	public function chmod($uri, $mode) {
-		$this->setErrorHandler();
-		$result = smbclient_chmod($this->state, $uri, $mode);
-		$this->restoreErrorHandler();
-
-		if ($result === false) {
-			$this->handleError();
-		}
-		return $result;
-	}
-
-	/**
-	 * @param string $uri
-	 * @param int $mtime
-	 * @param int $atime
-	 * @return bool
-	 */
-	public function utimes($uri, $mtime = null, $atime = null) {
-		if ($mtime = null) {
-			$mtime = time();
-		}
-		if ($atime = null) {
-			$atime = $mtime;
-		}
-		$this->setErrorHandler();
-		$result = smbclient_utimes($this->state, $uri, $mtime, $atime);
-		$this->restoreErrorHandler();
-
-		if ($result === false) {
-			$this->handleError();
-		}
-		return $result;
-	}
-
-	/**
-	 * @param string $uri
-	 * @return array
-	 */
-	public function listxattr($uri) {
-		$this->setErrorHandler();
-		$result = smbclient_listxattr($this->state, $uri);
-		$this->restoreErrorHandler();
-
-		if ($result === false) {
-			$this->handleError();
-		}
-		return $result;
-	}
-
-	/**
-	 * @param string $uri
 	 * @param string $key
 	 * @return string
 	 */
@@ -423,22 +363,6 @@ class NativeState {
 	public function setxattr($uri, $key, $value, $flags = 0) {
 		$this->setErrorHandler();
 		$result = smbclient_setxattr($this->state, $uri, $key, $value, $flags);
-		$this->restoreErrorHandler();
-
-		if ($result === false) {
-			$this->handleError();
-		}
-		return $result;
-	}
-
-	/**
-	 * @param string $uri
-	 * @param string $key
-	 * @return bool
-	 */
-	public function removexattr($uri, $key) {
-		$this->setErrorHandler();
-		$result = smbclient_removexattr($this->state, $uri, $key);
 		$this->restoreErrorHandler();
 
 		if ($result === false) {

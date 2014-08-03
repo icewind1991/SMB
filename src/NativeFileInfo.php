@@ -65,7 +65,7 @@ class NativeFileInfo implements IFileInfo {
 	 */
 	protected function stat() {
 		if (!$this->statCache) {
-			$this->statCache = $this->share->stat($this->getPath());
+			$this->statCache = $this->share->getStat($this->getPath());
 		}
 		return $this->statCache;
 	}
@@ -118,5 +118,21 @@ class NativeFileInfo implements IFileInfo {
 	public function isHidden() {
 		$mode = $this->getMode();
 		return (bool)($mode & FileInfo::MODE_HIDDEN);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isSystem() {
+		$mode = $this->getMode();
+		return (bool)($mode & FileInfo::MODE_SYSTEM);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isArchived() {
+		$mode = $this->getMode();
+		return (bool)($mode & FileInfo::MODE_ARCHIVE);
 	}
 }

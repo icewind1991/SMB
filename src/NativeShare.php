@@ -96,7 +96,15 @@ class NativeShare implements IShare {
 		return $files;
 	}
 
+	/**
+	 * @param string $path
+	 * @return \Icewind\SMB\IFileInfo[]
+	 */
 	public function stat($path) {
+		return new NativeFileInfo($this, $path, basename($path));
+	}
+
+	public function getStat($path) {
 		$this->connect();
 		return $this->state->stat($this->buildUrl($path));
 	}
@@ -248,6 +256,33 @@ class NativeShare implements IShare {
 			$result = hexdec(substr($result, 2));
 		}
 		return $result;
+	}
+
+	/**
+	 * Get extended attributes for the path
+	 *
+	 * @param string $path
+	 * @param string $attribute attribute to get the info
+	 * @param mixed $value
+	 * @return string the attribute value
+	 */
+	public function setAttribute($path, $attribute, $value) {
+		$this->connect();
+
+		if ($attribute === 'system.dos_attr.mode' and is_int($value)) {
+			$value = '0x' . dechex($value);
+		}
+
+		return $this->state->setxattr($this->buildUrl($path), $attribute, $value);
+	}
+
+	/**
+	 * @param string $path
+	 * @param int $mode a combination of FileInfo::MODE_READONLY, FileInfo::MODE_ARCHIVE, FileInfo::MODE_SYSTEM and FileInfo::MODE_HIDDEN, FileInfo::NORMAL
+	 * @return mixed
+	 */
+	public function setMode($path, $mode) {
+		return $this->setAttribute($path, 'system.dos_attr.mode', $mode);
 	}
 
 	public function __destruct() {

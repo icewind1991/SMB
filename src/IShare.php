@@ -87,16 +87,6 @@ interface IShare {
 	/**
 	 * List the content of a remote folder
 	 *
-	 * Returns a nested array in the format of
-	 * [
-	 *    $name => [
-	 *        'size' => $size,
-	 *        'type' => $type,
-	 *        'time' => $mtime
-	 *    ],
-	 *    ...
-	 * ]
-	 *
 	 * @param $path
 	 * @return \Icewind\SMB\IFileInfo[]
 	 *
@@ -104,6 +94,14 @@ interface IShare {
 	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function dir($path);
+
+	/**
+	 * @param string $path
+	 * @return \Icewind\SMB\IFileInfo
+	 *
+	 * @throws \Icewind\SMB\NotFoundException
+	 */
+	public function stat($path);
 
 	/**
 	 * Create a folder on the share
@@ -126,4 +124,11 @@ interface IShare {
 	 * @throws \Icewind\SMB\InvalidTypeException
 	 */
 	public function rmdir($path);
+
+	/**
+	 * @param string $path
+	 * @param int $mode a combination of FileInfo::MODE_READONLY, FileInfo::MODE_ARCHIVE, FileInfo::MODE_SYSTEM and FileInfo::MODE_HIDDEN, FileInfo::NORMAL
+	 * @return mixed
+	 */
+	public function setMode($path, $mode);
 }

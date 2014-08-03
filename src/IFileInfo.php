@@ -42,4 +42,14 @@ interface IFileInfo {
 	 * @return bool
 	 */
 	public function isHidden();
+
+	/**
+	 * @return bool
+	 */
+	public function isSystem();
+
+	/**
+	 * @return bool
+	 */
+	public function isArchived();
 }

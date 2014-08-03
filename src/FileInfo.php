@@ -19,6 +19,7 @@ class FileInfo implements IFileInfo {
 	const MODE_VOLUME_ID = 0x08;
 	const MODE_DIRECTORY = 0x10;
 	const MODE_ARCHIVE = 0x20;
+	const MODE_NORMAL = 0x80;
 
 	/**
 	 * @var string
@@ -107,5 +108,19 @@ class FileInfo implements IFileInfo {
 	 */
 	public function isHidden() {
 		return (bool)($this->mode & self::MODE_HIDDEN);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isSystem() {
+		return (bool)($this->mode & self::MODE_SYSTEM);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isArchived() {
+		return (bool)($this->mode & self::MODE_ARCHIVE);
 	}
 }

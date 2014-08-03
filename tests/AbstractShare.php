@@ -7,6 +7,10 @@
 
 namespace Icewind\SMB\Test;
 
+use Icewind\SMB\FileInfo;
+use Icewind\SMB\IFileInfo;
+use Icewind\SMB\IShare;
+
 abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @var \Icewind\SMB\Server $server
@@ -367,5 +371,79 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($fileEntry->isDirectory());
 		$this->assertFalse($fileEntry->isReadOnly());
 		$this->assertFalse($fileEntry->isReadOnly());
+	}
+
+	/**
+	 * @dataProvider nameProvider
+	 */
+	public function testStat($name) {
+		$txtFile = $this->getTextFile();
+		$size = filesize($txtFile);
+
+		$this->share->put($txtFile, $this->root . '/' . $name);
+		unlink($txtFile);
+
+		$info = $this->share->stat($this->root . '/' . $name);
+		$this->assertEquals($size, $info->getSize());
+	}
+
+	/**
+	 * note setting archive and system bit is not supported
+	 *
+	 * @dataProvider nameProvider
+	 */
+	public function testSetMode($name) {
+		$txtFile = $this->getTextFile();
+
+		$this->share->put($txtFile, $this->root . '/' . $name);
+
+		$this->share->setMode($this->root . '/' . $name, FileInfo::MODE_NORMAL);
+		$info = $this->share->stat($this->root . '/' . $name);
+		$this->assertFalse($info->isReadOnly());
+		$this->assertFalse($info->isArchived());
+		$this->assertFalse($info->isSystem());
+		$this->assertFalse($info->isHidden());
+
+		$this->share->setMode($this->root . '/' . $name, FileInfo::MODE_READONLY);
+		$info = $this->share->stat($this->root . '/' . $name);
+		$this->assertTrue($info->isReadOnly());
+		$this->assertFalse($info->isArchived());
+		$this->assertFalse($info->isSystem());
+		$this->assertFalse($info->isHidden());
+
+		$this->share->setMode($this->root . '/' . $name, FileInfo::MODE_ARCHIVE);
+		$info = $this->share->stat($this->root . '/' . $name);
+		$this->assertFalse($info->isReadOnly());
+		$this->assertTrue($info->isArchived());
+		$this->assertFalse($info->isSystem());
+		$this->assertFalse($info->isHidden());
+
+		$this->share->setMode($this->root . '/' . $name, FileInfo::MODE_READONLY | FileInfo::MODE_ARCHIVE);
+		$info = $this->share->stat($this->root . '/' . $name);
+		$this->assertTrue($info->isReadOnly());
+		$this->assertTrue($info->isArchived());
+		$this->assertFalse($info->isSystem());
+		$this->assertFalse($info->isHidden());
+
+		$this->share->setMode($this->root . '/' . $name, FileInfo::MODE_HIDDEN);
+		$info = $this->share->stat($this->root . '/' . $name);
+		$this->assertFalse($info->isReadOnly());
+		$this->assertFalse($info->isArchived());
+		$this->assertFalse($info->isSystem());
+		$this->assertTrue($info->isHidden());
+
+		$this->share->setMode($this->root . '/' . $name, FileInfo::MODE_SYSTEM);
+		$info = $this->share->stat($this->root . '/' . $name);
+		$this->assertFalse($info->isReadOnly());
+		$this->assertFalse($info->isArchived());
+		$this->assertTrue($info->isSystem());
+		$this->assertFalse($info->isHidden());
+
+		$this->share->setMode($this->root . '/' . $name, FileInfo::MODE_NORMAL);
+		$info = $this->share->stat($this->root . '/' . $name);
+		$this->assertFalse($info->isReadOnly());
+		$this->assertFalse($info->isArchived());
+		$this->assertFalse($info->isSystem());
+		$this->assertFalse($info->isHidden());
 	}
 }

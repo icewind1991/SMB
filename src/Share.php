@@ -113,6 +113,34 @@ class Share implements IShare {
 	}
 
 	/**
+	 * @param string $path
+	 * @return \Icewind\SMB\IFileInfo[]
+	 */
+	public function stat($path) {
+		$escapedPath = $this->escapePath($path);
+		$output = $this->execute('allinfo ' . $escapedPath);
+		if (count($output) < 3) {
+			$this->parseOutput($output);
+		}
+		$mtime = 0;
+		$mode = 0;
+		$size = 0;
+		foreach ($output as $line) {
+			list($name, $value) = explode(':', $line, 2);
+			$value = trim($value);
+			if ($name === 'write_time') {
+				$mtime = $value;
+			} else if ($name === 'attributes') {
+				$mode = $this->parseMode($value);
+			} else if ($name === 'stream') {
+				list(, $size,) = explode(' ', $value);
+				$size = intval($size);
+			}
+		}
+		return new FileInfo($path, basename($path), $size, $mtime, $mode);
+	}
+
+	/**
 	 * Create a folder on the share
 	 *
 	 * @param string $path
@@ -269,6 +297,37 @@ class Share implements IShare {
 		return CallbackWrapper::wrap($fh, null, null, function () use ($connection) {
 			$connection->close(false); // dont terminate, give the upload some time
 		});
+	}
+
+	/**
+	 * @param string $path
+	 * @param int $mode a combination of FileInfo::MODE_READONLY, FileInfo::MODE_ARCHIVE, FileInfo::MODE_SYSTEM and FileInfo::MODE_HIDDEN, FileInfo::NORMAL
+	 * @return mixed
+	 */
+	public function setMode($path, $mode) {
+		$modeString = '';
+		if ($mode & FileInfo::MODE_READONLY) {
+			$modeString .= 'r';
+		}
+		if ($mode & FileInfo::MODE_HIDDEN) {
+			$modeString .= 'h';
+		}
+		if ($mode & FileInfo::MODE_ARCHIVE) {
+			$modeString .= 'a';
+		}
+		if ($mode & FileInfo::MODE_SYSTEM) {
+			$modeString .= 's';
+		}
+		$path = $this->escapePath($path);
+
+		// first reset the mode to normal
+		$cmd = 'setmode ' . $path . ' -rsha';
+		$output = $this->execute($cmd);
+
+		// then set the modes we want
+		$cmd = 'setmode ' . $path . ' ' . $modeString;
+		$output = $this->execute($cmd);
+		return $this->parseOutput($output);
 	}
 
 	/**

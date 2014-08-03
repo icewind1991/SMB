@@ -29,6 +29,10 @@ before_install:
     path = /home/test
     guest ok = yes
     writeable = yes
+    map archive = yes
+    map system = yes
+    map hidden = yes
+    create mask = 0777
     inherit permissions = yes" | sudo tee -a /etc/samba/smb.conf
   - sudo service smbd restart
   - testparm -s
