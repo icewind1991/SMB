@@ -7,6 +7,8 @@
 
 namespace Icewind\SMB;
 
+require_once 'ErrorCodes.php';
+
 /**
  * Low level wrapper for libsmbclient-php for error handling
  */
@@ -48,6 +50,12 @@ class NativeState {
 		}
 	}
 
+	protected function testResult($result) {
+		if ($result === false or $result === null) {
+			$this->handleError();
+		}
+	}
+
 	/**
 	 * @param string $workGroup
 	 * @param string $user
@@ -61,9 +69,7 @@ class NativeState {
 		$this->state = smbclient_state_new();
 		$result = @smbclient_state_init($this->state, $workGroup, $user, $password);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		$this->connected = true;
 		return $result;
 	}
@@ -75,9 +81,7 @@ class NativeState {
 	public function opendir($uri) {
 		$result = @smbclient_opendir($this->state, $uri);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -88,9 +92,7 @@ class NativeState {
 	public function readdir($dir) {
 		$result = @smbclient_readdir($this->state, $dir);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -99,11 +101,9 @@ class NativeState {
 	 * @return bool
 	 */
 	public function closedir($dir) {
-		$result = @smbclient_closedir($this->state, $dir);
+		$result = smbclient_closedir($this->state, $dir);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -115,9 +115,7 @@ class NativeState {
 	public function rename($old, $new) {
 		$result = @smbclient_rename($this->state, $old, $this->state, $new);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -128,9 +126,7 @@ class NativeState {
 	public function unlink($uri) {
 		$result = @smbclient_unlink($this->state, $uri);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -142,9 +138,7 @@ class NativeState {
 	public function mkdir($uri, $mask = 0777) {
 		$result = @smbclient_mkdir($this->state, $uri, $mask);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -155,9 +149,7 @@ class NativeState {
 	public function rmdir($uri) {
 		$result = @smbclient_rmdir($this->state, $uri);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -168,9 +160,7 @@ class NativeState {
 	public function stat($uri) {
 		$result = @smbclient_stat($this->state, $uri);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -181,9 +171,7 @@ class NativeState {
 	public function fstat($file) {
 		$result = @smbclient_fstat($this->state, $file);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -196,9 +184,7 @@ class NativeState {
 	public function open($uri, $mode, $mask = 0666) {
 		$result = @smbclient_open($this->state, $uri, $mode, $mask);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -210,9 +196,7 @@ class NativeState {
 	public function create($uri, $mask = 0666) {
 		$result = @smbclient_creat($this->state, $uri, $mask);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -224,9 +208,7 @@ class NativeState {
 	public function read($file, $bytes) {
 		$result = @smbclient_read($this->state, $file, $bytes);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -239,9 +221,7 @@ class NativeState {
 	public function write($file, $data, $length = null) {
 		$result = @smbclient_write($this->state, $file, $data, $length);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -254,9 +234,7 @@ class NativeState {
 	public function lseek($file, $offset, $whence = SEEK_SET) {
 		$result = @smbclient_lseek($this->state, $file, $offset, $whence);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -268,18 +246,14 @@ class NativeState {
 	public function ftruncate($file, $size) {
 		$result = @smbclient_ftruncate($this->state, $file, $size);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
 	public function close($file) {
 		$result = @smbclient_close($this->state, $file);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -291,9 +265,7 @@ class NativeState {
 	public function getxattr($uri, $key) {
 		$result = @smbclient_getxattr($this->state, $uri, $key);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
@@ -307,9 +279,7 @@ class NativeState {
 	public function setxattr($uri, $key, $value, $flags = 0) {
 		$result = @smbclient_setxattr($this->state, $uri, $key, $value, $flags);
 
-		if ($result === false) {
-			$this->handleError();
-		}
+		$this->testResult($result);
 		return $result;
 	}
 
