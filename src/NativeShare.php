@@ -41,7 +41,7 @@ class NativeShare implements IShare {
 	 * @throws \Icewind\SMB\InvalidHostException
 	 */
 	protected function connect() {
-		if ($this->state and is_resource($this->state)) {
+		if ($this->state and $this->state instanceof NativeShare) {
 			return;
 		}
 
