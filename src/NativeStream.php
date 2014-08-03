@@ -8,16 +8,25 @@
 namespace Icewind\SMB;
 
 class NativeStream {
+	/**
+	 * @var resource
+	 */
 	public $context;
 
+	/**
+	 * @var \Icewind\SMB\NativeState
+	 */
 	private $state;
 
+	/**
+	 * @var resource
+	 */
 	private $handle;
 
 	/**
 	 * Wrap a stream from libsmbclient-php into a regular php stream
 	 *
-	 * @param resource $state
+	 * @param \Icewind\SMB\NativeState $state
 	 * @param resource $smbStream
 	 * @param string $mode
 	 * @return resource
@@ -36,7 +45,7 @@ class NativeStream {
 	}
 
 	public function stream_close() {
-		return smbclient_close($this->state, $this->handle);
+		return $this->state->close($this->handle);
 	}
 
 	public function stream_eof() {
@@ -54,15 +63,15 @@ class NativeStream {
 	}
 
 	public function stream_read($count) {
-		return smbclient_read($this->state, $this->handle, $count);
+		return $this->state->read($this->handle, $count);
 	}
 
 	public function stream_seek($offset, $whence = SEEK_SET) {
-		return smbclient_lseek($this->state, $this->handle, $offset, $whence);
+		return $this->state->lseek($this->handle, $offset, $whence);
 	}
 
 	public function stream_stat() {
-		return smbclient_fstat($this->state, $this->handle);
+		return $this->state->fstat($this->handle);
 	}
 
 	public function stream_tell() {
@@ -70,6 +79,6 @@ class NativeStream {
 	}
 
 	public function stream_write($data) {
-		return smbclient_write($this->state, $this->handle, $data);
+		return $this->state->write($this->handle, $data);
 	}
 }

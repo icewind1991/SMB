@@ -24,9 +24,6 @@ class NativeServer extends Server {
 	}
 
 	protected function connect() {
-		if ($this->state and is_resource($this->state)) {
-			return;
-		}
 		$user = $this->getUser();
 		$workgroup = null;
 		if (strpos($user, '/')) {

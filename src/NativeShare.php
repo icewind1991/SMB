@@ -222,7 +222,7 @@ class NativeShare implements IShare {
 	public function read($source) {
 		$this->connect();
 		$handle = $this->state->open($this->buildUrl($source), 'r');
-		return NativeStream::wrap($this->state->getState(), $handle, 'r');
+		return NativeStream::wrap($this->state, $handle, 'r');
 	}
 
 	/**
@@ -237,7 +237,7 @@ class NativeShare implements IShare {
 	public function write($source) {
 		$this->connect();
 		$handle = $this->state->create($this->buildUrl($source));
-		return NativeStream::wrap($this->state->getState(), $handle, 'w');
+		return NativeStream::wrap($this->state, $handle, 'w');
 	}
 
 	/**
