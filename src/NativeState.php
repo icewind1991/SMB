@@ -27,23 +27,7 @@ class NativeState {
 		return $this->state;
 	}
 
-	protected function setErrorHandler() {
-		if ($this->handlerSet) {
-			return;
-		}
-		$this->handlerSet = true;
-		set_error_handler(array($this, 'handleError'));
-	}
-
-	protected function restoreErrorHandler() {
-		if (!$this->handlerSet) {
-			return;
-		}
-		$this->handlerSet = false;
-		restore_error_handler();
-	}
-
-	protected function handleError($errorNumber = 0, $errorString = '') {
+	protected function handleError() {
 		$error = smbclient_state_errno($this->state);
 		switch ($error) {
 			// see error.h
@@ -60,11 +44,7 @@ class NativeState {
 			case 21:
 				throw new InvalidTypeException();
 			default:
-				if ($errorString) {
-					throw new Exception($errorString);
-				} else {
-					throw new Exception('Unknown error (' . $error . ')');
-				}
+				throw new Exception('Unknown error (' . $error . ')');
 		}
 	}
 
@@ -79,9 +59,7 @@ class NativeState {
 			return true;
 		}
 		$this->state = smbclient_state_new();
-		$this->setErrorHandler();
-		$result = smbclient_state_init($this->state, $workGroup, $user, $password);
-		$this->restoreErrorHandler();
+		$result = @smbclient_state_init($this->state, $workGroup, $user, $password);
 
 		if ($result === false) {
 			$this->handleError();
@@ -95,9 +73,7 @@ class NativeState {
 	 * @return resource
 	 */
 	public function opendir($uri) {
-		$this->setErrorHandler();
-		$result = smbclient_opendir($this->state, $uri);
-		$this->restoreErrorHandler();
+		$result = @smbclient_opendir($this->state, $uri);
 
 		if ($result === false) {
 			$this->handleError();
@@ -110,9 +86,7 @@ class NativeState {
 	 * @return array
 	 */
 	public function readdir($dir) {
-		$this->setErrorHandler();
-		$result = smbclient_readdir($this->state, $dir);
-		$this->restoreErrorHandler();
+		$result = @smbclient_readdir($this->state, $dir);
 
 		if ($result === false) {
 			$this->handleError();
@@ -125,9 +99,7 @@ class NativeState {
 	 * @return bool
 	 */
 	public function closedir($dir) {
-		$this->setErrorHandler();
-		$result = smbclient_closedir($this->state, $dir);
-		$this->restoreErrorHandler();
+		$result = @smbclient_closedir($this->state, $dir);
 
 		if ($result === false) {
 			$this->handleError();
@@ -141,9 +113,7 @@ class NativeState {
 	 * @return bool
 	 */
 	public function rename($old, $new) {
-		$this->setErrorHandler();
-		$result = smbclient_rename($this->state, $old, $this->state, $new);
-		$this->restoreErrorHandler();
+		$result = @smbclient_rename($this->state, $old, $this->state, $new);
 
 		if ($result === false) {
 			$this->handleError();
@@ -156,9 +126,7 @@ class NativeState {
 	 * @return bool
 	 */
 	public function unlink($uri) {
-		$this->setErrorHandler();
-		$result = smbclient_unlink($this->state, $uri);
-		$this->restoreErrorHandler();
+		$result = @smbclient_unlink($this->state, $uri);
 
 		if ($result === false) {
 			$this->handleError();
@@ -172,9 +140,7 @@ class NativeState {
 	 * @return bool
 	 */
 	public function mkdir($uri, $mask = 0777) {
-		$this->setErrorHandler();
-		$result = smbclient_mkdir($this->state, $uri, $mask);
-		$this->restoreErrorHandler();
+		$result = @smbclient_mkdir($this->state, $uri, $mask);
 
 		if ($result === false) {
 			$this->handleError();
@@ -187,9 +153,7 @@ class NativeState {
 	 * @return bool
 	 */
 	public function rmdir($uri) {
-		$this->setErrorHandler();
-		$result = smbclient_rmdir($this->state, $uri);
-		$this->restoreErrorHandler();
+		$result = @smbclient_rmdir($this->state, $uri);
 
 		if ($result === false) {
 			$this->handleError();
@@ -202,9 +166,7 @@ class NativeState {
 	 * @return array
 	 */
 	public function stat($uri) {
-		$this->setErrorHandler();
-		$result = smbclient_stat($this->state, $uri);
-		$this->restoreErrorHandler();
+		$result = @smbclient_stat($this->state, $uri);
 
 		if ($result === false) {
 			$this->handleError();
@@ -217,9 +179,7 @@ class NativeState {
 	 * @return array
 	 */
 	public function fstat($file) {
-		$this->setErrorHandler();
-		$result = smbclient_fstat($this->state, $file);
-		$this->restoreErrorHandler();
+		$result = @smbclient_fstat($this->state, $file);
 
 		if ($result === false) {
 			$this->handleError();
@@ -234,9 +194,7 @@ class NativeState {
 	 * @return resource
 	 */
 	public function open($uri, $mode, $mask = 0666) {
-		$this->setErrorHandler();
-		$result = smbclient_open($this->state, $uri, $mode, $mask);
-		$this->restoreErrorHandler();
+		$result = @smbclient_open($this->state, $uri, $mode, $mask);
 
 		if ($result === false) {
 			$this->handleError();
@@ -250,9 +208,7 @@ class NativeState {
 	 * @return resource
 	 */
 	public function create($uri, $mask = 0666) {
-		$this->setErrorHandler();
-		$result = smbclient_creat($this->state, $uri, $mask);
-		$this->restoreErrorHandler();
+		$result = @smbclient_creat($this->state, $uri, $mask);
 
 		if ($result === false) {
 			$this->handleError();
@@ -266,9 +222,7 @@ class NativeState {
 	 * @return string
 	 */
 	public function read($file, $bytes) {
-		$this->setErrorHandler();
-		$result = smbclient_read($this->state, $file, $bytes);
-		$this->restoreErrorHandler();
+		$result = @smbclient_read($this->state, $file, $bytes);
 
 		if ($result === false) {
 			$this->handleError();
@@ -283,9 +237,7 @@ class NativeState {
 	 * @return int
 	 */
 	public function write($file, $data, $length = null) {
-		$this->setErrorHandler();
-		$result = smbclient_write($this->state, $file, $data, $length);
-		$this->restoreErrorHandler();
+		$result = @smbclient_write($this->state, $file, $data, $length);
 
 		if ($result === false) {
 			$this->handleError();
@@ -300,9 +252,7 @@ class NativeState {
 	 * @return int
 	 */
 	public function lseek($file, $offset, $whence = SEEK_SET) {
-		$this->setErrorHandler();
-		$result = smbclient_lseek($this->state, $file, $offset, $whence);
-		$this->restoreErrorHandler();
+		$result = @smbclient_lseek($this->state, $file, $offset, $whence);
 
 		if ($result === false) {
 			$this->handleError();
@@ -316,9 +266,7 @@ class NativeState {
 	 * @return bool
 	 */
 	public function ftruncate($file, $size) {
-		$this->setErrorHandler();
-		$result = smbclient_ftruncate($this->state, $file, $size);
-		$this->restoreErrorHandler();
+		$result = @smbclient_ftruncate($this->state, $file, $size);
 
 		if ($result === false) {
 			$this->handleError();
@@ -327,9 +275,7 @@ class NativeState {
 	}
 
 	public function close($file) {
-		$this->setErrorHandler();
-		$result = smbclient_close($this->state, $file);
-		$this->restoreErrorHandler();
+		$result = @smbclient_close($this->state, $file);
 
 		if ($result === false) {
 			$this->handleError();
@@ -343,9 +289,7 @@ class NativeState {
 	 * @return string
 	 */
 	public function getxattr($uri, $key) {
-		$this->setErrorHandler();
-		$result = smbclient_getxattr($this->state, $uri, $key);
-		$this->restoreErrorHandler();
+		$result = @smbclient_getxattr($this->state, $uri, $key);
 
 		if ($result === false) {
 			$this->handleError();
@@ -361,9 +305,7 @@ class NativeState {
 	 * @return mixed
 	 */
 	public function setxattr($uri, $key, $value, $flags = 0) {
-		$this->setErrorHandler();
-		$result = smbclient_setxattr($this->state, $uri, $key, $value, $flags);
-		$this->restoreErrorHandler();
+		$result = @smbclient_setxattr($this->state, $uri, $key, $value, $flags);
 
 		if ($result === false) {
 			$this->handleError();
@@ -375,6 +317,5 @@ class NativeState {
 		if ($this->connected) {
 			smbclient_state_free($this->state);
 		}
-		$this->restoreErrorHandler();
 	}
 }
