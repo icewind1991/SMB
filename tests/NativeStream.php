@@ -94,6 +94,16 @@ class NativeStream extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('foo', stream_get_contents($fh));
 	}
 
+	public function testLockUnsupported() {
+		$fh = $this->share->write($this->root . '/foobar');
+		$this->assertFalse(flock($fh, LOCK_SH));
+	}
+
+	public function testSetOptionUnsupported() {
+		$fh = $this->share->write($this->root . '/foobar');
+		$this->assertFalse(stream_set_blocking($fh, false));
+	}
+
 	public function tearDown() {
 		if ($this->share) {
 			$this->cleanDir($this->root);

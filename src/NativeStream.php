@@ -7,7 +7,9 @@
 
 namespace Icewind\SMB;
 
-class NativeStream {
+use Icewind\Streams\File;
+
+class NativeStream implements File {
 	/**
 	 * @var resource
 	 */
@@ -55,7 +57,7 @@ class NativeStream {
 	}
 
 
-	public function stream_open() {
+	public function stream_open($path, $mode, $options, &$opened_path) {
 		$context = stream_context_get_options($this->context);
 		$this->state = $context['nativesmb']['state'];
 		$this->handle = $context['nativesmb']['handle'];
@@ -84,5 +86,13 @@ class NativeStream {
 
 	public function stream_truncate($size) {
 		return $this->state->ftruncate($this->handle, $size);
+	}
+
+	public function stream_set_option($option, $arg1, $arg2) {
+		return false;
+	}
+
+	public function stream_lock($operation) {
+		return false;
 	}
 }
