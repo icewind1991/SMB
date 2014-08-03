@@ -101,7 +101,7 @@ class NativeShare implements IShare {
 	 * @return \Icewind\SMB\IFileInfo[]
 	 */
 	public function stat($path) {
-		return new NativeFileInfo($this, $path, basename($path));
+		return new NativeFileInfo($this, $path, basename($path), $this->getStat($path));
 	}
 
 	public function getStat($path) {

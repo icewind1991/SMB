@@ -303,6 +303,23 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 		$this->share->rmdir('/foobar/asd');
 	}
 
+	/**
+	 * @expectedException \Icewind\SMB\NotFoundException
+	 */
+	public function testRenameNonExisting() {
+		$this->share->rename('/foobar/asd', '/foobar/bar');
+	}
+
+	/**
+	 * @expectedException \Icewind\SMB\NotFoundException
+	 */
+	public function testRenameTargetNonExisting() {
+		$txt= $this->getTextFile();
+		$this->share->put($txt, $this->root . '/foo.txt');
+		unlink($txt);
+		$this->share->rename($this->root . '/foo.txt', $this->root . '/bar/foo.txt');
+	}
+
 	public function testModifiedDate() {
 		$now = time();
 		$this->share->put($this->getTextFile(), $this->root . '/foo.txt');
@@ -385,6 +402,13 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 
 		$info = $this->share->stat($this->root . '/' . $name);
 		$this->assertEquals($size, $info->getSize());
+	}
+
+	/**
+	 * @expectedException \Icewind\SMB\NotFoundException
+	 */
+	public function testStatNonExisting() {
+		$this->share->stat($this->root . '/fo.txt');
 	}
 
 	/**

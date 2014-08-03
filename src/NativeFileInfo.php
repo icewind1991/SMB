@@ -39,11 +39,13 @@ class NativeFileInfo implements IFileInfo {
 	 * @param \Icewind\SMB\NativeShare $share
 	 * @param string $path
 	 * @param string $name
+	 * @param array $stat
 	 */
-	public function __construct($share, $path, $name) {
+	public function __construct($share, $path, $name, $stat = null) {
 		$this->share = $share;
 		$this->path = $path;
 		$this->name = $name;
+		$this->statCache = $stat;
 	}
 
 	/**
