@@ -13,9 +13,9 @@ before_install:
   - sudo useradd -m -p $pass test
   - sudo apt-get update -qq
   - sudo apt-get install samba smbclient libsmbclient-dev libsmbclient
-  - wget -O /tmp/libsmbclient-php.zip https://github.com/eduardok/libsmbclient-php/archive/086409c349fad9a420f6fcf65b11c9841b07e821.zip
+  - wget -O /tmp/libsmbclient-php.zip https://github.com/eduardok/libsmbclient-php/archive/master.zip
   - unzip /tmp/libsmbclient-php.zip -d /tmp
-  - cd /tmp/libsmbclient-php-086409c349fad9a420f6fcf65b11c9841b07e821
+  - cd /tmp/libsmbclient-php-master
   - phpize && ./configure && make && sudo make install
   - echo 'extension="libsmbclient.so"' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - cd $CURRENT_DIR
