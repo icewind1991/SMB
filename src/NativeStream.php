@@ -81,4 +81,8 @@ class NativeStream {
 	public function stream_write($data) {
 		return $this->state->write($this->handle, $data);
 	}
+
+	public function stream_truncate($size) {
+		return $this->state->ftruncate($this->handle, $size);
+	}
 }

@@ -84,6 +84,16 @@ class NativeStream extends \PHPUnit_Framework_TestCase {
 		unlink($sourceFile);
 	}
 
+	public function testTruncate() {
+		$fh = $this->share->write($this->root . '/foobar');
+		fwrite($fh, 'foobar');
+		ftruncate($fh, 3);
+		fclose($fh);
+
+		$fh = $this->share->read($this->root . '/foobar');
+		$this->assertEquals('foo', stream_get_contents($fh));
+	}
+
 	public function tearDown() {
 		if ($this->share) {
 			$this->cleanDir($this->root);
