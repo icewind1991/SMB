@@ -22,13 +22,6 @@ class NativeState {
 
 	protected $connected = false;
 
-	/**
-	 * @return resource
-	 */
-	public function getState() {
-		return $this->state;
-	}
-
 	protected function handleError() {
 		$error = smbclient_state_errno($this->state);
 		switch ($error) {
