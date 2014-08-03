@@ -85,6 +85,9 @@ class NativeStream extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function testTruncate() {
+		if (version_compare(phpversion(), '5.4.0', '<')) {
+			$this->markTestSkipped('php <5.4 doesn\'t support truncate for stream wrappers');
+		}
 		$fh = $this->share->write($this->root . '/foobar');
 		fwrite($fh, 'foobar');
 		ftruncate($fh, 3);
