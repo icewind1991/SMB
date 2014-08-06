@@ -203,28 +203,28 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testCreateFolderInNonExistingFolder() {
 		$this->share->mkdir($this->root . '/foo/bar');
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testRemoveFolderInNonExistingFolder() {
 		$this->share->rmdir($this->root . '/foo/bar');
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testRemoveNonExistingFolder() {
 		$this->share->rmdir($this->root . '/foo');
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\AlreadyExistsException
+	 * @expectedException \Icewind\SMB\Exception\AlreadyExistsException
 	 */
 	public function testCreateExistingFolder() {
 		$this->share->mkdir($this->root . '/bar');
@@ -233,7 +233,7 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\InvalidTypeException
+	 * @expectedException \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function testCreateFileExistingFolder() {
 		$this->share->mkdir($this->root . '/bar');
@@ -242,28 +242,28 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testCreateFileInNonExistingFolder() {
 		$this->share->put($this->getTextFile(), $this->root . '/foo/bar');
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testTestRemoveNonExistingFile() {
 		$this->share->del($this->root . '/foo');
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testDownloadNonExistingFile() {
 		$this->share->get($this->root . '/foo', '/dev/null');
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\InvalidTypeException
+	 * @expectedException \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function testDownloadFolder() {
 		$this->share->mkdir($this->root . '/foobar');
@@ -272,7 +272,7 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\InvalidTypeException
+	 * @expectedException \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function testDelFolder() {
 		$this->share->mkdir($this->root . '/foobar');
@@ -281,7 +281,7 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\InvalidTypeException
+	 * @expectedException \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function testRmdirFile() {
 		$this->share->put($this->getTextFile(), $this->root . '/foobar');
@@ -290,28 +290,28 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testDirNonExisting() {
 		$this->share->dir('/foobar/asd');
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testRmDirNonExisting() {
 		$this->share->rmdir('/foobar/asd');
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testRenameNonExisting() {
 		$this->share->rename('/foobar/asd', '/foobar/bar');
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testRenameTargetNonExisting() {
 		$txt= $this->getTextFile();
@@ -405,7 +405,7 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\NotFoundException
+	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testStatNonExisting() {
 		$this->share->stat($this->root . '/fo.txt');

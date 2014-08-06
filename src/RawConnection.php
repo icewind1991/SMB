@@ -7,6 +7,8 @@
 
 namespace Icewind\SMB;
 
+use Icewind\SMB\Exception\ConnectionException;
+
 class RawConnection {
 	/**
 	 * @var resource[] $pipes
@@ -37,7 +39,7 @@ class RawConnection {
 		));
 		$this->process = proc_open($command, $descriptorSpec, $this->pipes, '/', $env);
 		if (!$this->isValid()) {
-			throw new ConnectionError();
+			throw new ConnectionException();
 		}
 	}
 

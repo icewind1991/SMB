@@ -7,6 +7,13 @@
 
 namespace Icewind\SMB;
 
+use Icewind\SMB\Exception\AccessDeniedException;
+use Icewind\SMB\Exception\AlreadyExistsException;
+use Icewind\SMB\Exception\ConnectionException;
+use Icewind\SMB\Exception\Exception;
+use Icewind\SMB\Exception\InvalidTypeException;
+use Icewind\SMB\Exception\NotEmptyException;
+use Icewind\SMB\Exception\NotFoundException;
 use Icewind\Streams\CallbackWrapper;
 
 class Share implements IShare {
@@ -37,20 +44,23 @@ class Share implements IShare {
 	}
 
 	/**
-	 * @throws \Icewind\SMB\ConnectionError
-	 * @throws \Icewind\SMB\AuthenticationException
-	 * @throws \Icewind\SMB\InvalidHostException
+	 * @throws \Icewind\SMB\Exception\ConnectionError
+	 * @throws \Icewind\SMB\Exception\AuthenticationException
+	 * @throws \Icewind\SMB\Exception\InvalidHostException
 	 */
 	protected function connect() {
 		if ($this->connection and $this->connection->isValid()) {
 			return;
 		}
-		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
-			' //' . $this->server->getHost() . '/' . $this->name;
+		$command = sprintf('%s --authentication-file=/proc/self/fd/3 //%s/%s',
+			Server::CLIENT,
+			$this->server->getHost(),
+			$this->name
+		);
 		$this->connection = new Connection($command);
 		$this->connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		if (!$this->connection->isValid()) {
-			throw new ConnectionError();
+			throw new ConnectionException();
 		}
 	}
 
@@ -83,8 +93,8 @@ class Share implements IShare {
 	 * @param $path
 	 * @return \Icewind\SMB\IFileInfo[]
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function dir($path) {
 		$escapedPath = $this->escapePath($path);
@@ -146,8 +156,8 @@ class Share implements IShare {
 	 * @param string $path
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\AlreadyExistsException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\AlreadyExistsException
 	 */
 	public function mkdir($path) {
 		return $this->simpleCommand('mkdir', $path);
@@ -159,8 +169,8 @@ class Share implements IShare {
 	 * @param string $path
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function rmdir($path) {
 		return $this->simpleCommand('rmdir', $path);
@@ -172,8 +182,8 @@ class Share implements IShare {
 	 * @param string $path
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function del($path) {
 		//del return a file not found error when trying to delete a folder
@@ -200,8 +210,8 @@ class Share implements IShare {
 	 * @param string $to
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\AlreadyExistsException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\AlreadyExistsException
 	 */
 	public function rename($from, $to) {
 		$path1 = $this->escapePath($from);
@@ -218,8 +228,8 @@ class Share implements IShare {
 	 * @param string $target remove file
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function put($source, $target) {
 		$path1 = $this->escapeLocalPath($source); //first path is local, needs different escaping
@@ -235,8 +245,8 @@ class Share implements IShare {
 	 * @param string $target local file
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function get($source, $target) {
 		$path1 = $this->escapePath($source);
@@ -251,8 +261,8 @@ class Share implements IShare {
 	 * @param string $source
 	 * @return resource a read only stream with the contents of the remote file
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function read($source) {
 		$source = $this->escapePath($source);
@@ -260,9 +270,12 @@ class Share implements IShare {
 		$source = str_replace('\'', '\'"\'"\'', $source);
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
-		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
-			' //' . $this->server->getHost() . '/' . $this->name
-			. ' -c \'get ' . $source . ' /proc/self/fd/5\'';
+		$command = sprintf('%s --authentication-file=/proc/self/fd/3 //%s/%s -c \'get %s /proc/self/fd/5\'',
+			Server::CLIENT,
+			$this->server->getHost(),
+			$this->name,
+			$source
+		);
 		$connection = new Connection($command);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		$fh = $connection->getFileOutputStream();
@@ -276,8 +289,8 @@ class Share implements IShare {
 	 * @param string $target
 	 * @return resource a write only stream to upload a remote file
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function write($target) {
 		$target = $this->escapePath($target);
@@ -285,9 +298,12 @@ class Share implements IShare {
 		$target = str_replace('\'', '\'"\'"\'', $target);
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
-		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
-			' //' . $this->server->getHost() . '/' . $this->name
-			. ' -c \'put /proc/self/fd/4 ' . $target . '\'';
+		$command = sprintf('%s --authentication-file=/proc/self/fd/3 //%s/%s -c \'put /proc/self/fd/4 %s\'',
+			Server::CLIENT,
+			$this->server->getHost(),
+			$this->name,
+			$target
+		);
 		$connection = new RawConnection($command);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		$fh = $connection->getFileInputStream();
@@ -368,11 +384,11 @@ class Share implements IShare {
 	 * @param $lines
 	 *
 	 * @throws NotFoundException
-	 * @throws AlreadyExistsException
-	 * @throws AccessDeniedException
-	 * @throws NotEmptyException
-	 * @throws InvalidTypeException
-	 * @throws \Exception
+	 * @throws \Icewind\SMB\Exception\AlreadyExistsException
+	 * @throws \Icewind\SMB\Exception\AccessDeniedException
+	 * @throws \Icewind\SMB\Exception\NotEmptyException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\Exception
 	 * @return bool
 	 */
 	protected function parseOutput($lines) {

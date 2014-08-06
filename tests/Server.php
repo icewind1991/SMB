@@ -31,7 +31,7 @@ class Server extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\AuthenticationException
+	 * @expectedException \Icewind\SMB\Exception\AuthenticationException
 	 */
 	public function testWrongUserName() {
 		$this->markTestSkipped('This fails for no reason on travis');
@@ -40,7 +40,7 @@ class Server extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\AuthenticationException
+	 * @expectedException \Icewind\SMB\Exception\AuthenticationException
 	 */
 	public function testWrongPassword() {
 		$server = new \Icewind\SMB\Server($this->config->host, $this->config->user, uniqid());
@@ -48,7 +48,7 @@ class Server extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\InvalidHostException
+	 * @expectedException \Icewind\SMB\Exception\InvalidHostException
 	 */
 	public function testWrongHost() {
 		$server = new \Icewind\SMB\Server(uniqid(), $this->config->user, $this->config->password);

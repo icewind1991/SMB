@@ -34,8 +34,8 @@ class NativeServer extends Server {
 
 	/**
 	 * @return \Icewind\SMB\IShare[]
-	 * @throws \Icewind\SMB\AuthenticationException
-	 * @throws \Icewind\SMB\InvalidHostException
+	 * @throws \Icewind\SMB\Exception\AuthenticationException
+	 * @throws \Icewind\SMB\Exception\InvalidHostException
 	 */
 	public function listShares() {
 		$this->connect();

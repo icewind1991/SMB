@@ -7,8 +7,6 @@
 
 namespace Icewind\SMB;
 
-require_once 'ErrorCodes.php';
-
 class NativeShare implements IShare {
 	/**
 	 * @var Server $server
@@ -36,9 +34,9 @@ class NativeShare implements IShare {
 	}
 
 	/**
-	 * @throws \Icewind\SMB\ConnectionError
-	 * @throws \Icewind\SMB\AuthenticationException
-	 * @throws \Icewind\SMB\InvalidHostException
+	 * @throws \Icewind\SMB\Exception\ConnectionException
+	 * @throws \Icewind\SMB\Exception\AuthenticationException
+	 * @throws \Icewind\SMB\Exception\InvalidHostException
 	 */
 	protected function connect() {
 		if ($this->state and $this->state instanceof NativeShare) {
@@ -63,7 +61,7 @@ class NativeShare implements IShare {
 	}
 
 	private function buildUrl($path) {
-		$url = 'smb://' . $this->server->getHost() . '/' . $this->name;
+		$url = sprintf('smb://%s/%s', $this->server->getHost(), $this->name);
 		if ($path) {
 			$path = trim($path, '/');
 			$url .= '/' . $path;
@@ -77,8 +75,8 @@ class NativeShare implements IShare {
 	 * @param string $path
 	 * @return \Icewind\SMB\IFileInfo[]
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function dir($path) {
 		$this->connect();
@@ -115,8 +113,8 @@ class NativeShare implements IShare {
 	 * @param string $path
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\AlreadyExistsException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\AlreadyExistsException
 	 */
 	public function mkdir($path) {
 		$this->connect();
@@ -129,8 +127,8 @@ class NativeShare implements IShare {
 	 * @param string $path
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function rmdir($path) {
 		$this->connect();
@@ -143,8 +141,8 @@ class NativeShare implements IShare {
 	 * @param string $path
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function del($path) {
 		return $this->state->unlink($this->buildUrl($path));
@@ -157,8 +155,8 @@ class NativeShare implements IShare {
 	 * @param string $to
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\AlreadyExistsException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\AlreadyExistsException
 	 */
 	public function rename($from, $to) {
 		$this->connect();
@@ -172,8 +170,8 @@ class NativeShare implements IShare {
 	 * @param string $target remove file
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function put($source, $target) {
 		$this->connect();
@@ -195,8 +193,8 @@ class NativeShare implements IShare {
 	 * @param string $target local file
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function get($source, $target) {
 		$this->connect();
@@ -216,8 +214,8 @@ class NativeShare implements IShare {
 	 * @param string $source
 	 * @return resource a read only stream with the contents of the remote file
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function read($source) {
 		$this->connect();
@@ -231,8 +229,8 @@ class NativeShare implements IShare {
 	 * @param string $source
 	 * @return resource a read only stream with the contents of the remote file
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function write($source) {
 		$this->connect();

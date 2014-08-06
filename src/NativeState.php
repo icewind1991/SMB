@@ -7,7 +7,11 @@
 
 namespace Icewind\SMB;
 
-require_once 'ErrorCodes.php';
+use Icewind\SMB\Exception\AlreadyExistsException;
+use Icewind\SMB\Exception\Exception;
+use Icewind\SMB\Exception\ForbiddenException;
+use Icewind\SMB\Exception\InvalidTypeException;
+use Icewind\SMB\Exception\NotFoundException;
 
 /**
  * Low level wrapper for libsmbclient-php for error handling

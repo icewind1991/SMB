@@ -7,6 +7,10 @@
 
 namespace Icewind\SMB;
 
+use Icewind\SMB\Exception\AuthenticationException;
+use Icewind\SMB\Exception\ConnectionException;
+use Icewind\SMB\Exception\InvalidHostException;
+
 class Connection extends RawConnection {
 	const DELIMITER = 'smb:';
 
@@ -22,12 +26,12 @@ class Connection extends RawConnection {
 	/**
 	 * get all unprocessed output from smbclient until the next prompt
 	 *
-	 * @throws ConnectionError
+	 * @throws ConnectionException
 	 * @return string
 	 */
 	public function read() {
 		if (!$this->isValid()) {
-			throw new ConnectionError();
+			throw new ConnectionException();
 		}
 		$line = $this->readLine(); //first line is prompt
 		$this->checkConnectionError($line);

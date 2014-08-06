@@ -7,6 +7,9 @@
 
 namespace Icewind\SMB;
 
+use Icewind\SMB\Exception\AuthenticationException;
+use Icewind\SMB\Exception\InvalidHostException;
+
 class Server {
 	const CLIENT = 'smbclient';
 	const LOCALE = 'en_US.UTF-8';
@@ -77,8 +80,8 @@ class Server {
 	/**
 	 * @return \Icewind\SMB\IShare[]
 	 *
-	 * @throws \Icewind\SMB\AuthenticationException
-	 * @throws \Icewind\SMB\InvalidHostException
+	 * @throws \Icewind\SMB\Exception\AuthenticationException
+	 * @throws \Icewind\SMB\Exception\InvalidHostException
 	 */
 	public function listShares() {
 		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
