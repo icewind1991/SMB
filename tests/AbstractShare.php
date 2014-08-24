@@ -37,12 +37,13 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function nameProvider() {
-		// / ? < > \ : * | " are illegal characters in path on windows, no use trying to get them working
+		// / ? < > \ : * | " are illegal characters in path on windows
 		return array(
 			array('simple'),
 			array('with spaces_and-underscores'),
 			array("single'quote'"),
-			array('$as#d€££Ö€ßœĚęĘĞĜΣΥΦΩΫΫ')
+			array('日本語'),
+			array('$as#d€££Ö€ßœĚęĘĞĜΣΥΦΩΫ')
 		);
 	}
 
@@ -96,110 +97,101 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 		$this->fail('Share "' . $this->config->share . '" not found');
 	}
 
-	public function testDirectory() {
+	public function testRootStartsEmpty() {
 		$this->assertEquals(array(), $this->share->dir($this->root));
-
-		$this->share->mkdir($this->root . '/foo');
-		$dirs = $this->share->dir($this->root);
-		$this->assertCount(1, $dirs);
-		$this->assertEquals('foo', $dirs[0]->getName());
-
-		$this->share->rename($this->root . '/foo', $this->root . '/bar');
-
-		$dirs = $this->share->dir($this->root);
-		$this->assertEquals(1, count($dirs));
-		$this->assertEquals('bar', $dirs[0]->getName());
-
-		$this->share->rmdir($this->root . '/bar');
-		$this->assertCount(0, $this->share->dir($this->root));
-	}
-
-	/**
-	 * @dataProvider fileDataProvider
-	 */
-	public function testFile($text) {
-		$size = strlen($text);
-		$tmpFile1 = tempnam('/tmp', 'smb_test_');
-		file_put_contents($tmpFile1, $text);
-
-		$this->share->put($tmpFile1, $this->root . '/lorem.txt');
-		unlink($tmpFile1);
-
-		$files = $this->share->dir($this->root);
-		$this->assertCount(1, $files);
-		$this->assertEquals('lorem.txt', $files[0]->getName());
-		$this->assertEquals($size, $files[0]->getSize());
-
-		$this->share->rename($this->root . '/lorem.txt', $this->root . '/foo.txt');
-
-		$files = $this->share->dir($this->root);
-		$this->assertEquals(1, count($files));
-		$this->assertEquals('foo.txt', $files[0]->getName());
-
-		$tmpFile2 = tempnam('/tmp', 'smb_test_');
-		$this->share->get($this->root . '/foo.txt', $tmpFile2);
-
-		$this->assertEquals($text, file_get_contents($tmpFile2));
-		unlink($tmpFile2);
-
-		$this->share->del($this->root . '/foo.txt');
-		$this->assertCount(0, $this->share->dir($this->root));
 	}
 
 	/**
 	 * @dataProvider nameProvider
 	 */
-	public function testEscaping($name) {
-		$text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua';
-		$tmpFile1 = tempnam('/tmp', 'smb_test_');
-		file_put_contents($tmpFile1, $text);
-
+	public function testMkdir($name) {
 		$this->share->mkdir($this->root . '/' . $name);
-		$dir = $this->share->dir($this->root);
-		$this->assertEquals($name, $dir[0]->getName());
-		$this->assertTrue($dir[0]->isDirectory());
-		$this->assertCount(0, $this->share->dir($this->root . '/' . $name));
+		$dirs = $this->share->dir($this->root);
+		$this->assertCount(1, $dirs);
+		$this->assertEquals($name, $dirs[0]->getName());
+		$this->assertTrue($dirs[0]->isDirectory());
+	}
 
-		$this->share->put($tmpFile1, $this->root . '/' . $name . '/foo.txt');
-		$dir = $this->share->dir($this->root . '/' . $name);
-		$this->assertEquals('foo.txt', $dir[0]->getName());
+	/**
+	 * @dataProvider nameProvider
+	 */
+	public function testRenameDirectory($name) {
+		$this->share->mkdir($this->root . '/' . $name);
+		$this->share->rename($this->root . '/' . $name, $this->root . '/' . $name . '_rename');
+		$dirs = $this->share->dir($this->root);
+		$this->assertEquals(1, count($dirs));
+		$this->assertEquals($name . '_rename', $dirs[0]->getName());
+	}
 
-		$tmpFile2 = tempnam('/tmp', 'smb_test_');
-		$this->share->get($this->root . '/' . $name . '/foo.txt', $tmpFile2);
-		$this->assertEquals($text, file_get_contents($tmpFile2));
-		unlink($tmpFile2);
-
-		$this->share->rename($this->root . '/' . $name . '/foo.txt', $this->root . '/' . $name . '/bar.txt');
-		$dir = $this->share->dir($this->root . '/' . $name);
-		$this->assertEquals('bar.txt', $dir[0]->getName());
-		$this->assertFalse($dir[0]->isDirectory());
-
-		$this->share->del($this->root . '/' . $name . '/bar.txt');
-		$this->assertCount(0, $this->share->dir($this->root . '/' . $name));
+	/**
+	 * @dataProvider nameProvider
+	 */
+	public function testRmdir($name) {
+		$this->share->mkdir($this->root . '/' . $name);
 		$this->share->rmdir($this->root . '/' . $name);
 		$this->assertCount(0, $this->share->dir($this->root));
+	}
 
-		$this->share->put($tmpFile1, $this->root . '/' . $name);
-		$dir = $this->share->dir($this->root);
-		$this->assertEquals($name, $dir[0]->getName());
+	/**
+	 * @dataProvider nameAndDataProvider
+	 */
+	public function testPut($name, $text) {
+		$tmpFile = $this->getTextFile($text);
+		$size = filesize($tmpFile);
 
-		$tmpFile2 = tempnam('/tmp', 'smb_test_');
-		$this->share->get($this->root . '/' . $name, $tmpFile2);
-		$this->assertEquals($text, file_get_contents($tmpFile2));
-		unlink($tmpFile2);
+		$this->share->put($tmpFile, $this->root . '/' . $name);
+		unlink($tmpFile);
+
+		$files = $this->share->dir($this->root);
+		$this->assertCount(1, $files);
+		$this->assertEquals($name, $files[0]->getName());
+		$this->assertEquals($size, $files[0]->getSize());
+		$this->assertFalse($files[0]->isDirectory());
+	}
+
+	/**
+	 * @dataProvider nameProvider
+	 */
+	public function testRenameFile($name) {
+		$tmpFile = $this->getTextFile();
+
+		$this->share->put($tmpFile, $this->root . '/' . $name);
+		unlink($tmpFile);
+
+		$this->share->rename($this->root . '/' . $name, $this->root . '/' . $name . '_renamed');
+
+		$files = $this->share->dir($this->root);
+		$this->assertEquals(1, count($files));
+		$this->assertEquals($name . '_renamed', $files[0]->getName());
+	}
+
+	/**
+	 * @dataProvider nameAndDataProvider
+	 */
+	public function testGet($name, $text) {
+		$tmpFile = $this->getTextFile($text);
+
+		$this->share->put($tmpFile, $this->root . '/' . $name);
+		unlink($tmpFile);
+
+		$targetFile = tempnam('/tmp', 'smb_test_');
+		$this->share->get($this->root . '/' . $name, $targetFile);
+
+		$this->assertEquals($text, file_get_contents($targetFile));
+		unlink($targetFile);
+	}
+
+	/**
+	 * @dataProvider nameProvider
+	 */
+	public function testDel($name) {
+		$tmpFile = $this->getTextFile();
+
+		$this->share->put($tmpFile, $this->root . '/' . $name);
+		unlink($tmpFile);
 
 		$this->share->del($this->root . '/' . $name);
-
-		$tmpFile2 = tempnam('/tmp', 'smb_test_' . $name);
-		$this->share->put($tmpFile2, $this->root . '/' . $name);
-		$dir = $this->share->dir($this->root);
-		$this->assertEquals($name, $dir[0]->getName());
-		$this->share->del($this->root . '/' . $name);
-		unlink($tmpFile2);
-
-		$this->assertEquals(array(), $this->share->dir($this->root));
-
-		unlink($tmpFile1);
+		$this->assertCount(0, $this->share->dir($this->root));
 	}
 
 	/**
@@ -314,7 +306,7 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testRenameTargetNonExisting() {
-		$txt= $this->getTextFile();
+		$txt = $this->getTextFile();
 		$this->share->put($txt, $this->root . '/foo.txt');
 		unlink($txt);
 		$this->share->rename($this->root . '/foo.txt', $this->root . '/bar/foo.txt');
@@ -327,11 +319,6 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 		$mtime = $dir[0]->getMTime();
 		$this->assertTrue(abs($now - $mtime) <= 1, 'Modified time differs by ' . abs($now - $mtime) . ' seconds');
 		$this->share->del($this->root . '/foo.txt');
-	}
-
-	public function testListRoot() {
-		$files = $this->share->dir('');
-		$this->assertGreaterThan(0, count($files));
 	}
 
 	/**

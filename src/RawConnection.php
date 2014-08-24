@@ -35,7 +35,8 @@ class RawConnection {
 		setlocale(LC_ALL, Server::LOCALE);
 		$env = array_merge($env, array(
 			'CLI_FORCE_INTERACTIVE' => 'y', // Needed or the prompt isn't displayed!!
-			'LC_ALL' => Server::LOCALE
+			'LC_ALL' => Server::LOCALE,
+			'LANG' => Server::LOCALE
 		));
 		$this->process = proc_open($command, $descriptorSpec, $this->pipes, '/', $env);
 		if (!$this->isValid()) {
@@ -72,8 +73,8 @@ class RawConnection {
 	 *
 	 * @return string
 	 */
-	public function read() {
-		return trim(fgets($this->getOutputStream()));
+	public function readLine() {
+		return stream_get_line($this->getOutputStream(), 4086, "\n");
 	}
 
 	/**
@@ -83,7 +84,7 @@ class RawConnection {
 	 */
 	public function readAll() {
 		$output = array();
-		while ($line = $this->read()) {
+		while ($line = $this->readLine()) {
 			$output[] = $line;
 		}
 		return $output;

@@ -38,21 +38,12 @@ class Connection extends RawConnection {
 
 		$output = array();
 		$line = $this->readLine();
-		$length = strlen(self::DELIMITER);
-		while (substr($line, 0, $length) !== self::DELIMITER) { //next prompt functions as delimiter
+		$length = mb_strlen(self::DELIMITER);
+		while (mb_substr($line, 0, $length) !== self::DELIMITER) { //next prompt functions as delimiter
 			$output[] .= $line;
-			$line = parent::read();
+			$line = $this->readLine();
 		}
 		return $output;
-	}
-
-	/**
-	 * read a single line of unprocessed output
-	 *
-	 * @return string
-	 */
-	public function readLine() {
-		return parent::read();
 	}
 
 	/**
