@@ -64,7 +64,7 @@ class NativeShare implements IShare {
 		$url = sprintf('smb://%s/%s', $this->server->getHost(), $this->name);
 		if ($path) {
 			$path = trim($path, '/');
-			$url .= '/' . $path;
+			$url .= '/' . rawurlencode($path);
 		}
 		return $url;
 	}

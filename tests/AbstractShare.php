@@ -43,6 +43,7 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 			array('with spaces_and-underscores'),
 			array("single'quote'"),
 			array('日本語'),
+			array('url %2F +encode'),
 			array('$as#d€££Ö€ßœĚęĘĞĜΣΥΦΩΫ')
 		);
 	}
