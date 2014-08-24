@@ -8,8 +8,6 @@
 namespace Icewind\SMB\Test;
 
 use Icewind\SMB\FileInfo;
-use Icewind\SMB\IFileInfo;
-use Icewind\SMB\IShare;
 
 abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	/**
@@ -44,6 +42,7 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 			array("single'quote'"),
 			array('日本語'),
 			array('url %2F +encode'),
+			array('a somewhat longer filename than the other with more charaters as the all the other filenames'),
 			array('$as#d€££Ö€ßœĚęĘĞĜΣΥΦΩΫ')
 		);
 	}

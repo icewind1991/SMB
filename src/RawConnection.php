@@ -30,13 +30,14 @@ class RawConnection {
 			2 => array('pipe', 'w'), // child writes to stderr
 			3 => array('pipe', 'r'), // child reads from fd#3
 			4 => array('pipe', 'r'), // child reads from fd#4
-			5 => array('pipe', 'w') // child writes to fd#5
+			5 => array('pipe', 'w')  // child writes to fd#5
 		);
 		setlocale(LC_ALL, Server::LOCALE);
 		$env = array_merge($env, array(
 			'CLI_FORCE_INTERACTIVE' => 'y', // Needed or the prompt isn't displayed!!
 			'LC_ALL' => Server::LOCALE,
-			'LANG' => Server::LOCALE
+			'LANG' => Server::LOCALE,
+			'COLUMNS' => 8192 // prevent smbclient from line-wrapping it's output
 		));
 		$this->process = proc_open($command, $descriptorSpec, $this->pipes, '/', $env);
 		if (!$this->isValid()) {
