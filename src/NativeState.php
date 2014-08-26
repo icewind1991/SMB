@@ -11,6 +11,7 @@ use Icewind\SMB\Exception\AlreadyExistsException;
 use Icewind\SMB\Exception\Exception;
 use Icewind\SMB\Exception\ForbiddenException;
 use Icewind\SMB\Exception\InvalidTypeException;
+use Icewind\SMB\Exception\NotEmptyException;
 use Icewind\SMB\Exception\NotFoundException;
 
 /**
@@ -42,6 +43,8 @@ class NativeState {
 				throw new InvalidTypeException();
 			case 21:
 				throw new InvalidTypeException();
+			case 39:
+				throw new NotEmptyException();
 			default:
 				throw new Exception('Unknown error (' . $error . ')');
 		}

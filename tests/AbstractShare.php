@@ -282,6 +282,15 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @expectedException \Icewind\SMB\Exception\NotEmptyException
+	 */
+	public function testRmdirNotEmpty() {
+		$this->share->mkdir($this->root . '/foobar');
+		$this->share->put($this->getTextFile(), $this->root . '/foobar/asd');
+		$this->share->rmdir($this->root . '/foobar');
+	}
+
+	/**
 	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testDirNonExisting() {
