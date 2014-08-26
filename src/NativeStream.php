@@ -26,6 +26,11 @@ class NativeStream implements File {
 	private $handle;
 
 	/**
+	 * @var bool
+	 */
+	private $eof = false;
+
+	/**
 	 * Wrap a stream from libsmbclient-php into a regular php stream
 	 *
 	 * @param \Icewind\SMB\NativeState $state
@@ -51,6 +56,7 @@ class NativeStream implements File {
 	}
 
 	public function stream_eof() {
+		return $this->eof;
 	}
 
 	public function stream_flush() {
@@ -65,10 +71,15 @@ class NativeStream implements File {
 	}
 
 	public function stream_read($count) {
-		return $this->state->read($this->handle, $count);
+		$result = $this->state->read($this->handle, $count);
+		if (strlen($result) < $count) {
+			$this->eof = true;
+		}
+		return $result;
 	}
 
 	public function stream_seek($offset, $whence = SEEK_SET) {
+		$this->eof = false;
 		return $this->state->lseek($this->handle, $offset, $whence);
 	}
 

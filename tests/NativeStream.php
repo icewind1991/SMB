@@ -97,6 +97,21 @@ class NativeStream extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('foo', stream_get_contents($fh));
 	}
 
+	public function testEOF() {
+		if (version_compare(phpversion(), '5.4.0', '<')) {
+			$this->markTestSkipped('php <5.4 doesn\'t support truncate for stream wrappers');
+		}
+		$fh = $this->share->write($this->root . '/foobar');
+		fwrite($fh, 'foobar');
+		fclose($fh);
+
+		$fh = $this->share->read($this->root . '/foobar');
+		fread($fh, 3);
+		$this->assertFalse(feof($fh));
+		fread($fh, 5);
+		$this->assertTrue(feof($fh));
+	}
+
 	public function testLockUnsupported() {
 		$fh = $this->share->write($this->root . '/foobar');
 		$this->assertFalse(flock($fh, LOCK_SH));
