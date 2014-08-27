@@ -26,7 +26,7 @@ class NativeFileInfo implements IFileInfo {
 	protected $share;
 
 	/**
-	 * @var array
+	 * @var array | null
 	 */
 	protected $statCache;
 
