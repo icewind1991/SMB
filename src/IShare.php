@@ -22,8 +22,8 @@ interface IShare {
 	 * @param string $target local file
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function get($source, $target);
 
@@ -34,8 +34,8 @@ interface IShare {
 	 * @param string $target remove file
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function put($source, $target);
 
@@ -45,8 +45,8 @@ interface IShare {
 	 * @param string $source
 	 * @return resource a read only stream with the contents of the remote file
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function read($source);
 
@@ -56,8 +56,8 @@ interface IShare {
 	 * @param string $target
 	 * @return resource a write only stream to upload a remote file
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function write($target);
 
@@ -68,8 +68,8 @@ interface IShare {
 	 * @param string $to
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\AlreadyExistsException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\AlreadyExistsException
 	 */
 	public function rename($from, $to);
 
@@ -79,8 +79,8 @@ interface IShare {
 	 * @param string $path
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function del($path);
 
@@ -90,8 +90,8 @@ interface IShare {
 	 * @param $path
 	 * @return \Icewind\SMB\IFileInfo[]
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function dir($path);
 
@@ -99,7 +99,7 @@ interface IShare {
 	 * @param string $path
 	 * @return \Icewind\SMB\IFileInfo
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function stat($path);
 
@@ -109,8 +109,8 @@ interface IShare {
 	 * @param string $path
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\AlreadyExistsException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\AlreadyExistsException
 	 */
 	public function mkdir($path);
 
@@ -120,8 +120,8 @@ interface IShare {
 	 * @param string $path
 	 * @return bool
 	 *
-	 * @throws \Icewind\SMB\NotFoundException
-	 * @throws \Icewind\SMB\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function rmdir($path);
 
