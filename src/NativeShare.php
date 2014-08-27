@@ -182,7 +182,6 @@ class NativeShare implements IShare {
 			$this->state->write($targetHandle, $data);
 		}
 		$this->state->close($targetHandle);
-		restore_error_handler();
 		return true;
 	}
 
