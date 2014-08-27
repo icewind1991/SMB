@@ -339,6 +339,7 @@ class Share implements IShare {
 		// first reset the mode to normal
 		$cmd = 'setmode ' . $path . ' -rsha';
 		$output = $this->execute($cmd);
+		$this->parseOutput($output);
 
 		// then set the modes we want
 		$cmd = 'setmode ' . $path . ' ' . $modeString;
