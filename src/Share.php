@@ -32,6 +32,11 @@ class Share implements IShare {
 	 */
 	public $connection;
 
+	/**
+	 * @var \Icewind\SMB\Parser
+	 */
+	protected $parser;
+
 	private $serverTimezone;
 
 	/**
@@ -41,10 +46,11 @@ class Share implements IShare {
 	public function __construct($server, $name) {
 		$this->server = $server;
 		$this->name = $name;
+		$this->parser = new Parser($this->server->getTimeZone());
 	}
 
 	/**
-	 * @throws \Icewind\SMB\Exception\ConnectionError
+	 * @throws \Icewind\SMB\Exception\ConnectionException
 	 * @throws \Icewind\SMB\Exception\AuthenticationException
 	 * @throws \Icewind\SMB\Exception\InvalidHostException
 	 */
@@ -80,13 +86,6 @@ class Share implements IShare {
 		return $this->parseOutput($output);
 	}
 
-	private function getServerTimeZone() {
-		if (!$this->serverTimezone) {
-			$this->serverTimezone = $this->server->getTimeZone();
-		}
-		return $this->serverTimezone;
-	}
-
 	/**
 	 * List the content of a remote folder
 	 *
@@ -104,22 +103,7 @@ class Share implements IShare {
 		$output = $this->execute('dir');
 		$this->execute('cd /');
 
-		//last line is used space
-		array_pop($output);
-		$regex = '/^\s*(.*?)\s\s\s\s+(?:([NDHARS]*)\s+)?([0-9]+)\s+(.*)$/';
-		//2 spaces, filename, optional type, size, date
-		$content = array();
-		foreach ($output as $line) {
-			if (preg_match($regex, $line, $matches)) {
-				list(, $name, $mode, $size, $time) = $matches;
-				if ($name !== '.' and $name !== '..') {
-					$mode = $this->parseMode($mode);
-					$time = strtotime($time . ' ' . $this->getServerTimeZone());
-					$content[] = new FileInfo($path . '/' . $name, $name, $size, $time, $mode);
-				}
-			}
-		}
-		return $content;
+		return $this->parser->parseDir($output, $path);
 	}
 
 	/**
@@ -132,22 +116,8 @@ class Share implements IShare {
 		if (count($output) < 3) {
 			$this->parseOutput($output);
 		}
-		$mtime = 0;
-		$mode = 0;
-		$size = 0;
-		foreach ($output as $line) {
-			list($name, $value) = explode(':', $line, 2);
-			$value = trim($value);
-			if ($name === 'write_time') {
-				$mtime = $value;
-			} else if ($name === 'attributes') {
-				$mode = $this->parseMode($value);
-			} else if ($name === 'stream') {
-				list(, $size,) = explode(' ', $value);
-				$size = intval($size);
-			}
-		}
-		return new FileInfo($path, basename($path), $size, $mtime, $mode);
+		$stat = $this->parser->parseStat($output);
+		return new FileInfo($path, basename($path), $stat['size'], $stat['mtime'], $stat['mode']);
 	}
 
 	/**
@@ -322,17 +292,16 @@ class Share implements IShare {
 	 */
 	public function setMode($path, $mode) {
 		$modeString = '';
-		if ($mode & FileInfo::MODE_READONLY) {
-			$modeString .= 'r';
-		}
-		if ($mode & FileInfo::MODE_HIDDEN) {
-			$modeString .= 'h';
-		}
-		if ($mode & FileInfo::MODE_ARCHIVE) {
-			$modeString .= 'a';
-		}
-		if ($mode & FileInfo::MODE_SYSTEM) {
-			$modeString .= 's';
+		$modeMap = array(
+			FileInfo::MODE_READONLY => 'r',
+			FileInfo::MODE_HIDDEN => 'h',
+			FileInfo::MODE_ARCHIVE => 'a',
+			FileInfo::MODE_SYSTEM => 's'
+		);
+		foreach ($modeMap as $modeByte => $string) {
+			if ($mode & $modeByte) {
+				$modeString .= $string;
+			}
 		}
 		$path = $this->escapePath($path);
 
@@ -345,27 +314,6 @@ class Share implements IShare {
 		$cmd = 'setmode ' . $path . ' ' . $modeString;
 		$output = $this->execute($cmd);
 		return $this->parseOutput($output);
-	}
-
-	/**
-	 * @param string $mode
-	 * @return string
-	 */
-	protected function parseMode($mode) {
-		$result = 0;
-		$modeStrings = array(
-			'R' => FileInfo::MODE_READONLY,
-			'H' => FileInfo::MODE_HIDDEN,
-			'S' => FileInfo::MODE_SYSTEM,
-			'D' => FileInfo::MODE_DIRECTORY,
-			'A' => FileInfo::MODE_ARCHIVE
-		);
-		foreach ($modeStrings as $char => $val) {
-			if (strpos($mode, $char) !== false) {
-				$result |= $val;
-			}
-		}
-		return $result;
 	}
 
 	/**
@@ -393,37 +341,7 @@ class Share implements IShare {
 	 * @return bool
 	 */
 	protected function parseOutput($lines) {
-		if (count($lines) === 0) {
-			return true;
-		} else {
-			if (strpos($lines[0], 'does not exist')) {
-				throw new NotFoundException();
-			}
-			$parts = explode(' ', $lines[0]);
-			$error = false;
-			foreach ($parts as $part) {
-				if (substr($part, 0, 9) === 'NT_STATUS') {
-					$error = $part;
-				}
-			}
-			switch ($error) {
-				case ErrorCodes::PathNotFound:
-				case ErrorCodes::ObjectNotFound:
-				case ErrorCodes::NoSuchFile:
-					throw new NotFoundException();
-				case ErrorCodes::NameCollision:
-					throw new AlreadyExistsException();
-				case ErrorCodes::AccessDenied:
-					throw new AccessDeniedException();
-				case ErrorCodes::DirectoryNotEmpty:
-					throw new NotEmptyException();
-				case ErrorCodes::FileIsADirectory:
-				case ErrorCodes::NotADirectory:
-					throw new InvalidTypeException();
-				default:
-					throw new Exception();
-			}
-		}
+		$this->parser->checkForError($lines);
 	}
 
 	/**
