@@ -248,10 +248,6 @@ class NativeShare implements IShare {
 		$this->connect();
 
 		$result = $this->state->getxattr($this->buildUrl($path), $attribute);
-		// parse hex string
-		if ($attribute === 'system.dos_attr.mode') {
-			$result = hexdec(substr($result, 2));
-		}
 		return $result;
 	}
 
