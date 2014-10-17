@@ -83,7 +83,7 @@ class Share implements IShare {
 		$path = $this->escapePath($path);
 		$cmd = $command . ' ' . $path;
 		$output = $this->execute($cmd);
-		return $this->parseOutput($output);
+		return $this->parseOutput($output, $path);
 	}
 
 	/**
@@ -99,7 +99,7 @@ class Share implements IShare {
 		$escapedPath = $this->escapePath($path);
 		$output = $this->execute('cd ' . $escapedPath);
 		//check output for errors
-		$this->parseOutput($output);
+		$this->parseOutput($output, $path);
 		$output = $this->execute('dir');
 		$this->execute('cd /');
 
@@ -114,7 +114,7 @@ class Share implements IShare {
 		$escapedPath = $this->escapePath($path);
 		$output = $this->execute('allinfo ' . $escapedPath);
 		if (count($output) < 3) {
-			$this->parseOutput($output);
+			$this->parseOutput($output, $path);
 		}
 		$stat = $this->parser->parseStat($output);
 		return new FileInfo($path, basename($path), $stat['size'], $stat['mtime'], $stat['mode']);
@@ -167,7 +167,7 @@ class Share implements IShare {
 			} catch (NotFoundException $e2) {
 				throw $e;
 			} catch (\Exception $e2) {
-				throw new InvalidTypeException();
+				throw new InvalidTypeException($path);
 			}
 			throw $e;
 		}
@@ -188,7 +188,7 @@ class Share implements IShare {
 		$path2 = $this->escapePath($to);
 		$cmd = 'rename ' . $path1 . ' ' . $path2;
 		$output = $this->execute($cmd);
-		return $this->parseOutput($output);
+		return $this->parseOutput($output, $to);
 	}
 
 	/**
@@ -205,7 +205,7 @@ class Share implements IShare {
 		$path1 = $this->escapeLocalPath($source); //first path is local, needs different escaping
 		$path2 = $this->escapePath($target);
 		$output = $this->execute('put ' . $path1 . ' ' . $path2);
-		return $this->parseOutput($output);
+		return $this->parseOutput($output, $target);
 	}
 
 	/**
@@ -222,7 +222,7 @@ class Share implements IShare {
 		$path1 = $this->escapePath($source);
 		$path2 = $this->escapeLocalPath($target); //second path is local, needs different escaping
 		$output = $this->execute('get ' . $path1 . ' ' . $path2);
-		return $this->parseOutput($output);
+		return $this->parseOutput($output, $source);
 	}
 
 	/**
@@ -308,12 +308,12 @@ class Share implements IShare {
 		// first reset the mode to normal
 		$cmd = 'setmode ' . $path . ' -rsha';
 		$output = $this->execute($cmd);
-		$this->parseOutput($output);
+		$this->parseOutput($output, $path);
 
 		// then set the modes we want
 		$cmd = 'setmode ' . $path . ' ' . $modeString;
 		$output = $this->execute($cmd);
-		return $this->parseOutput($output);
+		return $this->parseOutput($output, $path);
 	}
 
 	/**
@@ -330,7 +330,8 @@ class Share implements IShare {
 	/**
 	 * check output for errors
 	 *
-	 * @param $lines
+	 * @param string[] $lines
+	 * @param string $path
 	 *
 	 * @throws NotFoundException
 	 * @throws \Icewind\SMB\Exception\AlreadyExistsException
@@ -340,8 +341,8 @@ class Share implements IShare {
 	 * @throws \Icewind\SMB\Exception\Exception
 	 * @return bool
 	 */
-	protected function parseOutput($lines) {
-		$this->parser->checkForError($lines);
+	protected function parseOutput($lines, $path = '') {
+		$this->parser->checkForError($lines, $path);
 	}
 
 	/**

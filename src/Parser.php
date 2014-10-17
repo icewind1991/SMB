@@ -27,12 +27,12 @@ class Parser {
 		$this->timeZone = $timeZone;
 	}
 
-	public function checkForError($output) {
+	public function checkForError($output, $path) {
 		if (count($output) === 0) {
 			return true;
 		} else {
 			if (strpos($output[0], 'does not exist')) {
-				throw new NotFoundException();
+				throw new NotFoundException($path);
 			}
 			$parts = explode(' ', $output[0]);
 			$error = false;
@@ -45,18 +45,22 @@ class Parser {
 				case ErrorCodes::PathNotFound:
 				case ErrorCodes::ObjectNotFound:
 				case ErrorCodes::NoSuchFile:
-					throw new NotFoundException();
+					throw new NotFoundException($path);
 				case ErrorCodes::NameCollision:
-					throw new AlreadyExistsException();
+					throw new AlreadyExistsException($path);
 				case ErrorCodes::AccessDenied:
-					throw new AccessDeniedException();
+					throw new AccessDeniedException($path);
 				case ErrorCodes::DirectoryNotEmpty:
-					throw new NotEmptyException();
+					throw new NotEmptyException($path);
 				case ErrorCodes::FileIsADirectory:
 				case ErrorCodes::NotADirectory:
-					throw new InvalidTypeException();
+					throw new InvalidTypeException($path);
 				default:
-					throw new Exception();
+					$message = 'Unknown error (' . $error . ')';
+					if ($path) {
+						$message .= ' for ' . $path;
+					}
+					throw new Exception($message);
 			}
 		}
 	}
