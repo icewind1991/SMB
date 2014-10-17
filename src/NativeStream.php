@@ -88,7 +88,7 @@ class NativeStream implements File {
 	}
 
 	public function stream_tell() {
-		return $this->stream_seek(0, SEEK_CUR);
+		return $this->state->lseek($this->handle, 0, SEEK_CUR);
 	}
 
 	public function stream_write($data) {
