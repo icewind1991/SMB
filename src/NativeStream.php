@@ -80,7 +80,7 @@ class NativeStream implements File {
 
 	public function stream_seek($offset, $whence = SEEK_SET) {
 		$this->eof = false;
-		return $this->state->lseek($this->handle, $offset, $whence);
+		return $this->state->lseek($this->handle, $offset, $whence) !== false;
 	}
 
 	public function stream_stat() {

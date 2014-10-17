@@ -233,7 +233,7 @@ class NativeState {
 	 * @param resource $file
 	 * @param int $offset
 	 * @param int $whence SEEK_SET | SEEK_CUR | SEEK_END
-	 * @return int
+	 * @return int | bool new file offset as measured from the start of the file on success, false on failure.
 	 */
 	public function lseek($file, $offset, $whence = SEEK_SET) {
 		$result = @smbclient_lseek($this->state, $file, $offset, $whence);
