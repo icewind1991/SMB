@@ -466,4 +466,36 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($info->isSystem());
 		$this->assertFalse($info->isHidden());
 	}
+
+	public function pathProvider() {
+		// / ? < > \ : * | " are illegal characters in path on windows
+		return array(
+			array('dir/sub/foo.txt'),
+			array('bar.txt'),
+			array("single'quote'/sub/foo.txt"),
+			array('日本語/url %2F +encode/asd.txt'),
+			array('a somewhat longer folder than the other with more charaters as the all the other filenames/' .
+				'followed by a somewhat long file name after that.txt')
+		);
+	}
+
+	/**
+	 * @dataProvider pathProvider
+	 */
+	public function testSubDirs($path) {
+		$dirs = explode('/', $path);
+		$name = array_pop($dirs);
+		$fullPath = '';
+		foreach ($dirs as $dir) {
+			$fullPath .= '/' . $dir;
+			$this->share->mkdir($this->root . $fullPath);
+		}
+		$txtFile = $this->getTextFile();
+		$size = filesize($txtFile);
+		$this->share->put($txtFile, $this->root . $fullPath . '/' . $name);
+		unlink($txtFile);
+		$info = $this->share->stat($this->root . $fullPath . '/' . $name);
+		$this->assertEquals($size, $info->getSize());
+		$this->assertFalse($info->isHidden());
+	}
 }
