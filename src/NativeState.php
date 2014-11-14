@@ -34,6 +34,7 @@ class NativeState {
 			case 0;
 				return;
 			case 1:
+            case 13:
 				throw new ForbiddenException($path, $error);
 			case 2:
 				throw new NotFoundException($path, $error);
