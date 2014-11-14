@@ -28,10 +28,15 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 	protected $config;
 
 	public function tearDown() {
-		if ($this->share) {
-			$this->cleanDir($this->root);
+		try {
+			if ($this->share) {
+				$this->cleanDir($this->root);
+			}
+			unset($this->share);
+		} catch (\Exception $e) {
+			unset($this->share);
+			throw $e;
 		}
-		unset($this->share);
 	}
 
 	public function nameProvider() {
@@ -474,8 +479,10 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 			array('bar.txt'),
 			array("single'quote'/sub/foo.txt"),
 			array('日本語/url %2F +encode/asd.txt'),
-			array('a somewhat longer folder than the other with more charaters as the all the other filenames/' .
-				'followed by a somewhat long file name after that.txt')
+			array(
+				'a somewhat longer folder than the other with more charaters as the all the other filenames/' .
+				'followed by a somewhat long file name after that.txt'
+			)
 		);
 	}
 
