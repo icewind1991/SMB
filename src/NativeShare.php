@@ -44,9 +44,12 @@ class NativeShare implements IShare {
 		}
 
 		$user = $this->server->getUser();
-		$workgroup = null;
 		if (strpos($user, '/')) {
-			list($workgroup, $user) = explode($user, '/');
+			list($workgroup, $user) = explode('/', $user);
+		} elseif (strpos($user, '\\')) {
+			list($workgroup, $user) = explode('\\', $user);
+		} else {
+			$workgroup = null;
 		}
 		$this->state->init($workgroup, $user, $this->server->getPassword());
 	}
