@@ -505,4 +505,30 @@ abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($size, $info->getSize());
 		$this->assertFalse($info->isHidden());
 	}
+
+	public function testDelAfterStat() {
+		$name = 'foo.txt';
+		$txtFile = $this->getTextFile();
+
+		$this->share->put($txtFile, $this->root . '/' . $name);
+		unlink($txtFile);
+
+		$this->share->stat($this->root . '/' . $name);
+		$this->share->del($this->root . '/foo.txt');
+	}
+
+	/**
+	 * @param $name
+	 * @dataProvider nameProvider
+	 */
+	public function testDirPaths($name) {
+		$txtFile = $this->getTextFile();
+		$this->share->mkdir($this->root . '/' . $name);
+		$this->share->put($txtFile, $this->root . '/' . $name . '/' . $name);
+		unlink($txtFile);
+
+		$content = $this->share->dir($this->root . '/' . $name);
+		$this->assertCount(1, $content);
+		$this->assertEquals($name, $content[0]->getName());
+	}
 }
