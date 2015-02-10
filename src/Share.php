@@ -11,6 +11,7 @@ use Icewind\SMB\Exception\AccessDeniedException;
 use Icewind\SMB\Exception\AlreadyExistsException;
 use Icewind\SMB\Exception\ConnectionException;
 use Icewind\SMB\Exception\Exception;
+use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\InvalidTypeException;
 use Icewind\SMB\Exception\NotEmptyException;
 use Icewind\SMB\Exception\NotFoundException;
@@ -64,6 +65,14 @@ class Share implements IShare {
 			$this->name
 		);
 		$this->connection = new Connection($command);
+		$this->connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
+		if (!$this->connection->isValid()) {
+			throw new ConnectionException();
+		}
+	}
+
+	protected function reconnect() {
+		$this->connection->reconnect();
 		$this->connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		if (!$this->connection->isValid()) {
 			throw new ConnectionException();
@@ -150,12 +159,13 @@ class Share implements IShare {
 	 * Delete a file on the share
 	 *
 	 * @param string $path
+	 * @param bool $secondTry
 	 * @return bool
-	 *
-	 * @throws \Icewind\SMB\Exception\NotFoundException
-	 * @throws \Icewind\SMB\Exception\InvalidTypeException
+	 * @throws InvalidTypeException
+	 * @throws NotFoundException
+	 * @throws \Exception
 	 */
-	public function del($path) {
+	public function del($path, $secondTry = false) {
 		//del return a file not found error when trying to delete a folder
 		//we catch it so we can check if $path doesn't exist or is of invalid type
 		try {
@@ -170,6 +180,12 @@ class Share implements IShare {
 				throw new InvalidTypeException($path);
 			}
 			throw $e;
+		} catch (FileInUseException $e) {
+			if ($secondTry) {
+				throw $e;
+			}
+			$this->reconnect();
+			return $this->del($path, true);
 		}
 	}
 

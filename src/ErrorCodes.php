@@ -24,4 +24,5 @@ class ErrorCodes {
 	const DirectoryNotEmpty = 'NT_STATUS_DIRECTORY_NOT_EMPTY';
 	const FileIsADirectory = 'NT_STATUS_FILE_IS_A_DIRECTORY';
 	const NotADirectory = 'NT_STATUS_NOT_A_DIRECTORY';
+	const SharingViolation = 'NT_STATUS_SHARING_VIOLATION';
 }

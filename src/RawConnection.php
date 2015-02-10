@@ -11,6 +11,16 @@ use Icewind\SMB\Exception\ConnectionException;
 
 class RawConnection {
 	/**
+	 * @var string
+	 */
+	private $command;
+
+	/**
+	 * @var string[]
+	 */
+	private $env;
+
+	/**
 	 * @var resource[] $pipes
 	 *
 	 * $pipes[0] holds STDIN for smbclient
@@ -24,6 +34,12 @@ class RawConnection {
 	private $process;
 
 	public function __construct($command, $env = array()) {
+		$this->command = $command;
+		$this->env = $env;
+		$this->connect();
+	}
+
+	private function connect() {
 		$descriptorSpec = array(
 			0 => array('pipe', 'r'), // child reads from stdin
 			1 => array('pipe', 'w'), // child writes to stdout
@@ -33,13 +49,13 @@ class RawConnection {
 			5 => array('pipe', 'w')  // child writes to fd#5
 		);
 		setlocale(LC_ALL, Server::LOCALE);
-		$env = array_merge($env, array(
+		$env = array_merge($this->env, array(
 			'CLI_FORCE_INTERACTIVE' => 'y', // Needed or the prompt isn't displayed!!
 			'LC_ALL' => Server::LOCALE,
 			'LANG' => Server::LOCALE,
 			'COLUMNS' => 8192 // prevent smbclient from line-wrapping it's output
 		));
-		$this->process = proc_open($command, $descriptorSpec, $this->pipes, '/', $env);
+		$this->process = proc_open($this->command, $descriptorSpec, $this->pipes, '/', $env);
 		if (!$this->isValid()) {
 			throw new ConnectionException();
 		}
@@ -136,6 +152,11 @@ class RawConnection {
 			proc_terminate($this->process);
 		}
 		proc_close($this->process);
+	}
+
+	public function reconnect() {
+		$this->close();
+		$this->connect();
 	}
 
 	public function __destruct() {

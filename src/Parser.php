@@ -10,6 +10,7 @@ namespace Icewind\SMB;
 use Icewind\SMB\Exception\AccessDeniedException;
 use Icewind\SMB\Exception\AlreadyExistsException;
 use Icewind\SMB\Exception\Exception;
+use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\InvalidTypeException;
 use Icewind\SMB\Exception\NotEmptyException;
 use Icewind\SMB\Exception\NotFoundException;
@@ -55,6 +56,8 @@ class Parser {
 				case ErrorCodes::FileIsADirectory:
 				case ErrorCodes::NotADirectory:
 					throw new InvalidTypeException($path);
+				case ErrorCodes::SharingViolation:
+					throw new FileInUseException($path);
 				default:
 					$message = 'Unknown error (' . $error . ')';
 					if ($path) {
