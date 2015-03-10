@@ -149,6 +149,14 @@ class RawConnection {
 			return;
 		}
 		if ($terminate) {
+			$status = proc_get_status($this->process);
+			$ppid = $status['pid'];
+			$pids = preg_split('/\s+/', `ps -o pid --no-heading --ppid $ppid`);
+			foreach($pids as $pid) {
+				if(is_numeric($pid)) {
+					posix_kill($pid, 9); //9 is the SIGKILL signal
+				}
+			}
 			proc_terminate($this->process);
 		}
 		proc_close($this->process);
