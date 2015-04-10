@@ -149,15 +149,17 @@ class RawConnection {
 			return;
 		}
 		if ($terminate) {
-			// if for case that posix_ functions are not available
-			if (function_exists('posix_kill')) {
-				$status = proc_get_status($this->process);
-				$ppid = $status['pid'];
-				$pids = preg_split('/\s+/', `ps -o pid --no-heading --ppid $ppid`);
-				foreach($pids as $pid) {
-					if(is_numeric($pid)) {
+			$status = proc_get_status($this->process);
+			$ppid = $status['pid'];
+			$pids = preg_split('/\s+/', `ps -o pid --no-heading --ppid $ppid`);
+			foreach($pids as $pid) {
+				if(is_numeric($pid)) {
+					// try for case that posix_ functions are not available
+					try {
 						//9 is the SIGKILL signal
 						posix_kill($pid, 9);
+					} catch (\Exception $e) {
+						throw $e;
 					}
 				}
 			}
