@@ -7,7 +7,7 @@
 
 namespace Icewind\SMB\Test;
 
-class Server extends \PHPUnit_Framework_TestCase {
+class Server extends TestCase {
 	/**
 	 * @var \Icewind\SMB\Server $server
 	 */
@@ -16,6 +16,7 @@ class Server extends \PHPUnit_Framework_TestCase {
 	private $config;
 
 	public function setUp() {
+		$this->requireBackendEnv('smbclient');
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
 		$this->server = new \Icewind\SMB\Server($this->config->host, $this->config->user, $this->config->password);
 	}

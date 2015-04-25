@@ -9,7 +9,7 @@ namespace Icewind\SMB\Test;
 
 use Icewind\SMB\FileInfo;
 
-abstract class AbstractShare extends \PHPUnit_Framework_TestCase {
+abstract class AbstractShare extends TestCase {
 	/**
 	 * @var \Icewind\SMB\Server $server
 	 */

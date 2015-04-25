@@ -11,6 +11,7 @@ use Icewind\SMB\Server as NormalServer;
 
 class Share extends AbstractShare {
 	public function setUp() {
+		$this->requireBackendEnv('smbclient');
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
 		$this->server = new NormalServer($this->config->host, $this->config->user, $this->config->password);
 		$this->share = $this->server->getShare($this->config->share);
