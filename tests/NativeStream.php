@@ -9,7 +9,7 @@ namespace Icewind\SMB\Test;
 
 use Icewind\SMB\NativeServer;
 
-class NativeStream extends \PHPUnit_Framework_TestCase {
+class NativeStream extends TestCase {
 	/**
 	 * @var \Icewind\SMB\Server $server
 	 */
@@ -28,6 +28,7 @@ class NativeStream extends \PHPUnit_Framework_TestCase {
 	protected $config;
 
 	public function setUp() {
+		$this->requireBackendEnv('libsmbclient');
 		if (!function_exists('smbclient_state_new')) {
 			$this->markTestSkipped('libsmbclient php extension not installed');
 		}

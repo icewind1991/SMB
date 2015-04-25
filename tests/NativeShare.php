@@ -11,6 +11,7 @@ use Icewind\SMB\NativeServer;
 
 class NativeShare extends AbstractShare {
 	public function setUp() {
+		$this->requireBackendEnv('libsmbclient');
 		if (!function_exists('smbclient_state_new')) {
 			$this->markTestSkipped('libsmbclient php extension not installed');
 		}
