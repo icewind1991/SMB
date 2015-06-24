@@ -149,6 +149,7 @@ class NativeShare implements IShare {
 	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function del($path) {
+		$this->connect();
 		return $this->state->unlink($this->buildUrl($path));
 	}
 
