@@ -27,7 +27,7 @@ class NativeServer extends Server {
 		$user = $this->getUser();
 		$workgroup = null;
 		if (strpos($user, '/')) {
-			list($workgroup, $user) = explode($user, '/');
+			list($workgroup, $user) = explode('/', $user);
 		}
 		$this->state->init($workgroup, $user, $this->getPassword());
 	}
