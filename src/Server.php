@@ -78,12 +78,12 @@ class Server {
 	}
 
 	/**
-	 * @return \Icewind\SMB\IShare[]
+	 * @return array
 	 *
 	 * @throws \Icewind\SMB\Exception\AuthenticationException
 	 * @throws \Icewind\SMB\Exception\InvalidHostException
 	 */
-	public function listShares() {
+	private function listSMB() {
 		$command = Server::CLIENT . ' --authentication-file=/proc/self/fd/3' .
 			' -gL ' . escapeshellarg($this->getHost());
 		$connection = new RawConnection($command);
@@ -106,6 +106,16 @@ class Server {
 			throw new InvalidHostException();
 		}
 
+		return $output;
+	}
+
+	/**
+	 * @return \Icewind\SMB\IShare[]
+	 *
+	 */
+	public function listShares() {
+		$output = $this->listSMB();
+
 		$shareNames = array();
 		foreach ($output as $line) {
 			if (strpos($line, '|')) {
@@ -121,6 +131,26 @@ class Server {
 			$shares[] = $this->getShare($name);
 		}
 		return $shares;
+	}
+
+	/**
+	 * @return array
+	 *
+	 */
+	public function listPrinters() {
+		$output = $this->listSMB();
+
+		$printers = array();
+		foreach ($output as $line) {
+			if (strpos($line, '|')) {
+				list($type, $name, $description) = explode('|', $line);
+				if (strtolower($type) === 'printer') {
+					$printers[$name] = $description;
+				}
+			}
+		}
+
+		return $printers;
 	}
 
 	/**
