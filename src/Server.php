@@ -110,21 +110,34 @@ class Server {
 	}
 
 	/**
+	 * Filters the raw output
+	 *
+	 * @param  string $filter
+	 * @return array
+	 */
+	private function filterRawOutput($rawOutput, $filter) {
+		$filtered = array();
+
+		foreach ($rawOutput as $line) {
+			if (strpos($line, '|')) {
+				list($type, $name, $description) = explode('|', $line);
+				if (strtolower($type) === $filter) {
+					$filtered[$name] = $description;
+				}
+			}
+		}
+
+		return $filtered;
+	}
+
+	/**
 	 * @return \Icewind\SMB\IShare[]
 	 *
 	 */
 	public function listShares() {
 		$output = $this->listSMB();
 
-		$shareNames = array();
-		foreach ($output as $line) {
-			if (strpos($line, '|')) {
-				list($type, $name, $description) = explode('|', $line);
-				if (strtolower($type) === 'disk') {
-					$shareNames[$name] = $description;
-				}
-			}
-		}
+		$shareNames = $this->filterRawOutput($output, 'disk');
 
 		$shares = array();
 		foreach ($shareNames as $name => $description) {
@@ -140,17 +153,7 @@ class Server {
 	public function listPrinters() {
 		$output = $this->listSMB();
 
-		$printers = array();
-		foreach ($output as $line) {
-			if (strpos($line, '|')) {
-				list($type, $name, $description) = explode('|', $line);
-				if (strtolower($type) === 'printer') {
-					$printers[$name] = $description;
-				}
-			}
-		}
-
-		return $printers;
+		return $this->filterRawOutput($output, 'printer');
 	}
 
 	/**
