@@ -45,6 +45,7 @@ abstract class AbstractShare extends TestCase {
 			array('simple'),
 			array('with spaces_and-underscores'),
 			array("single'quote'"),
+			array("foo ; asd -- bar"),
 			array('日本語'),
 			array('url %2F +encode'),
 			array('a somewhat longer filename than the other with more charaters as the all the other filenames'),

@@ -258,20 +258,19 @@ class Share implements IShare {
 	 */
 	public function read($source) {
 		$source = $this->escapePath($source);
-		// close the single quote, open a double quote where we put the single quote...
-		$source = str_replace('\'', '\'"\'"\'', $source);
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
 		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('%s %s --authentication-file=/proc/self/fd/3 //%s/%s -c \'get %s /proc/self/fd/5\'',
+		$command = sprintf('%s %s --authentication-file=/proc/self/fd/3 //%s/%s',
 			Server::CLIENT,
 			$workgroupArgument,
 			$this->server->getHost(),
-			$this->name,
-			$source
+			$this->name
 		);
 		$connection = new Connection($command);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
+		$connection->write('get ' . $source . ' /proc/self/fd/5');
+		$connection->write('exit');
 		$fh = $connection->getFileOutputStream();
 		stream_context_set_option($fh, 'file', 'connection', $connection);
 		return $fh;
@@ -288,25 +287,25 @@ class Share implements IShare {
 	 */
 	public function write($target) {
 		$target = $this->escapePath($target);
-		// close the single quote, open a double quote where we put the single quote...
-		$target = str_replace('\'', '\'"\'"\'', $target);
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
 		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('%s %s --authentication-file=/proc/self/fd/3 //%s/%s -c \'put /proc/self/fd/4 %s\'',
+		$command = sprintf('%s %s --authentication-file=/proc/self/fd/3 //%s/%s',
 			Server::CLIENT,
 			$workgroupArgument,
 			$this->server->getHost(),
-			$this->name,
-			$target
+			$this->name
 		);
-		$connection = new RawConnection($command);
+		$connection = new Connection($command);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		$fh = $connection->getFileInputStream();
 
+		$connection->write('put /proc/self/fd/4 ' . $target);
+		$connection->write('exit');
+
 		// use a close callback to ensure the upload is finished before continuing
 		// this also serves as a way to keep the connection in scope
-		return CallbackWrapper::wrap($fh, null, null, function () use ($connection) {
+		return CallbackWrapper::wrap($fh, null, null, function () use ($connection, $target) {
 			$connection->close(false); // dont terminate, give the upload some time
 		});
 	}
