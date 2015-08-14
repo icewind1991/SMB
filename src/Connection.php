@@ -28,12 +28,16 @@ class Connection extends RawConnection {
 	/**
 	 * get all unprocessed output from smbclient until the next prompt
 	 *
-	 * @throws ConnectionException
 	 * @return string
+	 * @throws AuthenticationException
+	 * @throws ConnectException
+	 * @throws ConnectionException
+	 * @throws InvalidHostException
+	 * @throws NoLoginServerException
 	 */
 	public function read() {
 		if (!$this->isValid()) {
-			throw new ConnectionException('Connection not valied');
+			throw new ConnectionException('Connection not valid');
 		}
 		$line = $this->readLine(); //first line is prompt
 		$this->checkConnectionError($line);
