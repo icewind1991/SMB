@@ -58,11 +58,10 @@ class Share implements IShare {
 			return;
 		}
 		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('%s %s --authentication-file=/proc/self/fd/3 //%s/%s',
+		$command = sprintf('%s %s --authentication-file=/proc/self/fd/3 %s',
 			Server::CLIENT,
 			$workgroupArgument,
-			$this->server->getHost(),
-			$this->name
+			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
 		);
 		$this->connection = new Connection($command);
 		$this->connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
@@ -261,11 +260,10 @@ class Share implements IShare {
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
 		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('%s %s --authentication-file=/proc/self/fd/3 //%s/%s',
+		$command = sprintf('%s %s --authentication-file=/proc/self/fd/3 %s',
 			Server::CLIENT,
 			$workgroupArgument,
-			$this->server->getHost(),
-			$this->name
+			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
 		);
 		$connection = new Connection($command);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
@@ -290,11 +288,10 @@ class Share implements IShare {
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
 		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('%s %s --authentication-file=/proc/self/fd/3 //%s/%s',
+		$command = sprintf('%s %s --authentication-file=/proc/self/fd/3 %s',
 			Server::CLIENT,
 			$workgroupArgument,
-			$this->server->getHost(),
-			$this->name
+			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
 		);
 		$connection = new Connection($command);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());

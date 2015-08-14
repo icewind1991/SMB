@@ -55,4 +55,13 @@ class Server extends TestCase {
 		$server = new \Icewind\SMB\Server(uniqid(), $this->config->user, $this->config->password);
 		$server->listShares();
 	}
+
+
+	/**
+	 * @expectedException \Icewind\SMB\Exception\InvalidHostException
+	 */
+	public function testHostEscape() {
+		$server = new \Icewind\SMB\Server($this->config->host . ';asd', $this->config->user, $this->config->password);
+		$server->listShares();
+	}
 }

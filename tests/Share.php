@@ -22,4 +22,15 @@ class Share extends AbstractShare {
 		}
 		$this->share->mkdir($this->root);
 	}
+
+	/**
+	 * @expectedException \Icewind\SMB\Exception\InvalidHostException
+	 */
+	public function testHostEscape() {
+		$this->requireBackendEnv('smbclient');
+		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
+		$this->server = new NormalServer($this->config->host . ';asd', $this->config->user, $this->config->password);
+		$share = $this->server->getShare($this->config->share);
+		$share->dir($this->root);
+	}
 }
