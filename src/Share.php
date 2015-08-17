@@ -7,17 +7,13 @@
 
 namespace Icewind\SMB;
 
-use Icewind\SMB\Exception\AccessDeniedException;
-use Icewind\SMB\Exception\AlreadyExistsException;
 use Icewind\SMB\Exception\ConnectionException;
-use Icewind\SMB\Exception\Exception;
 use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\InvalidTypeException;
-use Icewind\SMB\Exception\NotEmptyException;
 use Icewind\SMB\Exception\NotFoundException;
 use Icewind\Streams\CallbackWrapper;
 
-class Share implements IShare {
+class Share extends AbstractShare {
 	/**
 	 * @var Server $server
 	 */
@@ -43,6 +39,7 @@ class Share implements IShare {
 	 * @param string $name
 	 */
 	public function __construct($server, $name) {
+		parent::__construct();
 		$this->server = $server;
 		$this->name = $name;
 		$this->parser = new Parser(new TimeZoneProvider($this->server->getHost()));
@@ -380,6 +377,7 @@ class Share implements IShare {
 	 * @return string
 	 */
 	protected function escapePath($path) {
+		$this->verifyPath($path);
 		if ($path === '/') {
 			$path = '';
 		}

@@ -7,6 +7,7 @@
 
 namespace Icewind\SMB\Test;
 
+use Icewind\SMB\Exception\InvalidPathException;
 use Icewind\SMB\FileInfo;
 
 abstract class AbstractShare extends TestCase {
@@ -40,7 +41,6 @@ abstract class AbstractShare extends TestCase {
 	}
 
 	public function nameProvider() {
-		// / ? < > \ : * | " are illegal characters in path on windows
 		return array(
 			array('simple'),
 			array('with spaces_and-underscores'),
@@ -50,6 +50,20 @@ abstract class AbstractShare extends TestCase {
 			array('url %2F +encode'),
 			array('a somewhat longer filename than the other with more charaters as the all the other filenames'),
 			array('$as#d€££Ö€ßœĚęĘĞĜΣΥΦΩΫ')
+		);
+	}
+
+	public function invalidPathProvider() {
+		// / ? < > \ : * | " are illegal characters in path on windows
+		return array(
+			array("new\nline"),
+			array('null' . chr(0) . 'byte'),
+			array('foo?bar'),
+			array('foo<bar>'),
+			array('foo:bar'),
+			array('foo*bar'),
+			array('foo|bar'),
+			array('foo"bar"')
 		);
 	}
 
@@ -119,6 +133,18 @@ abstract class AbstractShare extends TestCase {
 	}
 
 	/**
+	 * @dataProvider invalidPathProvider
+	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
+	 */
+	public function testMkdirInvalidPath($name) {
+		$this->share->mkdir($this->root . '/' . $name);
+		$dirs = $this->share->dir($this->root);
+		$this->assertCount(1, $dirs);
+		$this->assertEquals($name, $dirs[0]->getName());
+		$this->assertTrue($dirs[0]->isDirectory());
+	}
+
+	/**
 	 * @dataProvider nameProvider
 	 */
 	public function testRenameDirectory($name) {
@@ -153,6 +179,22 @@ abstract class AbstractShare extends TestCase {
 		$this->assertEquals($name, $files[0]->getName());
 		$this->assertEquals($size, $files[0]->getSize());
 		$this->assertFalse($files[0]->isDirectory());
+	}
+
+	/**
+	 * @dataProvider invalidPathProvider
+	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
+	 */
+	public function testPutInvalidPath($name) {
+		$tmpFile = $this->getTextFile('foo');
+
+		try {
+			$this->share->put($tmpFile, $this->root . '/' . $name);
+		} catch (InvalidPathException $e) {
+			unlink($tmpFile);
+			throw $e;
+		}
+		unlink($tmpFile);
 	}
 
 	/**
@@ -254,6 +296,14 @@ abstract class AbstractShare extends TestCase {
 	}
 
 	/**
+	 * @dataProvider invalidPathProvider
+	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
+	 */
+	public function testDownloadInvalidPath($name) {
+		$this->share->get($name, '');
+	}
+
+	/**
 	 * @expectedException \Icewind\SMB\Exception\NotFoundException
 	 */
 	public function testDownloadNonExistingFile() {
@@ -279,6 +329,14 @@ abstract class AbstractShare extends TestCase {
 	}
 
 	/**
+	 * @dataProvider invalidPathProvider
+	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
+	 */
+	public function testDelInvalidPath($name) {
+		$this->share->del($name);
+	}
+
+	/**
 	 * @expectedException \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function testRmdirFile() {
@@ -294,6 +352,14 @@ abstract class AbstractShare extends TestCase {
 		$this->share->mkdir($this->root . '/foobar');
 		$this->share->put($this->getTextFile(), $this->root . '/foobar/asd');
 		$this->share->rmdir($this->root . '/foobar');
+	}
+
+	/**
+	 * @dataProvider invalidPathProvider
+	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
+	 */
+	public function testRmDirInvalidPath($name) {
+		$this->share->rmdir($name);
 	}
 
 	/**
@@ -315,6 +381,14 @@ abstract class AbstractShare extends TestCase {
 	 */
 	public function testRenameNonExisting() {
 		$this->share->rename('/foobar/asd', '/foobar/bar');
+	}
+
+	/**
+	 * @dataProvider invalidPathProvider
+	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
+	 */
+	public function testRenameInvalidPath($name) {
+		$this->share->rename($name, $name . '_');
 	}
 
 	/**
@@ -351,6 +425,14 @@ abstract class AbstractShare extends TestCase {
 	}
 
 	/**
+	 * @dataProvider invalidPathProvider
+	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
+	 */
+	public function testReadStreamInvalidPath($name) {
+		$this->share->read($name);
+	}
+
+	/**
 	 * @dataProvider nameAndDataProvider
 	 */
 	public function testWriteStream($name, $text) {
@@ -363,6 +445,16 @@ abstract class AbstractShare extends TestCase {
 		$this->assertEquals($text, file_get_contents($tmpFile1));
 		$this->share->del($this->root . '/' . $name);
 		unlink($tmpFile1);
+	}
+
+	/**
+	 * @dataProvider invalidPathProvider
+	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
+	 */
+	public function testWriteStreamInvalidPath($name) {
+		$fh = $this->share->write($this->root . '/' . $name);
+		fwrite($fh, 'foo');
+		fclose($fh);
 	}
 
 	public function testDir() {
@@ -393,6 +485,14 @@ abstract class AbstractShare extends TestCase {
 	}
 
 	/**
+	 * @dataProvider invalidPathProvider
+	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
+	 */
+	public function testDirInvalidPath($name) {
+		$this->share->dir($name);
+	}
+
+	/**
 	 * @dataProvider nameProvider
 	 */
 	public function testStat($name) {
@@ -404,6 +504,14 @@ abstract class AbstractShare extends TestCase {
 
 		$info = $this->share->stat($this->root . '/' . $name);
 		$this->assertEquals($size, $info->getSize());
+	}
+
+	/**
+	 * @dataProvider invalidPathProvider
+	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
+	 */
+	public function testStatInvalidPath($name) {
+		$this->share->stat($name);
 	}
 
 	/**
