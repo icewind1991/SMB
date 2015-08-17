@@ -13,7 +13,7 @@ abstract class AbstractShare implements IShare {
 	private $forbiddenCharacters;
 
 	public function __construct() {
-		$this->forbiddenCharacters = array('?', '<', '>', ':', '*', '|', '"', chr(0), "\n");
+		$this->forbiddenCharacters = array('?', '<', '>', ':', '*', '|', '"', chr(0), "\n", "\r");
 	}
 
 	protected function verifyPath($path) {

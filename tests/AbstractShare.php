@@ -57,6 +57,7 @@ abstract class AbstractShare extends TestCase {
 		// / ? < > \ : * | " are illegal characters in path on windows
 		return array(
 			array("new\nline"),
+			array("\rreturn"),
 			array('null' . chr(0) . 'byte'),
 			array('foo?bar'),
 			array('foo<bar>'),
