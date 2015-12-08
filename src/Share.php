@@ -61,7 +61,7 @@ class Share extends AbstractShare {
 			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
 		);
 		$this->connection = new Connection($command);
-		$this->connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
+		$this->connection->writeAuthentication($this->server->getWorkgroup(), $this->server->getUser(), $this->server->getPassword());
 		if (!$this->connection->isValid()) {
 			throw new ConnectionException();
 		}
@@ -69,7 +69,7 @@ class Share extends AbstractShare {
 
 	protected function reconnect() {
 		$this->connection->reconnect();
-		$this->connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
+		$this->connection->writeAuthentication($this->server->getWorkgroup(), $this->server->getUser(), $this->server->getPassword());
 		if (!$this->connection->isValid()) {
 			throw new ConnectionException();
 		}
@@ -263,7 +263,7 @@ class Share extends AbstractShare {
 			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
 		);
 		$connection = new Connection($command);
-		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
+		$connection->writeAuthentication($this->server->getWorkgroup(), $this->server->getUser(), $this->server->getPassword());
 		$connection->write('get ' . $source . ' /proc/self/fd/5');
 		$connection->write('exit');
 		$fh = $connection->getFileOutputStream();
@@ -291,7 +291,7 @@ class Share extends AbstractShare {
 			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
 		);
 		$connection = new Connection($command);
-		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
+		$connection->writeAuthentication($this->server->getWorkgroup(), $this->server->getUser(), $this->server->getPassword());
 		$fh = $connection->getFileInputStream();
 
 		$connection->write('put /proc/self/fd/4 ' . $target);
