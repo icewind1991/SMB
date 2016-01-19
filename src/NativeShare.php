@@ -7,6 +7,7 @@
 
 namespace Icewind\SMB;
 
+use Icewind\SMB\Exception\InvalidPathException;
 use Icewind\SMB\Exception\InvalidResourceException;
 
 class NativeShare extends AbstractShare {
@@ -195,9 +196,13 @@ class NativeShare extends AbstractShare {
 	 *
 	 * @throws \Icewind\SMB\Exception\NotFoundException
 	 * @throws \Icewind\SMB\Exception\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\InvalidPathException
 	 * @throws \Icewind\SMB\Exception\InvalidResourceException
 	 */
 	public function get($source, $target) {
+		if (!$target) {
+			throw new InvalidPathException('Invalid target path: Filename cannot be empty');
+		}
 		$targetHandle = @fopen($target, 'wb');
 		if (!$targetHandle) {
 			$error = error_get_last();
