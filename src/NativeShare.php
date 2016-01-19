@@ -198,9 +198,15 @@ class NativeShare extends AbstractShare {
 	 * @throws \Icewind\SMB\Exception\InvalidResourceException
 	 */
 	public function get($source, $target) {
-		$targetHandle = fopen($target, 'wb');
+		$targetHandle = @fopen($target, 'wb');
 		if (!$targetHandle) {
-			throw new InvalidResourceException('Failed opening local file "' . $target . '" for writing');
+			$error = error_get_last();
+			if (is_array($error)) {
+				$reason = $error['message'];
+			} else {
+				$reason = 'Unknown error';
+			}
+			throw new InvalidResourceException('Failed opening local file "' . $target . '" for writing: ' . $reason);
 		}
 
 		$this->connect();
