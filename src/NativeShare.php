@@ -7,6 +7,8 @@
 
 namespace Icewind\SMB;
 
+use Icewind\SMB\Exception\InvalidResourceException;
+
 class NativeShare extends AbstractShare {
 	/**
 	 * @var Server $server
@@ -193,11 +195,20 @@ class NativeShare extends AbstractShare {
 	 *
 	 * @throws \Icewind\SMB\Exception\NotFoundException
 	 * @throws \Icewind\SMB\Exception\InvalidTypeException
+	 * @throws \Icewind\SMB\Exception\InvalidResourceException
 	 */
 	public function get($source, $target) {
+		$targetHandle = fopen($target, 'wb');
+		if (!$targetHandle) {
+			throw new InvalidResourceException('Failed opening local file "' . $target . '" for writing');
+		}
+
 		$this->connect();
 		$sourceHandle = $this->state->open($this->buildUrl($source), 'r');
-		$targetHandle = fopen($target, 'wb');
+		if (!$sourceHandle) {
+			fclose($targetHandle);
+			throw new InvalidResourceException('Failed opening remote file "' . $source . '" for reading');
+		}
 
 		while ($data = $this->state->read($sourceHandle, 4096)) {
 			fwrite($targetHandle, $data);

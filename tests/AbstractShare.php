@@ -231,6 +231,20 @@ abstract class AbstractShare extends TestCase {
 	}
 
 	/**
+	 * @expectedException \Icewind\SMB\Exception\InvalidResourceException
+	 */
+	public function testGetInvalidTarget() {
+		$name = 'test.txt';
+		$text = 'dummy';
+		$tmpFile = $this->getTextFile($text);
+
+		$this->share->put($tmpFile, $this->root . '/' . $name);
+		unlink($tmpFile);
+
+		$this->share->get($this->root . '/' . $name, '/non/existing/file');
+	}
+
+	/**
 	 * @dataProvider nameProvider
 	 */
 	public function testDel($name) {
