@@ -207,7 +207,7 @@ abstract class AbstractShare extends TestCase {
 		$this->share->put($tmpFile, $this->root . '/' . $name);
 		unlink($tmpFile);
 
-		$this->share->rename($this->root . '/' . $name, $this->root . '/' . $name . '_renamed');
+		$this->assertTrue($this->share->rename($this->root . '/' . $name, $this->root . '/' . $name . '_renamed'));
 
 		$files = $this->share->dir($this->root);
 		$this->assertEquals(1, count($files));
@@ -224,7 +224,7 @@ abstract class AbstractShare extends TestCase {
 		unlink($tmpFile);
 
 		$targetFile = tempnam('/tmp', 'smb_test_');
-		$this->share->get($this->root . '/' . $name, $targetFile);
+		$this->assertTrue($this->share->get($this->root . '/' . $name, $targetFile));
 
 		$this->assertEquals($text, file_get_contents($targetFile));
 		unlink($targetFile);
