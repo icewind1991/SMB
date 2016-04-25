@@ -61,7 +61,7 @@ class Share extends AbstractShare {
 			return;
 		}
 		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('%s %s --authentication-file=%s %s',
+		$command = sprintf('stdbuf -o0 %s %s --authentication-file=%s %s',
 			$this->system->getSmbclientPath(),
 			$workgroupArgument,
 			System::getFD(3),
