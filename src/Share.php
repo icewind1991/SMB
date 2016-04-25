@@ -345,6 +345,26 @@ class Share extends AbstractShare {
 	}
 
 	/**
+	 * @param string $path
+	 * @param callable $callback callable which will be called for each received change
+	 * @return mixed
+	 */
+	public function notify($path, callable $callback) {
+		$this->connect();
+		$command = 'notify ' . $this->escapePath($path);
+		$this->connection->write($command . PHP_EOL);
+		$this->connection->read(function ($line) use ($callback, $path) {
+			$code = (int)substr($line, 0, 4);
+			$subPath = substr($line, 5);
+			if ($path === '') {
+				$callback($code, $subPath);
+			} else {
+				$callback($code, $path . '/' . $subPath);
+			}
+		});
+	}
+
+	/**
 	 * @param string $command
 	 * @return array
 	 */
