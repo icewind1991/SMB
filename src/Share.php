@@ -357,9 +357,9 @@ class Share extends AbstractShare {
 			$code = (int)substr($line, 0, 4);
 			$subPath = substr($line, 5);
 			if ($path === '') {
-				$callback($code, $subPath);
+				return $callback($code, $subPath);
 			} else {
-				$callback($code, $path . '/' . $subPath);
+				return $callback($code, $path . '/' . $subPath);
 			}
 		});
 	}
