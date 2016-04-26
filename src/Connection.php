@@ -15,6 +15,7 @@ use Icewind\SMB\Exception\NoLoginServerException;
 
 class Connection extends RawConnection {
 	const DELIMITER = 'smb:';
+	const DELIMITER_LENGTH = 4;
 
 	/**
 	 * send input to smbclient
@@ -48,8 +49,7 @@ class Connection extends RawConnection {
 		if ($line === false) {
 			$this->unknownError($promptLine);
 		}
-		$length = mb_strlen(self::DELIMITER);
-		while (mb_substr($line, 0, $length) !== self::DELIMITER && $line !== false) { //next prompt functions as delimiter
+		while (!$this->isPrompt($line)) { //next prompt functions as delimiter
 			if (is_callable($callback)) {
 				$result = $callback($line);
 				if ($result === false) { // allow the callback to close the connection for infinite running commands
@@ -61,6 +61,16 @@ class Connection extends RawConnection {
 			$line = $this->readLine();
 		}
 		return $output;
+	}
+
+	/**
+	 * Check
+	 *
+	 * @param $line
+	 * @return bool
+	 */
+	private function isPrompt($line) {
+		return mb_substr($line, 0, self::DELIMITER_LENGTH) === self::DELIMITER || $line === false;
 	}
 
 	/**
