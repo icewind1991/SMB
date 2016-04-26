@@ -51,6 +51,22 @@ class Share extends AbstractShare {
 		$this->parser = new Parser(new TimeZoneProvider($this->server->getHost(), $this->system));
 	}
 
+	protected function getConnection() {
+		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
+		$command = sprintf('stdbuf -o0 %s %s --authentication-file=%s %s',
+			$this->system->getSmbclientPath(),
+			$workgroupArgument,
+			System::getFD(3),
+			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
+		);
+		$connection = new Connection($command);
+		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
+		if (!$connection->isValid()) {
+			throw new ConnectionException();
+		}
+		return $connection;
+	}
+
 	/**
 	 * @throws \Icewind\SMB\Exception\ConnectionException
 	 * @throws \Icewind\SMB\Exception\AuthenticationException
@@ -60,18 +76,7 @@ class Share extends AbstractShare {
 		if ($this->connection and $this->connection->isValid()) {
 			return;
 		}
-		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('stdbuf -o0 %s %s --authentication-file=%s %s',
-			$this->system->getSmbclientPath(),
-			$workgroupArgument,
-			System::getFD(3),
-			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
-		);
-		$this->connection = new Connection($command);
-		$this->connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
-		if (!$this->connection->isValid()) {
-			throw new ConnectionException();
-		}
+		$this->connection = $this->getConnection();
 	}
 
 	protected function reconnect() {
