@@ -58,7 +58,7 @@ class Connection extends RawConnection {
 			}
 		}
 		$length = mb_strlen(self::DELIMITER);
-		while (mb_substr($line, 0, $length) !== self::DELIMITER && $line) { //next prompt functions as delimiter
+		while (mb_substr($line, 0, $length) !== self::DELIMITER && $line !== false) { //next prompt functions as delimiter
 			if (is_callable($callback)) {
 				$result = $callback($line);
 				if ($result === false) { // allow the callback to close the connection for infinite running commands
