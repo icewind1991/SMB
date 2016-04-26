@@ -7,13 +7,6 @@ php:
   - 7.0
 
 env:
-
-
-matrix:
-  allow_failures:
-    - php: 7.0
-
-env:
   global:
     - CURRENT_DIR=`pwd`
   matrix:
