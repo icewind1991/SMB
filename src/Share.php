@@ -355,10 +355,10 @@ class Share extends AbstractShare {
 	 * @return mixed
 	 */
 	public function notify($path, callable $callback) {
-		$this->connect();
+		$connection = $this->getConnection(); // use a fresh connection since the notify command blocks the process
 		$command = 'notify ' . $this->escapePath($path);
-		$this->connection->write($command . PHP_EOL);
-		$this->connection->read(function ($line) use ($callback, $path) {
+		$connection->write($command . PHP_EOL);
+		$connection->read(function ($line) use ($callback, $path) {
 			$code = (int)substr($line, 0, 4);
 			$subPath = substr($line, 5);
 			if ($path === '') {
