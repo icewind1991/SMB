@@ -64,8 +64,9 @@ class Connection extends RawConnection {
 				if ($result === false) { // allow the callback to close the connection for infinite running commands
 					$this->close(true);
 				}
+			} else {
+				$output[] .= $line;
 			}
-			$output[] .= $line;
 			$line = $this->readLine();
 		}
 		return $output;
