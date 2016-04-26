@@ -46,16 +46,7 @@ class Connection extends RawConnection {
 		$output = array();
 		$line = $this->readLine();
 		if ($line === false) {
-			if ($promptLine) { //maybe we have some error we missed on the previous line
-				throw new ConnectException('Unknown error (' . $promptLine . ')');
-			} else {
-				$error = $this->readError(); // maybe something on stderr
-				if ($error) {
-					throw new ConnectException('Unknown error (' . $error . ')');
-				} else {
-					throw new ConnectException('Unknown error');
-				}
-			}
+			$this->unknownError($promptLine);
 		}
 		$length = mb_strlen(self::DELIMITER);
 		while (mb_substr($line, 0, $length) !== self::DELIMITER && $line !== false) { //next prompt functions as delimiter
@@ -70,6 +61,23 @@ class Connection extends RawConnection {
 			$line = $this->readLine();
 		}
 		return $output;
+	}
+
+	/**
+	 * @param string $promptLine (optional) prompt line that might contain some info about the error
+	 * @throws ConnectException
+	 */
+	private function unknownError($promptLine = '') {
+		if ($promptLine) { //maybe we have some error we missed on the previous line
+			throw new ConnectException('Unknown error (' . $promptLine . ')');
+		} else {
+			$error = $this->readError(); // maybe something on stderr
+			if ($error) {
+				throw new ConnectException('Unknown error (' . $error . ')');
+			} else {
+				throw new ConnectException('Unknown error');
+			}
+		}
 	}
 
 	/**
