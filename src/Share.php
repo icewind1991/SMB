@@ -51,6 +51,22 @@ class Share extends AbstractShare {
 		$this->parser = new Parser(new TimeZoneProvider($this->server->getHost(), $this->system));
 	}
 
+	protected function getConnection() {
+		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
+		$command = sprintf('stdbuf -o0 %s %s --authentication-file=%s %s',
+			$this->system->getSmbclientPath(),
+			$workgroupArgument,
+			System::getFD(3),
+			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
+		);
+		$connection = new Connection($command);
+		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
+		if (!$connection->isValid()) {
+			throw new ConnectionException();
+		}
+		return $connection;
+	}
+
 	/**
 	 * @throws \Icewind\SMB\Exception\ConnectionException
 	 * @throws \Icewind\SMB\Exception\AuthenticationException
@@ -60,18 +76,7 @@ class Share extends AbstractShare {
 		if ($this->connection and $this->connection->isValid()) {
 			return;
 		}
-		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('%s %s --authentication-file=%s %s',
-			$this->system->getSmbclientPath(),
-			$workgroupArgument,
-			System::getFD(3),
-			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
-		);
-		$this->connection = new Connection($command);
-		$this->connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
-		if (!$this->connection->isValid()) {
-			throw new ConnectionException();
-		}
+		$this->connection = $this->getConnection();
 	}
 
 	protected function reconnect() {
@@ -342,6 +347,26 @@ class Share extends AbstractShare {
 		$cmd = 'setmode ' . $path . ' ' . $modeString;
 		$output = $this->execute($cmd);
 		return $this->parseOutput($output, $path);
+	}
+
+	/**
+	 * @param string $path
+	 * @param callable $callback callable which will be called for each received change
+	 * @return mixed
+	 */
+	public function notify($path, callable $callback) {
+		$connection = $this->getConnection(); // use a fresh connection since the notify command blocks the process
+		$command = 'notify ' . $this->escapePath($path);
+		$connection->write($command . PHP_EOL);
+		$connection->read(function ($line) use ($callback, $path) {
+			$code = (int)substr($line, 0, 4);
+			$subPath = substr($line, 5);
+			if ($path === '') {
+				return $callback($code, $subPath);
+			} else {
+				return $callback($code, $path . '/' . $subPath);
+			}
+		});
 	}
 
 	/**
