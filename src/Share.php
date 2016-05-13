@@ -360,7 +360,7 @@ class Share extends AbstractShare {
 		$connection->write($command . PHP_EOL);
 		$connection->read(function ($line) use ($callback, $path) {
 			$code = (int)substr($line, 0, 4);
-			$subPath = substr($line, 5);
+			$subPath = str_replace('\\', '/', substr($line, 5));
 			if ($path === '') {
 				return $callback($code, $subPath);
 			} else {
