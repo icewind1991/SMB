@@ -8,6 +8,7 @@
 namespace Icewind\SMB;
 
 use Icewind\SMB\Exception\ConnectionException;
+use Icewind\SMB\Exception\DependencyException;
 use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\InvalidTypeException;
 use Icewind\SMB\Exception\NotFoundException;
@@ -53,7 +54,8 @@ class Share extends AbstractShare {
 
 	protected function getConnection() {
 		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('stdbuf -o0 %s %s --authentication-file=%s %s',
+		$command = sprintf('%s%s %s --authentication-file=%s %s',
+			$this->system->hasStdBuf() ? 'stdbuf -o0 ' : '',
 			$this->system->getSmbclientPath(),
 			$workgroupArgument,
 			System::getFD(3),
@@ -353,8 +355,13 @@ class Share extends AbstractShare {
 	 * @param string $path
 	 * @param callable $callback callable which will be called for each received change
 	 * @return mixed
+	 * @throws ConnectionException
+	 * @throws DependencyException
 	 */
 	public function notify($path, callable $callback) {
+		if (!$this->system->hasStdBuf()) { //stdbuf is required to disable smbclient's output buffering
+			throw new DependencyException('stdbuf is required for usage of the notify command');
+		}
 		$connection = $this->getConnection(); // use a fresh connection since the notify command blocks the process
 		$command = 'notify ' . $this->escapePath($path);
 		$connection->write($command . PHP_EOL);
