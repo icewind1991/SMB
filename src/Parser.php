@@ -108,7 +108,7 @@ class Parser {
 			if ($name === 'write_time') {
 				$mtime = strtotime($value);
 			} else if ($name === 'attributes') {
-				$mode = hexdec(substr($value, 1, -1));
+				$mode =  $this->parseMode($value);
 			} else if ($name === 'stream') {
 				list(, $size,) = explode(' ', $value);
 				$size = intval($size);
