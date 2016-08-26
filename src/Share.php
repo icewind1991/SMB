@@ -99,8 +99,8 @@ class Share extends AbstractShare {
 	}
 
 	protected function simpleCommand($command, $path) {
-		$path = $this->escapePath($path);
-		$cmd = $command . ' ' . $path;
+		$escapedPath = $this->escapePath($path);
+		$cmd = $command . ' ' . $escapedPath;
 		$output = $this->execute($cmd);
 		return $this->parseOutput($output, $path);
 	}

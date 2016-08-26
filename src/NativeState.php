@@ -63,8 +63,15 @@ class NativeState {
 		}
 	}
 
-	protected function testResult($result, $path) {
+	protected function testResult($result, $uri) {
 		if ($result === false or $result === null) {
+			// smb://host/share/path
+			if (is_string($uri)) {
+				list(, , , , $path) = explode('/', $uri, 5);
+				$path = '/' . $path;
+			} else {
+				$path = null;
+			}
 			$this->handleError($path);
 		}
 	}
