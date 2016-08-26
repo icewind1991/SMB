@@ -67,11 +67,7 @@ class Parser {
 				case ErrorCodes::SharingViolation:
 					throw new FileInUseException($path);
 				default:
-					$message = 'Unknown error (' . $error . ')';
-					if ($path) {
-						$message .= ' for ' . $path;
-					}
-					throw new Exception($message);
+					throw Exception::unknown($path, $error);
 			}
 		}
 	}

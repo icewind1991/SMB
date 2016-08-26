@@ -59,11 +59,7 @@ class NativeState {
 			case 113:
 				throw new NoRouteToHostException($path, $error);
 			default:
-				$message = 'Unknown error (' . $error . ')';
-				if ($path) {
-					$message .= ' for ' . $path;
-				}
-				throw new Exception($message, $error);
+				throw Exception::unknown($path, $error);
 		}
 	}
 
