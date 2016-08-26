@@ -218,8 +218,7 @@ class Share extends AbstractShare {
 	public function rename($from, $to) {
 		$path1 = $this->escapePath($from);
 		$path2 = $this->escapePath($to);
-		$cmd = 'rename ' . $path1 . ' ' . $path2;
-		$output = $this->execute($cmd);
+		$output = $this->execute('rename ' . $path1 . ' ' . $path2);
 		return $this->parseOutput($output, $to);
 	}
 
