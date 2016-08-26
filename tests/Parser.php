@@ -63,6 +63,38 @@ class Parser extends \PHPUnit_Framework_TestCase {
 					'mode' => FileInfo::MODE_NORMAL,
 					'size' => 29634
 				)
+			),
+			array(
+				array(
+					'altname: folder',
+					'create_time:    Sat Oct 12 07:05:58 PM 2013 CEST',
+					'access_time:    Tue Oct 15 02:58:48 PM 2013 CEST',
+					'write_time:     Sat Oct 12 07:05:58 PM 2013 CEST',
+					'change_time:    Sat Oct 12 07:05:58 PM 2013 CEST',
+					'attributes: D (10)',
+					'stream: [::$DATA], 29634 bytes'
+				),
+				array(
+					'mtime' => strtotime('12 Oct 2013 19:05:58 CEST'),
+					'mode' => FileInfo::MODE_DIRECTORY,
+					'size' => 29634
+				)
+			),
+			array(
+				array(
+					'altname: .hidden',
+					'create_time:    Sat Oct 12 07:05:58 PM 2013 CEST',
+					'access_time:    Tue Oct 15 02:58:48 PM 2013 CEST',
+					'write_time:     Sat Oct 12 07:05:58 PM 2013 CEST',
+					'change_time:    Sat Oct 12 07:05:58 PM 2013 CEST',
+					'attributes: HA (22)',
+					'stream: [::$DATA], 29634 bytes'
+				),
+				array(
+					'mtime' => strtotime('12 Oct 2013 19:05:58 CEST'),
+					'mode' => FileInfo::MODE_HIDDEN + FileInfo::MODE_ARCHIVE,
+					'size' => 29634
+				)
 			)
 		);
 	}
