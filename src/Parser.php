@@ -20,6 +20,8 @@ use Icewind\SMB\Exception\NotEmptyException;
 use Icewind\SMB\Exception\NotFoundException;
 
 class Parser {
+	const MSG_NOT_FOUND = 'Error opening local file ';
+
 	/**
 	 * @var \Icewind\SMB\TimeZoneProvider
 	 */
@@ -32,46 +34,45 @@ class Parser {
 		$this->timeZoneProvider = $timeZoneProvider;
 	}
 
+	private function getErrorCode($line) {
+		$parts = explode(' ', $line);
+		foreach ($parts as $part) {
+			if (substr($part, 0, 9) === 'NT_STATUS') {
+				return $part;
+			}
+		}
+		return false;
+	}
+
 	public function checkForError($output, $path) {
-		if (count($output) === 0) {
-			return true;
-		} else {
-			if (strpos($output[0], 'does not exist')) {
+		if (strpos($output[0], 'does not exist')) {
+			throw new NotFoundException($path);
+		}
+		$error = $this->getErrorCode($output[0]);
+
+		if (substr($output[0], 0, strlen(self::MSG_NOT_FOUND)) === self::MSG_NOT_FOUND) {
+			$localPath = substr($output[0], strlen(self::MSG_NOT_FOUND));
+			throw new InvalidResourceException('Failed opening local file "' . $localPath . '" for writing');
+		}
+
+		switch ($error) {
+			case ErrorCodes::PathNotFound:
+			case ErrorCodes::ObjectNotFound:
+			case ErrorCodes::NoSuchFile:
 				throw new NotFoundException($path);
-			}
-			$parts = explode(' ', $output[0]);
-			$error = false;
-			foreach ($parts as $part) {
-				if (substr($part, 0, 9) === 'NT_STATUS') {
-					$error = $part;
-				}
-			}
-
-			$notFoundMsg = 'Error opening local file ';
-			if (substr($output[0], 0, strlen($notFoundMsg)) === $notFoundMsg) {
-				$localPath = substr($output[0], strlen($notFoundMsg));
-				throw new InvalidResourceException('Failed opening local file "' . $localPath . '" for writing');
-			}
-
-			switch ($error) {
-				case ErrorCodes::PathNotFound:
-				case ErrorCodes::ObjectNotFound:
-				case ErrorCodes::NoSuchFile:
-					throw new NotFoundException($path);
-				case ErrorCodes::NameCollision:
-					throw new AlreadyExistsException($path);
-				case ErrorCodes::AccessDenied:
-					throw new AccessDeniedException($path);
-				case ErrorCodes::DirectoryNotEmpty:
-					throw new NotEmptyException($path);
-				case ErrorCodes::FileIsADirectory:
-				case ErrorCodes::NotADirectory:
-					throw new InvalidTypeException($path);
-				case ErrorCodes::SharingViolation:
-					throw new FileInUseException($path);
-				default:
-					throw Exception::unknown($path, $error);
-			}
+			case ErrorCodes::NameCollision:
+				throw new AlreadyExistsException($path);
+			case ErrorCodes::AccessDenied:
+				throw new AccessDeniedException($path);
+			case ErrorCodes::DirectoryNotEmpty:
+				throw new NotEmptyException($path);
+			case ErrorCodes::FileIsADirectory:
+			case ErrorCodes::NotADirectory:
+				throw new InvalidTypeException($path);
+			case ErrorCodes::SharingViolation:
+				throw new FileInUseException($path);
+			default:
+				throw Exception::unknown($path, $error);
 		}
 	}
 

@@ -401,7 +401,11 @@ class Share extends AbstractShare {
 	 * @return bool
 	 */
 	protected function parseOutput($lines, $path = '') {
-		return $this->parser->checkForError($lines, $path);
+		if (count($lines) === 0) {
+			return true;
+		} else {
+			return $this->parser->checkForError($lines, $path);
+		}
 	}
 
 	/**
