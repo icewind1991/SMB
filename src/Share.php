@@ -61,7 +61,7 @@ class Share extends AbstractShare {
 			System::getFD(3),
 			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
 		);
-		$connection = new Connection($command);
+		$connection = new Connection($command, $this->parser);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		if (!$connection->isValid()) {
 			throw new ConnectionException();
@@ -276,7 +276,7 @@ class Share extends AbstractShare {
 			System::getFD(3),
 			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
 		);
-		$connection = new Connection($command);
+		$connection = new Connection($command, $this->parser);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		$connection->write('get ' . $source . ' ' . System::getFD(5));
 		$connection->write('exit');
@@ -305,7 +305,7 @@ class Share extends AbstractShare {
 			System::getFD(3),
 			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
 		);
-		$connection = new Connection($command);
+		$connection = new Connection($command, $this->parser);
 		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
 		$fh = $connection->getFileInputStream();
 

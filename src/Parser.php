@@ -9,10 +9,13 @@ namespace Icewind\SMB;
 
 use Icewind\SMB\Exception\AccessDeniedException;
 use Icewind\SMB\Exception\AlreadyExistsException;
+use Icewind\SMB\Exception\AuthenticationException;
 use Icewind\SMB\Exception\Exception;
 use Icewind\SMB\Exception\FileInUseException;
+use Icewind\SMB\Exception\InvalidHostException;
 use Icewind\SMB\Exception\InvalidResourceException;
 use Icewind\SMB\Exception\InvalidTypeException;
+use Icewind\SMB\Exception\NoLoginServerException;
 use Icewind\SMB\Exception\NotEmptyException;
 use Icewind\SMB\Exception\NotFoundException;
 
@@ -69,6 +72,33 @@ class Parser {
 				default:
 					throw Exception::unknown($path, $error);
 			}
+		}
+	}
+
+	/**
+	 * check if the first line holds a connection failure
+	 *
+	 * @param $line
+	 * @throws AuthenticationException
+	 * @throws InvalidHostException
+	 * @throws NoLoginServerException
+	 */
+	public function checkConnectionError($line) {
+		$line = rtrim($line, ')');
+		if (substr($line, -23) === ErrorCodes::LogonFailure) {
+			throw new AuthenticationException('Invalid login');
+		}
+		if (substr($line, -26) === ErrorCodes::BadHostName) {
+			throw new InvalidHostException('Invalid hostname');
+		}
+		if (substr($line, -22) === ErrorCodes::Unsuccessful) {
+			throw new InvalidHostException('Connection unsuccessful');
+		}
+		if (substr($line, -28) === ErrorCodes::ConnectionRefused) {
+			throw new InvalidHostException('Connection refused');
+		}
+		if (substr($line, -26) === ErrorCodes::NoLogonServers) {
+			throw new NoLoginServerException('No login server');
 		}
 	}
 
@@ -134,5 +164,18 @@ class Parser {
 			}
 		}
 		return $content;
+	}
+
+	public function parseListShares($output) {
+		$shareNames = array();
+		foreach ($output as $line) {
+			if (strpos($line, '|')) {
+				list($type, $name, $description) = explode('|', $line);
+				if (strtolower($type) === 'disk') {
+					$shareNames[$name] = $description;
+				}
+			}
+		}
+		return $shareNames;
 	}
 }
