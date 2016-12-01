@@ -33,4 +33,20 @@ class Share extends AbstractShare {
 		$share = $this->server->getShare($this->config->share);
 		$share->dir($this->root);
 	}
+
+	/**
+	 * @expectedException \Icewind\SMB\Exception\DependencyException
+	 */
+	public function testNoSmbclient() {
+		$system = $this->getMockBuilder('\Icewind\SMB\System')
+			->setMethods(['getSmbclientPath'])
+			->getMock();
+		$share = new \Icewind\SMB\Share($this->server, 'dummy', $system);
+
+		$system->expects($this->any())
+			->method('getSmbclientPath')
+			->will($this->returnValue(''));
+
+		$share->mkdir('');
+	}
 }

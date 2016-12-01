@@ -43,17 +43,22 @@ class Share extends AbstractShare {
 	/**
 	 * @param Server $server
 	 * @param string $name
+	 * @param System $system
 	 */
-	public function __construct($server, $name) {
+	public function __construct($server, $name, System $system = null) {
 		parent::__construct();
 		$this->server = $server;
 		$this->name = $name;
-		$this->system = new System();
+		$this->system = (!is_null($system)) ? $system : new System();
 		$this->parser = new Parser(new TimeZoneProvider($this->server->getHost(), $this->system));
 	}
 
 	protected function getConnection() {
 		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
+		$smbClientPath = $this->system->getSmbclientPath();
+		if (!$smbClientPath) {
+			throw new DependencyException('Can\'t find smbclient binary in path');
+		}
 		$command = sprintf('%s%s %s --authentication-file=%s %s',
 			$this->system->hasStdBuf() ? 'stdbuf -o0 ' : '',
 			$this->system->getSmbclientPath(),

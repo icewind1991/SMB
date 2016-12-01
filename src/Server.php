@@ -153,7 +153,7 @@ class Server {
 	 * @return \Icewind\SMB\IShare
 	 */
 	public function getShare($name) {
-		return new Share($this, $name);
+		return new Share($this, $name, $this->system);
 	}
 
 	/**
