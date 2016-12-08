@@ -9,6 +9,7 @@ namespace Icewind\SMB\Test;
 
 use Icewind\SMB\Change;
 use Icewind\SMB\Exception\AlreadyExistsException;
+use Icewind\SMB\INotifyHandler;
 use Icewind\SMB\IShare;
 
 class NotifyHandlerTest extends TestCase {
@@ -37,11 +38,11 @@ class NotifyHandlerTest extends TestCase {
 		$changes = $process->getChanges();
 		$process->stop();
 		$expected = [
-			new Change(IShare::NOTIFY_ADDED, 'source.txt'),
-			new Change(IShare::NOTIFY_RENAMED_OLD, 'source.txt'),
-			new Change(IShare::NOTIFY_RENAMED_NEW, 'target.txt'),
-			new Change(IShare::NOTIFY_MODIFIED, 'target.txt'),
-			new Change(IShare::NOTIFY_REMOVED, 'target.txt'),
+			new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'),
+			new Change(INotifyHandler::NOTIFY_RENAMED_OLD, 'source.txt'),
+			new Change(INotifyHandler::NOTIFY_RENAMED_NEW, 'target.txt'),
+			new Change(INotifyHandler::NOTIFY_MODIFIED, 'target.txt'),
+			new Change(INotifyHandler::NOTIFY_REMOVED, 'target.txt'),
 		];
 
 		$this->assertEquals($expected, $changes);
@@ -65,8 +66,8 @@ class NotifyHandlerTest extends TestCase {
 		$process->stop();
 
 		$expected = [
-			new Change(IShare::NOTIFY_ADDED, 'sub/source.txt'),
-			new Change(IShare::NOTIFY_REMOVED, 'sub/source.txt'),
+			new Change(INotifyHandler::NOTIFY_ADDED, 'sub/source.txt'),
+			new Change(INotifyHandler::NOTIFY_REMOVED, 'sub/source.txt'),
 		];
 
 		$share->rmdir('sub');
@@ -89,7 +90,7 @@ class NotifyHandlerTest extends TestCase {
 			$results = $change;
 			return false; // stop listening
 		});
-		$this->assertEquals($results, new Change(IShare::NOTIFY_ADDED, 'source.txt'));
+		$this->assertEquals($results, new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'));
 	}
 
 	public function testStopped() {
