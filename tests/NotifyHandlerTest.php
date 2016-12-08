@@ -26,9 +26,25 @@ class NotifyHandlerTest extends TestCase {
 		$this->server = new \Icewind\SMB\Server($this->config->host, $this->config->user, $this->config->password);
 	}
 
+	/**
+	 * sometimes smb adds modified changes in the mix for shits and giggles
+	 *
+	 * filter them out so we can compare changes properly
+	 *
+	 * @param array $changes
+	 * @return array
+	 */
+	private function filterModifiedChanges(array $changes) {
+		return array_values(array_filter($changes, function (Change $change) {
+			return $change->getCode() !== INotifyHandler::NOTIFY_MODIFIED;
+		}));
+	}
+
 	public function testGetChanges() {
 		$share = $this->server->getShare($this->config->share);
 		$process = $share->notify('');
+
+		usleep(1000 * 100);// give it some time to start listening
 
 		$share->put(__FILE__, 'source.txt');
 		$share->rename('source.txt', 'target.txt');
@@ -41,11 +57,10 @@ class NotifyHandlerTest extends TestCase {
 			new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'),
 			new Change(INotifyHandler::NOTIFY_RENAMED_OLD, 'source.txt'),
 			new Change(INotifyHandler::NOTIFY_RENAMED_NEW, 'target.txt'),
-			new Change(INotifyHandler::NOTIFY_MODIFIED, 'target.txt'),
 			new Change(INotifyHandler::NOTIFY_REMOVED, 'target.txt'),
 		];
 
-		$this->assertEquals($expected, $changes);
+		$this->assertEquals($expected, $this->filterModifiedChanges($changes));
 	}
 
 	public function testChangesSubdir() {
@@ -53,7 +68,7 @@ class NotifyHandlerTest extends TestCase {
 
 		try {
 			$share->mkdir('sub');
-		} catch (AlreadyExistsException $e){
+		} catch (AlreadyExistsException $e) {
 
 		}
 		$process = $share->notify('sub');
@@ -71,7 +86,7 @@ class NotifyHandlerTest extends TestCase {
 		];
 
 		$share->rmdir('sub');
-		$this->assertEquals($expected, $changes);
+		$this->assertEquals($expected, $this->filterModifiedChanges($changes));
 	}
 
 	public function testListen() {
