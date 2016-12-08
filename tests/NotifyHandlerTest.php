@@ -36,21 +36,15 @@ class NotifyHandlerTest extends TestCase {
 
 		$changes = $process->getChanges();
 		$process->stop();
-		$this->assertCount(5, $changes);
-		$this->assertEquals(IShare::NOTIFY_ADDED, $changes[0]->getCode());
-		$this->assertEquals('source.txt', $changes[0]->getPath());
+		$expected = [
+			new Change(IShare::NOTIFY_ADDED, 'source.txt'),
+			new Change(IShare::NOTIFY_RENAMED_OLD, 'source.txt'),
+			new Change(IShare::NOTIFY_RENAMED_NEW, 'target.txt'),
+			new Change(IShare::NOTIFY_MODIFIED, 'target.txt'),
+			new Change(IShare::NOTIFY_REMOVED, 'target.txt'),
+		];
 
-		$this->assertEquals(IShare::NOTIFY_RENAMED_OLD, $changes[1]->getCode());
-		$this->assertEquals('source.txt', $changes[1]->getPath());
-
-		$this->assertEquals(IShare::NOTIFY_RENAMED_NEW, $changes[2]->getCode());
-		$this->assertEquals('target.txt', $changes[2]->getPath());
-
-		$this->assertEquals(IShare::NOTIFY_MODIFIED, $changes[3]->getCode());
-		$this->assertEquals('target.txt', $changes[3]->getPath());
-
-		$this->assertEquals(IShare::NOTIFY_REMOVED, $changes[4]->getCode());
-		$this->assertEquals('target.txt', $changes[4]->getPath());
+		$this->assertEquals($expected, $changes);
 	}
 
 	public function testChangesSubdir() {
@@ -69,10 +63,14 @@ class NotifyHandlerTest extends TestCase {
 
 		$changes = $process->getChanges();
 		$process->stop();
+
+		$expected = [
+			new Change(IShare::NOTIFY_ADDED, 'sub/source.txt'),
+			new Change(IShare::NOTIFY_REMOVED, 'sub/source.txt'),
+		];
+
 		$share->rmdir('sub');
-		$this->assertCount(2, $changes);
-		$this->assertEquals(IShare::NOTIFY_ADDED, $changes[0]->getCode());
-		$this->assertEquals('sub/source.txt', $changes[0]->getPath());
+		$this->assertEquals($expected, $changes);
 	}
 
 	public function testListen() {
