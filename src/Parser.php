@@ -27,6 +27,20 @@ class Parser {
 	 */
 	protected $timeZoneProvider;
 
+	// todo replace with static once <5.6 support is dropped
+	// see error.h
+	private static $exceptionMap = [
+		ErrorCodes::PathNotFound      => '\Icewind\SMB\Exception\NotFoundException',
+		ErrorCodes::ObjectNotFound    => '\Icewind\SMB\Exception\NotFoundException',
+		ErrorCodes::NoSuchFile        => '\Icewind\SMB\Exception\NotFoundException',
+		ErrorCodes::NameCollision     => '\Icewind\SMB\Exception\AlreadyExistsException',
+		ErrorCodes::AccessDenied      => '\Icewind\SMB\Exception\AccessDeniedException',
+		ErrorCodes::DirectoryNotEmpty => '\Icewind\SMB\Exception\NotEmptyException',
+		ErrorCodes::FileIsADirectory  => '\Icewind\SMB\Exception\InvalidTypeException',
+		ErrorCodes::NotADirectory     => '\Icewind\SMB\Exception\InvalidTypeException',
+		ErrorCodes::SharingViolation  => '\Icewind\SMB\Exception\FileInUseException'
+	];
+
 	/**
 	 * @param \Icewind\SMB\TimeZoneProvider $timeZoneProvider
 	 */
@@ -55,25 +69,7 @@ class Parser {
 			throw new InvalidResourceException('Failed opening local file "' . $localPath . '" for writing');
 		}
 
-		switch ($error) {
-			case ErrorCodes::PathNotFound:
-			case ErrorCodes::ObjectNotFound:
-			case ErrorCodes::NoSuchFile:
-				throw new NotFoundException($path);
-			case ErrorCodes::NameCollision:
-				throw new AlreadyExistsException($path);
-			case ErrorCodes::AccessDenied:
-				throw new AccessDeniedException($path);
-			case ErrorCodes::DirectoryNotEmpty:
-				throw new NotEmptyException($path);
-			case ErrorCodes::FileIsADirectory:
-			case ErrorCodes::NotADirectory:
-				throw new InvalidTypeException($path);
-			case ErrorCodes::SharingViolation:
-				throw new FileInUseException($path);
-			default:
-				throw Exception::unknown($path, $error);
-		}
+		throw Exception::fromMap(self::$exceptionMap, $error, $path);
 	}
 
 	/**
@@ -134,8 +130,8 @@ class Parser {
 		}
 		return [
 			'mtime' => strtotime($data['write_time']),
-			'mode' => hexdec(substr($data['attributes'], strpos($data['attributes'], '('), -1)),
-			'size' => intval(explode(' ', $data['stream'])[1])
+			'mode'  => hexdec(substr($data['attributes'], strpos($data['attributes'], '('), -1)),
+			'size'  => isset($data['stream']) ? intval(explode(' ', $data['stream'])[1]) : 0
 		];
 	}
 

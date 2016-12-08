@@ -16,4 +16,23 @@ class Exception extends \Exception {
 
 		return new Exception($message, $error);
 	}
+
+	/**
+	 * @param array $exceptionMap
+	 * @param mixed $error
+	 * @param string $path
+	 * @return Exception
+	 */
+	static public function fromMap(array $exceptionMap, $error, $path) {
+		if (isset($exceptionMap[$error])) {
+			$exceptionClass = $exceptionMap[$error];
+			if (is_numeric($error)) {
+				return new $exceptionClass($path, $error);
+			} else {
+				return new $exceptionClass($path);
+			}
+		} else {
+			return Exception::unknown($path, $error);
+		}
+	}
 }
