@@ -1,9 +1,19 @@
+dist: trusty
+sudo: required
 language: php
 php:
   - 5.4
   - 5.5
   - 5.6
   - 7.0
+
+addons:
+  apt:
+    packages:
+    - samba
+    - smbclient
+    - libsmbclient-dev
+    - libsmbclient
 
 env:
   global:
@@ -15,12 +25,10 @@ env:
 before_install:
   - pass=$(perl -e 'print crypt("test", "password")')
   - sudo useradd -m -p $pass test
-  - sudo apt-get update -qq
-  - sudo apt-get install samba smbclient
   - if [ "$BACKEND" == 'libsmbclient' ]; then ./install_libsmbclient.sh; fi
   - cd $CURRENT_DIR
   - chmod go+w $HOME
-  - printf "%s\n%s\n" test test|sudo smbpasswd -s test
+  - printf "%s\n%s\n" test test|sudo smbpasswd -a -s test
   - sudo mkdir /home/test/test
   - sudo chown test /home/test/test
   - |
