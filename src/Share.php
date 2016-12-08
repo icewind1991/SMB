@@ -132,7 +132,7 @@ class Share extends AbstractShare {
 
 	/**
 	 * @param string $path
-	 * @return \Icewind\SMB\IFileInfo[]
+	 * @return \Icewind\SMB\IFileInfo
 	 */
 	public function stat($path) {
 		$escapedPath = $this->escapePath($path);
@@ -334,10 +334,14 @@ class Share extends AbstractShare {
 		$output = $this->execute($cmd);
 		$this->parseOutput($output, $path);
 
-		// then set the modes we want
-		$cmd = 'setmode ' . $path . ' ' . $modeString;
-		$output = $this->execute($cmd);
-		return $this->parseOutput($output, $path);
+		if ($mode !== FileInfo::MODE_NORMAL) {
+			// then set the modes we want
+			$cmd = 'setmode ' . $path . ' ' . $modeString;
+			$output = $this->execute($cmd);
+			return $this->parseOutput($output, $path);
+		} else {
+			return true;
+		}
 	}
 
 	/**
@@ -385,7 +389,8 @@ class Share extends AbstractShare {
 		if (count($lines) === 0) {
 			return true;
 		} else {
-			return $this->parser->checkForError($lines, $path);
+			$this->parser->checkForError($lines, $path);
+			return false;
 		}
 	}
 
