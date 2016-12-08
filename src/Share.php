@@ -274,15 +274,8 @@ class Share extends AbstractShare {
 		$source = $this->escapePath($source);
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
-		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('%s %s --authentication-file=%s %s',
-			$this->system->getSmbclientPath(),
-			$workgroupArgument,
-			System::getFD(3),
-			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
-		);
-		$connection = new Connection($command, $this->parser);
-		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
+		$connection = $this->getConnection();
+
 		$connection->write('get ' . $source . ' ' . System::getFD(5));
 		$connection->write('exit');
 		$fh = $connection->getFileOutputStream();
@@ -303,17 +296,9 @@ class Share extends AbstractShare {
 		$target = $this->escapePath($target);
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
-		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
-		$command = sprintf('%s %s --authentication-file=%s %s',
-			$this->system->getSmbclientPath(),
-			$workgroupArgument,
-			System::getFD(3),
-			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
-		);
-		$connection = new Connection($command, $this->parser);
-		$connection->writeAuthentication($this->server->getUser(), $this->server->getPassword());
-		$fh = $connection->getFileInputStream();
+		$connection = $this->getConnection();
 
+		$fh = $connection->getFileInputStream();
 		$connection->write('put ' . System::getFD(4) . ' ' . $target);
 		$connection->write('exit');
 
