@@ -122,9 +122,7 @@ class Parser {
 	}
 
 	public function parseStat($output) {
-		$mtime = 0;
-		$mode = 0;
-		$size = 0;
+		$data = [];
 		foreach ($output as $line) {
 			// A line = explode statement may not fill all array elements
 			// properly. May happen when accessing non Windows Fileservers
@@ -132,20 +130,13 @@ class Parser {
 			$name = isset($words[0]) ? $words[0] : '';
 			$value = isset($words[1]) ? $words[1] : '';
 			$value = trim($value);
-			if ($name === 'write_time') {
-				$mtime = strtotime($value);
-			} else if ($name === 'attributes') {
-				$mode = hexdec(substr($value, strpos($value, '('), -1));
-			} else if ($name === 'stream') {
-				list(, $size,) = explode(' ', $value);
-				$size = intval($size);
-			}
+			$data[$name] = $value;
 		}
-		return array(
-			'mtime' => $mtime,
-			'mode' => $mode,
-			'size' => $size
-		);
+		return [
+			'mtime' => strtotime($data['write_time']),
+			'mode' => hexdec(substr($data['attributes'], strpos($data['attributes'], '('), -1)),
+			'size' => intval(explode(' ', $data['stream'])[1])
+		];
 	}
 
 	public function parseDir($output, $basePath) {
