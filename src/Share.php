@@ -342,27 +342,18 @@ class Share extends AbstractShare {
 
 	/**
 	 * @param string $path
-	 * @param callable $callback callable which will be called for each received change
-	 * @return mixed
+	 * @return INotifyHandler
 	 * @throws ConnectionException
 	 * @throws DependencyException
 	 */
-	public function notify($path, callable $callback) {
+	public function notify($path) {
 		if (!$this->system->hasStdBuf()) { //stdbuf is required to disable smbclient's output buffering
 			throw new DependencyException('stdbuf is required for usage of the notify command');
 		}
 		$connection = $this->getConnection(); // use a fresh connection since the notify command blocks the process
 		$command = 'notify ' . $this->escapePath($path);
 		$connection->write($command . PHP_EOL);
-		$connection->read(function ($line) use ($callback, $path) {
-			$code = (int)substr($line, 0, 4);
-			$subPath = str_replace('\\', '/', substr($line, 5));
-			if ($path === '') {
-				return $callback($code, $subPath);
-			} else {
-				return $callback($code, $path . '/' . $subPath);
-			}
-		});
+		return new NotifyHandler($connection, $path);
 	}
 
 	/**

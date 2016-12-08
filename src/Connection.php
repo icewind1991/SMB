@@ -38,7 +38,7 @@ class Connection extends RawConnection {
 	 * get all unprocessed output from smbclient until the next prompt
 	 *
 	 * @param callable $callback (optional) callback to call for every line read
-	 * @return string
+	 * @return string[]
 	 * @throws AuthenticationException
 	 * @throws ConnectException
 	 * @throws ConnectionException
@@ -62,6 +62,7 @@ class Connection extends RawConnection {
 				$result = $callback($line);
 				if ($result === false) { // allow the callback to close the connection for infinite running commands
 					$this->close(true);
+					break;
 				}
 			} else {
 				$output[] .= $line;

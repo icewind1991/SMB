@@ -145,8 +145,7 @@ interface IShare {
 
 	/**
 	 * @param string $path
-	 * @param callable $callback callable which will be called for each received change
-	 * @return mixed
+	 * @return INotifyHandler
 	 */
-	public function notify($path, callable $callback);
+	public function notify($path);
 }

@@ -1,0 +1,103 @@
+<?php
+/**
+ * Copyright (c) 2016 Robin Appelman <icewind@owncloud.com>
+ * This file is licensed under the Licensed under the MIT license:
+ * http://opensource.org/licenses/MIT
+ */
+
+namespace Icewind\SMB\Test;
+
+use Icewind\SMB\Change;
+use Icewind\SMB\Exception\AlreadyExistsException;
+use Icewind\SMB\IShare;
+
+class NotifyHandlerTest extends TestCase {
+	/**
+	 * @var \Icewind\SMB\Server $server
+	 */
+	private $server;
+
+	private $config;
+
+	public function setUp() {
+		$this->requireBackendEnv('smbclient');
+		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
+		$this->server = new \Icewind\SMB\Server($this->config->host, $this->config->user, $this->config->password);
+	}
+
+	public function testGetChanges() {
+		$share = $this->server->getShare($this->config->share);
+		$process = $share->notify('');
+
+		$share->put(__FILE__, 'source.txt');
+		$share->rename('source.txt', 'target.txt');
+		$share->del('target.txt');
+		usleep(1000 * 100);// give it some time
+
+		$changes = $process->getChanges();
+		$process->stop();
+		$this->assertCount(5, $changes);
+		$this->assertEquals(IShare::NOTIFY_ADDED, $changes[0]->getCode());
+		$this->assertEquals('source.txt', $changes[0]->getPath());
+
+		$this->assertEquals(IShare::NOTIFY_RENAMED_OLD, $changes[1]->getCode());
+		$this->assertEquals('source.txt', $changes[1]->getPath());
+
+		$this->assertEquals(IShare::NOTIFY_RENAMED_NEW, $changes[2]->getCode());
+		$this->assertEquals('target.txt', $changes[2]->getPath());
+
+		$this->assertEquals(IShare::NOTIFY_MODIFIED, $changes[3]->getCode());
+		$this->assertEquals('target.txt', $changes[3]->getPath());
+
+		$this->assertEquals(IShare::NOTIFY_REMOVED, $changes[4]->getCode());
+		$this->assertEquals('target.txt', $changes[4]->getPath());
+	}
+
+	public function testChangesSubdir() {
+		$share = $this->server->getShare($this->config->share);
+
+		try {
+			$share->mkdir('sub');
+		} catch (AlreadyExistsException $e){
+
+		}
+		$process = $share->notify('sub');
+		usleep(1000 * 100);// give it some time to start listening
+		$share->put(__FILE__, 'sub/source.txt');
+		$share->del('sub/source.txt');
+		usleep(1000 * 100);// give it some time
+
+		$changes = $process->getChanges();
+		$process->stop();
+		$share->rmdir('sub');
+		$this->assertCount(2, $changes);
+		$this->assertEquals(IShare::NOTIFY_ADDED, $changes[0]->getCode());
+		$this->assertEquals('sub/source.txt', $changes[0]->getPath());
+	}
+
+	public function testListen() {
+		$share = $this->server->getShare($this->config->share);
+		$process = $share->notify('');
+
+		usleep(1000 * 100);// give it some time to start listening
+
+		$share->put(__FILE__, 'source.txt');
+		$share->del('source.txt');
+
+		$results = [];
+
+		// the notify process buffers incoming messages so callback will be triggered for the above changes
+		$process->listen(function ($change) use (&$results) {
+			$results = $change;
+			return false; // stop listening
+		});
+		$this->assertEquals($results, new Change(IShare::NOTIFY_ADDED, 'source.txt'));
+	}
+
+	public function testStopped() {
+		$share = $this->server->getShare($this->config->share);
+		$process = $share->notify('');
+		$process->stop();
+		$this->assertEquals([], $process->getChanges());
+	}
+}

@@ -290,14 +290,13 @@ class NativeShare extends AbstractShare {
 
 	/**
 	 * @param string $path
-	 * @param callable $callback callable which will be called for each received change
-	 * @return mixed
+	 * @return INotifyHandler
 	 */
-	public function notify($path, callable $callback) {
+	public function notify($path) {
 		// php-smbclient does support notify (https://github.com/eduardok/libsmbclient-php/issues/29)
 		// so we use the smbclient based backend for this
 		$share = new Share($this->server, $this->getName());
-		$share->notify($path, $callback);
+		return $share->notify($path);
 	}
 
 	public function __destruct() {
