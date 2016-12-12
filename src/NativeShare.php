@@ -97,7 +97,7 @@ class NativeShare extends AbstractShare {
 
 	/**
 	 * @param string $path
-	 * @return \Icewind\SMB\IFileInfo[]
+	 * @return \Icewind\SMB\IFileInfo
 	 */
 	public function stat($path) {
 		return new NativeFileInfo($this, $path, basename($path), $this->getStat($path));
