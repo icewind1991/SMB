@@ -134,3 +134,19 @@ if (Server::NativeAvailable()) {
 $share = $server->getShare('test');
 $share->put($fileToUpload, 'example.txt');
 ```
+
+### Using notify
+
+```php
+<?php
+use Icewind\SMB\Server;
+
+require('vendor/autoload.php');
+
+$server = new Server('localhost', 'test', 'test');
+$share = $server->getShare('test');
+
+$share->notify('')->listen(function (\Icewind\SMB\Change $change) {
+	echo $change->getCode() . ': ' . $change->getPath() . "\n";
+});
+```
