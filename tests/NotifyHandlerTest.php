@@ -31,8 +31,8 @@ class NotifyHandlerTest extends TestCase {
 	 *
 	 * filter them out so we can compare changes properly
 	 *
-	 * @param array $changes
-	 * @return array
+	 * @param Change[] $changes
+	 * @return Change[]
 	 */
 	private function filterModifiedChanges(array $changes) {
 		return array_values(array_filter($changes, function (Change $change) {
@@ -113,5 +113,41 @@ class NotifyHandlerTest extends TestCase {
 		$process = $share->notify('');
 		$process->stop();
 		$this->assertEquals([], $process->getChanges());
+	}
+
+	public function testListenAfterGetChanges() {
+		$share = $this->server->getShare($this->config->share);
+		$process = $share->notify('');
+
+		usleep(1000 * 100);// give it some time to start listening
+
+		$share->put(__FILE__, 'source.txt');
+		$share->rename('source.txt', 'target.txt');
+		$share->del('target.txt');
+		usleep(1000 * 100);// give it some time
+
+		$changes = $process->getChanges();
+		$expected = [
+			new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'),
+			new Change(INotifyHandler::NOTIFY_RENAMED_OLD, 'source.txt'),
+			new Change(INotifyHandler::NOTIFY_RENAMED_NEW, 'target.txt'),
+			new Change(INotifyHandler::NOTIFY_REMOVED, 'target.txt'),
+		];
+
+		$this->assertEquals($expected, $this->filterModifiedChanges($changes));
+
+		usleep(1000 * 200);
+
+		$share->put(__FILE__, 'source2.txt');
+		$share->del('source2.txt');
+
+		$results = null;
+
+		// the notify process buffers incoming messages so callback will be triggered for the above changes
+		$process->listen(function ($change) use (&$results) {
+			$results = $change;
+			return false; // stop listening
+		});
+		$this->assertNotNull($results);
 	}
 }
