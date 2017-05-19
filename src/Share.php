@@ -55,14 +55,16 @@ class Share extends AbstractShare {
 
 	protected function getConnection() {
 		$workgroupArgument = ($this->server->getWorkgroup()) ? ' -W ' . escapeshellarg($this->server->getWorkgroup()) : '';
+                $maxProtocolArgument = ($this->server->getMaxProtocol()) ? ' -m ' . escapeshellarg($this->server->getMaxProtocol()) : '';
 		$smbClientPath = $this->system->getSmbclientPath();
 		if (!$smbClientPath) {
 			throw new DependencyException('Can\'t find smbclient binary in path');
 		}
-		$command = sprintf('%s%s %s --authentication-file=%s %s',
+		$command = sprintf('%s%s %s %s --authentication-file=%s %s',
 			$this->system->hasStdBuf() ? 'stdbuf -o0 ' : '',
 			$this->system->getSmbclientPath(),
 			$workgroupArgument,
+                        $maxProtocolArgument,
 			System::getFD(3),
 			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
 		);
