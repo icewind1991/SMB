@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2014 Robin Appelman <icewind@owncloud.com>
  * This file is licensed under the Licensed under the MIT license:
@@ -11,155 +12,177 @@ use Icewind\SMB\Exception\AuthenticationException;
 use Icewind\SMB\Exception\InvalidHostException;
 
 class Server {
-	const LOCALE = 'en_US.UTF-8';
 
-	/**
-	 * @var string $host
-	 */
-	protected $host;
+    const LOCALE = 'en_US.UTF-8';
 
-	/**
-	 * @var string $user
-	 */
-	protected $user;
+    /**
+     * @var string $host
+     */
+    protected $host;
 
-	/**
-	 * @var string $password
-	 */
-	protected $password;
+    /**
+     * @var string $user
+     */
+    protected $user;
 
-	/**
-	 * @var string $workgroup
-	 */
-	protected $workgroup;
+    /**
+     * @var string $password
+     */
+    protected $password;
 
-	/**
-	 * @var \Icewind\SMB\System
-	 */
-	private $system;
+    /**
+     * @var string $workgroup
+     */
+    protected $workgroup;
 
-	/**
-	 * @var TimeZoneProvider
-	 */
-	private $timezoneProvider;
+    /**
+     * @var \Icewind\SMB\System
+     */
+    private $system;
 
-	/**
-	 * Check if the smbclient php extension is available
-	 *
-	 * @return bool
-	 */
-	public static function NativeAvailable() {
-		return function_exists('smbclient_state_new');
-	}
+    /**
+     * @var TimeZoneProvider
+     */
+    private $timezoneProvider;
+    
+    /**
+     *
+     * @var string $maxProtocol 
+     */
+    private $maxProtocol;
 
-	/**
-	 * @param string $host
-	 * @param string $user
-	 * @param string $password
-	 */
-	public function __construct($host, $user, $password) {
-		$this->host = $host;
-		list($workgroup, $user) = $this->splitUser($user);
-		$this->user = $user;
-		$this->workgroup = $workgroup;
-		$this->password = $password;
-		$this->system = new System();
-		$this->timezoneProvider = new TimeZoneProvider($host, $this->system);
-	}
+    /**
+     * Check if the smbclient php extension is available
+     *
+     * @return bool
+     */
+    public static function NativeAvailable() {
+        return function_exists('smbclient_state_new');
+    }
 
-	/**
-	 * Split workgroup from username
-	 *
-	 * @param $user
-	 * @return string[] [$workgroup, $user]
-	 */
-	public function splitUser($user) {
-		if (strpos($user, '/')) {
-			return explode('/', $user, 2);
-		} elseif (strpos($user, '\\')) {
-			return explode('\\', $user);
-		} else {
-			return array(null, $user);
-		}
-	}
+    /**
+     * @param string $host
+     * @param string $user
+     * @param string $password
+     */
+    public function __construct($host, $user, $password) {
+        $this->host = $host;
+        list($workgroup, $user) = $this->splitUser($user);
+        $this->user = $user;
+        $this->workgroup = $workgroup;
+        $this->password = $password;
+        $this->system = new System();
+        $this->timezoneProvider = new TimeZoneProvider($host, $this->system);
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getAuthString() {
-		return $this->user . '%' . $this->password;
-	}
+    /**
+     * Split workgroup from username
+     *
+     * @param $user
+     * @return string[] [$workgroup, $user]
+     */
+    public function splitUser($user) {
+        if (strpos($user, '/')) {
+            return explode('/', $user, 2);
+        } elseif (strpos($user, '\\')) {
+            return explode('\\', $user);
+        } else {
+            return array(null, $user);
+        }
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getUser() {
-		return $this->user;
-	}
+    /**
+     * @return string
+     */
+    public function getAuthString() {
+        return $this->user . '%' . $this->password;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getPassword() {
-		return $this->password;
-	}
+    /**
+     * @return string
+     */
+    public function getUser() {
+        return $this->user;
+    }
 
-	/**
-	 * return string
-	 */
-	public function getHost() {
-		return $this->host;
-	}
+    /**
+     * @return string
+     */
+    public function getPassword() {
+        return $this->password;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getWorkgroup() {
-		return $this->workgroup;
-	}
+    /**
+     * return string
+     */
+    public function getHost() {
+        return $this->host;
+    }
 
-	/**
-	 * @return \Icewind\SMB\IShare[]
-	 *
-	 * @throws \Icewind\SMB\Exception\AuthenticationException
-	 * @throws \Icewind\SMB\Exception\InvalidHostException
-	 */
-	public function listShares() {
-		$workgroupArgument = ($this->workgroup) ? ' -W ' . escapeshellarg($this->workgroup) : '';
-		$command = sprintf('%s %s --authentication-file=%s -gL %s',
-			$this->system->getSmbclientPath(),
-			$workgroupArgument,
-			System::getFD(3),
-			escapeshellarg($this->getHost())
-		);
-		$connection = new RawConnection($command);
-		$connection->writeAuthentication($this->getUser(), $this->getPassword());
-		$output = $connection->readAll();
-		$parser = new Parser($this->timezoneProvider);
+    /**
+     * @return string
+     */
+    public function getWorkgroup() {
+        return $this->workgroup;
+    }
 
-		$parser->checkConnectionError($output[0]);
+    /**
+     * @return \Icewind\SMB\IShare[]
+     *
+     * @throws \Icewind\SMB\Exception\AuthenticationException
+     * @throws \Icewind\SMB\Exception\InvalidHostException
+     */
+    public function listShares() {
+        $workgroupArgument = ($this->workgroup) ? ' -W ' . escapeshellarg($this->workgroup) : '';
+        $maxProtocolArgument = ($this->maxProtocol) ? ' -m ' . escapeshellarg($this->maxProtocol) : '';
+        $command = sprintf('%s %s %s --authentication-file=%s -gL %s', $this->system->getSmbclientPath(), $workgroupArgument, $maxProtocolArgument,System::getFD(3), escapeshellarg($this->getHost())
+        );
+        $connection = new RawConnection($command);
+        $connection->writeAuthentication($this->getUser(), $this->getPassword());
+        $output = $connection->readAll();
+        $parser = new Parser($this->timezoneProvider);
 
-		$shareNames = $parser->parseListShares($output);
+        $parser->checkConnectionError($output[0]);
 
-		$shares = array();
-		foreach ($shareNames as $name => $description) {
-			$shares[] = $this->getShare($name);
-		}
-		return $shares;
-	}
+        $shareNames = $parser->parseListShares($output);
 
-	/**
-	 * @param string $name
-	 * @return \Icewind\SMB\IShare
-	 */
-	public function getShare($name) {
-		return new Share($this, $name, $this->system);
-	}
+        $shares = array();
+        foreach ($shareNames as $name => $description) {
+            $shares[] = $this->getShare($name);
+        }
+        return $shares;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getTimeZone() {
-		return $this->timezoneProvider->get();
-	}
+    /**
+     * @param string $name
+     * @return \Icewind\SMB\IShare
+     */
+    public function getShare($name) {
+        return new Share($this, $name, $this->system);
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimeZone() {
+        return $this->timezoneProvider->get();
+    }
+
+    /**
+     * @return integer
+     */
+    public function getMaxProtocol() {
+        return $this->maxProtocol;
+    }
+
+    /**
+     * @param integer $maxProtocol
+     */
+    public function setMaxProtocol($maxProtocol) {
+        if((ctype_digit(strval($maxProtocol)))){
+             $this->maxProtocol = 'SMB' . $maxProtocol;
+        } else {
+            throw new Exception\InvalidTypeException("Parameter is invalid, integer type only is accepted");
+        }
+    }
 }
