@@ -233,7 +233,7 @@ class NativeShare extends AbstractShare {
 	public function read($source) {
 		$url = $this->buildUrl($source);
 		$handle = $this->state->open($url, 'r');
-		return NativeStream::wrap($this->state, $handle, 'r', $url);
+		return NativeReadStream::wrap($this->state, $handle, 'r', $url);
 	}
 
 	/**
