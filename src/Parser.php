@@ -30,6 +30,7 @@ class Parser {
 	// todo replace with static once <5.6 support is dropped
 	// see error.h
 	private static $exceptionMap = [
+		ErrorCodes::LogonFailure      => '\Icewind\SMB\Exception\AuthenticationException',
 		ErrorCodes::PathNotFound      => '\Icewind\SMB\Exception\NotFoundException',
 		ErrorCodes::ObjectNotFound    => '\Icewind\SMB\Exception\NotFoundException',
 		ErrorCodes::NoSuchFile        => '\Icewind\SMB\Exception\NotFoundException',
