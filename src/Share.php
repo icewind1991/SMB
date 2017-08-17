@@ -413,6 +413,7 @@ class Share extends AbstractShare {
 		}
 		$path = str_replace('/', '\\', $path);
 		$path = str_replace('"', '^"', $path);
+		$path = ltrim($path, '\\');
 		return '"' . $path . '"';
 	}
 
