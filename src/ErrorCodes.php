@@ -27,4 +27,5 @@ class ErrorCodes {
 	const NotADirectory = 'NT_STATUS_NOT_A_DIRECTORY';
 	const SharingViolation = 'NT_STATUS_SHARING_VIOLATION';
 	const InvalidParameter = 'NT_STATUS_INVALID_PARAMETER';
+	const RevisionMismatch = 'NT_STATUS_REVISION_MISMATCH';
 }
