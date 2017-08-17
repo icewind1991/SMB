@@ -39,7 +39,8 @@ class Parser {
 		ErrorCodes::DirectoryNotEmpty => '\Icewind\SMB\Exception\NotEmptyException',
 		ErrorCodes::FileIsADirectory  => '\Icewind\SMB\Exception\InvalidTypeException',
 		ErrorCodes::NotADirectory     => '\Icewind\SMB\Exception\InvalidTypeException',
-		ErrorCodes::SharingViolation  => '\Icewind\SMB\Exception\FileInUseException'
+		ErrorCodes::SharingViolation  => '\Icewind\SMB\Exception\FileInUseException',
+		ErrorCodes::InvalidParameter  => '\Icewind\SMB\Exception\InvalidParameterException'
 	];
 
 	/**
