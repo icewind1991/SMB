@@ -12,8 +12,6 @@ if (Server::NativeAvailable()) {
 
 $share = $server->getShare('test');
 
-$share->put(__FILE__, 'example.php');
-
 $files = $share->dir('/');
 foreach ($files as $file) {
 	echo $file->getName() . "\n";
