@@ -72,6 +72,9 @@ class Share extends AbstractShare {
 		if (!$connection->isValid()) {
 			throw new ConnectionException($connection->readLine());
 		}
+		$connection->write('');
+		// some versions of smbclient add a help message in first of the first prompt
+		$connection->clearTillPrompt();
 		return $connection;
 	}
 
@@ -125,6 +128,7 @@ class Share extends AbstractShare {
 		//check output for errors
 		$this->parseOutput($output, $path);
 		$output = $this->execute('dir');
+
 		$this->execute('cd /');
 
 		return $this->parser->parseDir($output, $path);

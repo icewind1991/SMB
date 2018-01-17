@@ -34,6 +34,14 @@ class Connection extends RawConnection {
 		parent::write($input . PHP_EOL);
 	}
 
+	public function clearTillPrompt() {
+		do {
+			$promptLine = $this->readLine();
+		} while (!$this->isPrompt($promptLine));
+		$this->write('');
+		$this->readLine();
+	}
+
 	/**
 	 * get all unprocessed output from smbclient until the next prompt
 	 *
