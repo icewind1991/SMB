@@ -35,6 +35,7 @@ class Connection extends RawConnection {
 	}
 
 	public function clearTillPrompt() {
+		$this->write('');
 		do {
 			$promptLine = $this->readLine();
 		} while (!$this->isPrompt($promptLine));

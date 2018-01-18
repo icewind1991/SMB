@@ -24,7 +24,7 @@ class Share extends AbstractShare {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\Exception\InvalidHostException
+	 * @expectedException \Icewind\SMB\Exception\ConnectException
 	 */
 	public function testHostEscape() {
 		$this->requireBackendEnv('smbclient');
