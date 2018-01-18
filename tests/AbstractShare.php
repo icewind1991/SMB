@@ -7,6 +7,7 @@
 
 namespace Icewind\SMB\Test;
 
+use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\InvalidPathException;
 use Icewind\SMB\Exception\NotFoundException;
 use Icewind\SMB\FileInfo;
@@ -262,7 +263,7 @@ abstract class AbstractShare extends TestCase {
 		try {
 			$this->share->mkdir($this->root . '/foo/bar');
 			$this->fail();
-		} catch(NotFoundException $e) {
+		} catch (NotFoundException $e) {
 			$this->assertEquals($this->root . '/foo/bar', $e->getPath());
 		}
 	}
@@ -669,5 +670,13 @@ abstract class AbstractShare extends TestCase {
 	public function testStatRoot() {
 		$info = $this->share->stat('/');
 		$this->assertInstanceOf('\Icewind\SMB\IFileInfo', $info);
+	}
+
+	/**
+	* @expectedException \Icewind\SMB\Exception\FileInUseException
+	 */
+	public function testMoveIntoSelf() {
+		$this->share->mkdir($this->root . '/folder');
+		$this->share->rename($this->root . '/folder', $this->root . '/folder/subfolder');
 	}
 }
