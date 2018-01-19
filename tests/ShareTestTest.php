@@ -9,7 +9,7 @@ namespace Icewind\SMB\Test;
 
 use Icewind\SMB\Server as NormalServer;
 
-class Share extends AbstractShare {
+class ShareTestTest extends AbstractShareTest {
 	public function setUp() {
 		$this->requireBackendEnv('smbclient');
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));

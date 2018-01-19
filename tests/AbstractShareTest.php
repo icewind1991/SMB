@@ -12,7 +12,7 @@ use Icewind\SMB\Exception\InvalidPathException;
 use Icewind\SMB\Exception\NotFoundException;
 use Icewind\SMB\FileInfo;
 
-abstract class AbstractShare extends TestCase {
+abstract class AbstractShareTest extends TestCase {
 	/**
 	 * @var \Icewind\SMB\Server $server
 	 */

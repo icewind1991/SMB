@@ -9,7 +9,7 @@ namespace Icewind\SMB\Test;
 
 use Icewind\SMB\NativeServer;
 
-class NativeShare extends AbstractShare {
+class NativeShareTestTest extends AbstractShareTest {
 	public function setUp() {
 		$this->requireBackendEnv('libsmbclient');
 		if (!function_exists('smbclient_state_new')) {

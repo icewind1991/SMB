@@ -9,7 +9,7 @@ namespace Icewind\SMB\Test;
 
 use Icewind\SMB\NativeServer;
 
-class NativeStream extends TestCase {
+class NativeStreamTest extends TestCase {
 	/**
 	 * @var \Icewind\SMB\Server $server
 	 */

@@ -10,7 +10,7 @@ namespace Icewind\SMB\Test;
 
 use Icewind\SMB\FileInfo;
 
-class Parser extends \PHPUnit_Framework_TestCase {
+class ParserTest extends \PHPUnit_Framework_TestCase {
 	public function modeProvider() {
 		return array(
 			array('D', FileInfo::MODE_DIRECTORY),

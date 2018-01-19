@@ -10,7 +10,7 @@ namespace Icewind\SMB;
 use Icewind\SMB\Exception\Exception;
 
 /**
- * Low level wrapper for libsmbclient-php for error handling
+ * Low level wrapper for libsmbclient-php with error handling
  */
 class NativeState {
 	/**

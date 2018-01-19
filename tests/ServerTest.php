@@ -7,7 +7,7 @@
 
 namespace Icewind\SMB\Test;
 
-class Server extends TestCase {
+class ServerTest extends TestCase {
 	/**
 	 * @var \Icewind\SMB\Server $server
 	 */
