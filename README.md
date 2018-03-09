@@ -150,3 +150,15 @@ $share->notify('')->listen(function (\Icewind\SMB\Change $change) {
 	echo $change->getCode() . ': ' . $change->getPath() . "\n";
 });
 ```
+
+## Testing SMB
+
+Use the following steps to check if the library can connect to your SMB share.
+
+1. Clone this repository or download the source as [zip](https://github.com/icewind1991/SMB/archive/master.zip)
+2. Make sure [composer](https://getcomposer.org/) is installed
+3. Run `composer install` in the root of the repository
+4. Edit `example.php` with the relevant settings for your share.
+5. Run `php example.php`
+
+If everything works correctly then the contents of the share should be outputted.
