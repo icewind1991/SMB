@@ -7,7 +7,19 @@
 
 namespace Icewind\SMB;
 
+use Icewind\SMB\Exception\AlreadyExistsException;
+use Icewind\SMB\Exception\ConnectionRefusedException;
 use Icewind\SMB\Exception\Exception;
+use Icewind\SMB\Exception\FileInUseException;
+use Icewind\SMB\Exception\ForbiddenException;
+use Icewind\SMB\Exception\HostDownException;
+use Icewind\SMB\Exception\InvalidArgumentException;
+use Icewind\SMB\Exception\InvalidTypeException;
+use Icewind\SMB\Exception\NoRouteToHostException;
+use Icewind\SMB\Exception\NotEmptyException;
+use Icewind\SMB\Exception\NotFoundException;
+use Icewind\SMB\Exception\OutOfSpaceException;
+use Icewind\SMB\Exception\TimedOutException;
 
 /**
  * Low level wrapper for libsmbclient-php with error handling
@@ -22,23 +34,22 @@ class NativeState {
 
 	protected $connected = false;
 
-	// todo replace with static once <5.6 support is dropped
 	// see error.h
-	private static $exceptionMap = [
-		1   => '\Icewind\SMB\Exception\ForbiddenException',
-		2   => '\Icewind\SMB\Exception\NotFoundException',
-		13  => '\Icewind\SMB\Exception\ForbiddenException',
-		16  => '\Icewind\SMB\Exception\FileInUseException',
-		17  => '\Icewind\SMB\Exception\AlreadyExistsException',
-		20  => '\Icewind\SMB\Exception\InvalidTypeException',
-		21  => '\Icewind\SMB\Exception\InvalidTypeException',
-		22  => '\Icewind\SMB\Exception\InvalidArgumentException',
-		28  => '\Icewind\SMB\Exception\OutOfSpaceException',
-		39  => '\Icewind\SMB\Exception\NotEmptyException',
-		110 => '\Icewind\SMB\Exception\TimedOutException',
-		111 => '\Icewind\SMB\Exception\ConnectionRefusedException',
-		112 => '\Icewind\SMB\Exception\HostDownException',
-		113 => '\Icewind\SMB\Exception\NoRouteToHostException'
+	const EXCEPTION_MAP = [
+		1   => ForbiddenException::class,
+		2   => NotFoundException::class,
+		13  => ForbiddenException::class,
+		16  => FileInUseException::class,
+		17  => AlreadyExistsException::class,
+		20  => InvalidTypeException::class,
+		21  => InvalidTypeException::class,
+		22  => InvalidArgumentException::class,
+		28  => OutOfSpaceException::class,
+		39  => NotEmptyException::class,
+		110 => TimedOutException::class,
+		111 => ConnectionRefusedException::class,
+		112 => HostDownException::class,
+		113 => NoRouteToHostException::class
 	];
 
 	protected function handleError($path) {
@@ -46,7 +57,7 @@ class NativeState {
 		if ($error === 0) {
 			return;
 		}
-		throw Exception::fromMap(self::$exceptionMap, $error, $path);
+		throw Exception::fromMap(self::EXCEPTION_MAP, $error, $path);
 	}
 
 	protected function testResult($result, $uri) {
