@@ -5,7 +5,7 @@
  * http://opensource.org/licenses/MIT
  */
 
-namespace Icewind\SMB;
+namespace Icewind\SMB\Native;
 
 use Icewind\SMB\Exception\AlreadyExistsException;
 use Icewind\SMB\Exception\ConnectionRefusedException;
@@ -20,6 +20,7 @@ use Icewind\SMB\Exception\NotEmptyException;
 use Icewind\SMB\Exception\NotFoundException;
 use Icewind\SMB\Exception\OutOfSpaceException;
 use Icewind\SMB\Exception\TimedOutException;
+use Icewind\SMB\IAuth;
 
 /**
  * Low level wrapper for libsmbclient-php with error handling
@@ -63,7 +64,7 @@ class NativeState {
 	protected function testResult($result, $uri) {
 		if ($result === false or $result === null) {
 			// smb://host/share/path
-			if (is_string($uri)) {
+			if (is_string($uri) && count(explode('/', $uri, 5)) > 4) {
 				list(, , , , $path) = explode('/', $uri, 5);
 				$path = '/' . $path;
 			} else {
@@ -74,18 +75,17 @@ class NativeState {
 	}
 
 	/**
-	 * @param string $workGroup
-	 * @param string $user
-	 * @param string $password
+	 * @param IAuth $auth
 	 * @return bool
 	 */
-	public function init($workGroup, $user, $password) {
+	public function init(IAuth $auth) {
 		if ($this->connected) {
 			return true;
 		}
 		$this->state = smbclient_state_new();
 		smbclient_option_set($this->state, SMBCLIENT_OPT_AUTO_ANONYMOUS_LOGIN, false);
-		$result = @smbclient_state_init($this->state, $workGroup, $user, $password);
+		$auth->setExtraSmbClientOptions($this->state);
+		$result = @smbclient_state_init($this->state, $auth->getWorkgroup(), $auth->getUsername(), $auth->getPassword());
 
 		$this->testResult($result, '');
 		$this->connected = true;

@@ -8,19 +8,20 @@
 namespace Icewind\SMB\Test;
 
 
-use Icewind\SMB\FileInfo;
+use Icewind\SMB\IFileInfo;
+use Icewind\SMB\Wrapped\FileInfo;
 
 class ParserTest extends \PHPUnit_Framework_TestCase {
 	public function modeProvider() {
 		return array(
-			array('D', FileInfo::MODE_DIRECTORY),
-			array('A', FileInfo::MODE_ARCHIVE),
-			array('S', FileInfo::MODE_SYSTEM),
-			array('H', FileInfo::MODE_HIDDEN),
-			array('R', FileInfo::MODE_READONLY),
-			array('N', FileInfo::MODE_NORMAL),
-			array('RA', FileInfo::MODE_READONLY | FileInfo::MODE_ARCHIVE),
-			array('RAH', FileInfo::MODE_READONLY | FileInfo::MODE_ARCHIVE | FileInfo::MODE_HIDDEN)
+			array('D', IFileInfo::MODE_DIRECTORY),
+			array('A', IFileInfo::MODE_ARCHIVE),
+			array('S', IFileInfo::MODE_SYSTEM),
+			array('H', IFileInfo::MODE_HIDDEN),
+			array('R', IFileInfo::MODE_READONLY),
+			array('N', IFileInfo::MODE_NORMAL),
+			array('RA', IFileInfo::MODE_READONLY | IFileInfo::MODE_ARCHIVE),
+			array('RAH', IFileInfo::MODE_READONLY | IFileInfo::MODE_ARCHIVE | IFileInfo::MODE_HIDDEN)
 		);
 	}
 
@@ -42,7 +43,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 	 * @dataProvider modeProvider
 	 */
 	public function testParseMode($string, $mode) {
-		$parser = new \Icewind\SMB\Parser($this->getTimeZoneProvider('UTC'));
+		$parser = new \Icewind\SMB\Wrapped\Parser($this->getTimeZoneProvider('UTC'));
 		$this->assertEquals($mode, $parser->parseMode($string), 'Failed parsing ' . $string);
 	}
 
@@ -60,7 +61,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 				),
 				array(
 					'mtime' => strtotime('12 Oct 2013 19:05:58 CEST'),
-					'mode' => FileInfo::MODE_NORMAL,
+					'mode' => IFileInfo::MODE_NORMAL,
 					'size' => 29634
 				)
 			),
@@ -76,7 +77,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 				),
 				array(
 					'mtime' => strtotime('12 Oct 2013 19:05:58 CEST'),
-					'mode' => FileInfo::MODE_DIRECTORY,
+					'mode' => IFileInfo::MODE_DIRECTORY,
 					'size' => 29634
 				)
 			),
@@ -92,7 +93,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 				),
 				array(
 					'mtime' => strtotime('12 Oct 2013 19:05:58 CEST'),
-					'mode' => FileInfo::MODE_HIDDEN + FileInfo::MODE_ARCHIVE,
+					'mode' => IFileInfo::MODE_HIDDEN + IFileInfo::MODE_ARCHIVE,
 					'size' => 29634
 				)
 			)
@@ -103,7 +104,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 	 * @dataProvider statProvider
 	 */
 	public function testStat($output, $stat) {
-		$parser = new \Icewind\SMB\Parser($this->getTimeZoneProvider('UTC'));
+		$parser = new \Icewind\SMB\Wrapped\Parser($this->getTimeZoneProvider('UTC'));
 		$this->assertEquals($stat, $parser->parseStat($output));
 	}
 
@@ -119,7 +120,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 				),
 				array(
 					new FileInfo('/c.pdf', 'c.pdf', 29634, strtotime('12 Oct 2013 19:05:58 CEST'),
-						FileInfo::MODE_NORMAL)
+						IFileInfo::MODE_NORMAL)
 				)
 			)
 		);
@@ -129,7 +130,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 	 * @dataProvider dirProvider
 	 */
 	public function testDir($output, $dir) {
-		$parser = new \Icewind\SMB\Parser($this->getTimeZoneProvider('CEST'));
+		$parser = new \Icewind\SMB\Wrapped\Parser($this->getTimeZoneProvider('CEST'));
 		$this->assertEquals($dir, $parser->parseDir($output, ''));
 	}
 }

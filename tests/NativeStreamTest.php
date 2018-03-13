@@ -7,16 +7,19 @@
 
 namespace Icewind\SMB\Test;
 
-use Icewind\SMB\NativeServer;
+use Icewind\SMB\BasicAuth;
+use Icewind\SMB\Native\NativeServer;
+use Icewind\SMB\System;
+use Icewind\SMB\TimeZoneProvider;
 
 class NativeStreamTest extends TestCase {
 	/**
-	 * @var \Icewind\SMB\Server $server
+	 * @var \Icewind\SMB\IServer $server
 	 */
 	protected $server;
 
 	/**
-	 * @var \Icewind\SMB\NativeShare $share
+	 * @var \Icewind\SMB\Native\NativeShare $share
 	 */
 	protected $share;
 
@@ -33,7 +36,15 @@ class NativeStreamTest extends TestCase {
 			$this->markTestSkipped('libsmbclient php extension not installed');
 		}
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
-		$this->server = new NativeServer($this->config->host, $this->config->user, $this->config->password);
+		$this->server = new NativeServer(
+			$this->config->host,
+			new BasicAuth(
+				$this->config->user,
+				$this->config->password
+			),
+			new System(),
+			new TimeZoneProvider($this->config->host, new System())
+		);
 		$this->share = $this->server->getShare($this->config->share);
 		if ($this->config->root) {
 			$this->root = '/' . $this->config->root . '/' . uniqid();

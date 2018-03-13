@@ -6,15 +6,14 @@ use Icewind\SMB\Server;
 require('vendor/autoload.php');
 
 $host = 'localhost';
-$user = 'test';
+$user = 'test\test';
 $password = 'test';
 $share = 'test';
 
-if (Server::NativeAvailable()) {
-	$server = new NativeServer($host, $user, $password);
-} else {
-	$server = new Server($host, $user, $password);
-}
+$auth = new \Icewind\SMB\BasicAuth($user, $password);
+$serverFactory = new \Icewind\SMB\ServerFactory();
+
+$server = $serverFactory->createServer($host, $auth);
 
 $share = $server->getShare($share);
 

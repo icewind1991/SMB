@@ -7,9 +7,14 @@
 
 namespace Icewind\SMB\Test;
 
+use Icewind\SMB\BasicAuth;
+use Icewind\SMB\System;
+use Icewind\SMB\TimeZoneProvider;
+use Icewind\SMB\Wrapped\Server;
+
 class ServerTest extends TestCase {
 	/**
-	 * @var \Icewind\SMB\Server $server
+	 * @var \Icewind\SMB\Wrapped\Server $server
 	 */
 	private $server;
 
@@ -18,7 +23,15 @@ class ServerTest extends TestCase {
 	public function setUp() {
 		$this->requireBackendEnv('smbclient');
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
-		$this->server = new \Icewind\SMB\Server($this->config->host, $this->config->user, $this->config->password);
+		$this->server = new Server(
+			$this->config->host,
+			new BasicAuth(
+				$this->config->user,
+				$this->config->password
+			),
+			new System(),
+			new TimeZoneProvider($this->config->host, new System())
+		);
 	}
 
 	public function testListShares() {
@@ -36,7 +49,15 @@ class ServerTest extends TestCase {
 	 */
 	public function testWrongUserName() {
 		$this->markTestSkipped('This fails for no reason on travis');
-		$server = new \Icewind\SMB\Server($this->config->host, uniqid(), uniqid());
+		$server = new Server(
+			$this->config->host,
+			new BasicAuth(
+				uniqid(),
+				uniqid()
+			),
+			new System(),
+			new TimeZoneProvider($this->config->host, new System())
+		);
 		$server->listShares();
 	}
 
@@ -44,7 +65,15 @@ class ServerTest extends TestCase {
 	 * @expectedException \Icewind\SMB\Exception\AuthenticationException
 	 */
 	public function testWrongPassword() {
-		$server = new \Icewind\SMB\Server($this->config->host, $this->config->user, uniqid());
+		$server = new Server(
+			$this->config->host,
+			new BasicAuth(
+				$this->config->user,
+				uniqid()
+			),
+			new System(),
+			new TimeZoneProvider($this->config->host, new System())
+		);
 		$server->listShares();
 	}
 
@@ -52,7 +81,15 @@ class ServerTest extends TestCase {
 	 * @expectedException \Icewind\SMB\Exception\InvalidHostException
 	 */
 	public function testWrongHost() {
-		$server = new \Icewind\SMB\Server(uniqid(), $this->config->user, $this->config->password);
+		$server = new Server(
+			uniqid(),
+			new BasicAuth(
+				$this->config->user,
+				$this->config->password
+			),
+			new System(),
+			new TimeZoneProvider($this->config->host, new System())
+		);
 		$server->listShares();
 	}
 
@@ -61,7 +98,15 @@ class ServerTest extends TestCase {
 	 * @expectedException \Icewind\SMB\Exception\InvalidHostException
 	 */
 	public function testHostEscape() {
-		$server = new \Icewind\SMB\Server($this->config->host . ';asd', $this->config->user, $this->config->password);
+		$server = new Server(
+			$this->config->host . ';asd',
+			new BasicAuth(
+				$this->config->user,
+				$this->config->password
+			),
+			new System(),
+			new TimeZoneProvider($this->config->host, new System())
+		);
 		$server->listShares();
 	}
 }

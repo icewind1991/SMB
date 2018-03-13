@@ -5,7 +5,7 @@
  * http://opensource.org/licenses/MIT
  */
 
-namespace Icewind\SMB;
+namespace Icewind\SMB\Wrapped;
 
 use Icewind\SMB\Exception\AccessDeniedException;
 use Icewind\SMB\Exception\AlreadyExistsException;
@@ -19,6 +19,7 @@ use Icewind\SMB\Exception\InvalidTypeException;
 use Icewind\SMB\Exception\NoLoginServerException;
 use Icewind\SMB\Exception\NotEmptyException;
 use Icewind\SMB\Exception\NotFoundException;
+use Icewind\SMB\TimeZoneProvider;
 
 class Parser {
 	const MSG_NOT_FOUND = 'Error opening local file ';
@@ -45,7 +46,7 @@ class Parser {
 	];
 
 	/**
-	 * @param \Icewind\SMB\TimeZoneProvider $timeZoneProvider
+	 * @param TimeZoneProvider $timeZoneProvider
 	 */
 	public function __construct(TimeZoneProvider $timeZoneProvider) {
 		$this->timeZoneProvider = $timeZoneProvider;

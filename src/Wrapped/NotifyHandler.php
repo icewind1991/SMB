@@ -6,11 +6,13 @@
  *
  */
 
-namespace Icewind\SMB;
+namespace Icewind\SMB\Wrapped;
 
 
+use Icewind\SMB\Change;
 use Icewind\SMB\Exception\Exception;
 use Icewind\SMB\Exception\RevisionMismatchException;
+use Icewind\SMB\INotifyHandler;
 
 class NotifyHandler implements INotifyHandler {
 	/**

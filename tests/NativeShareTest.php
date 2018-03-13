@@ -7,16 +7,27 @@
 
 namespace Icewind\SMB\Test;
 
-use Icewind\SMB\NativeServer;
+use Icewind\SMB\BasicAuth;
+use Icewind\SMB\Native\NativeServer;
+use Icewind\SMB\System;
+use Icewind\SMB\TimeZoneProvider;
 
-class NativeShareTestTest extends AbstractShareTest {
+class NativeShareTest extends AbstractShareTest {
 	public function setUp() {
 		$this->requireBackendEnv('libsmbclient');
 		if (!function_exists('smbclient_state_new')) {
 			$this->markTestSkipped('libsmbclient php extension not installed');
 		}
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
-		$this->server = new NativeServer($this->config->host, $this->config->user, $this->config->password);
+		$this->server = new NativeServer(
+			$this->config->host,
+			new BasicAuth(
+				$this->config->user,
+				$this->config->password
+			),
+			new System(),
+			new TimeZoneProvider($this->config->host, new System())
+		);
 		$this->share = $this->server->getShare($this->config->share);
 		if ($this->config->root) {
 			$this->root = '/' . $this->config->root . '/' . uniqid();

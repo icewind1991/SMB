@@ -7,13 +7,24 @@
 
 namespace Icewind\SMB\Test;
 
-use Icewind\SMB\Server as NormalServer;
+use Icewind\SMB\BasicAuth;
+use Icewind\SMB\System;
+use Icewind\SMB\TimeZoneProvider;
+use Icewind\SMB\Wrapped\Server as NormalServer;
 
-class ShareTestTest extends AbstractShareTest {
+class ShareTest extends AbstractShareTest {
 	public function setUp() {
 		$this->requireBackendEnv('smbclient');
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
-		$this->server = new NormalServer($this->config->host, $this->config->user, $this->config->password);
+		$this->server = new NormalServer(
+			$this->config->host,
+			new BasicAuth(
+				$this->config->user,
+				$this->config->password
+			),
+			new System(),
+			new TimeZoneProvider($this->config->host, new System())
+		);
 		$this->share = $this->server->getShare($this->config->share);
 		if ($this->config->root) {
 			$this->root = '/' . $this->config->root . '/' . uniqid();
@@ -29,24 +40,16 @@ class ShareTestTest extends AbstractShareTest {
 	public function testHostEscape() {
 		$this->requireBackendEnv('smbclient');
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
-		$this->server = new NormalServer($this->config->host . ';asd', $this->config->user, $this->config->password);
+		$this->server = new NormalServer(
+			$this->config->host . ';asd',
+			new BasicAuth(
+				$this->config->user,
+				$this->config->password
+			),
+			new System(),
+			new TimeZoneProvider($this->config->host, new System())
+		);
 		$share = $this->server->getShare($this->config->share);
 		$share->dir($this->root);
-	}
-
-	/**
-	 * @expectedException \Icewind\SMB\Exception\DependencyException
-	 */
-	public function testNoSmbclient() {
-		$system = $this->getMockBuilder('\Icewind\SMB\System')
-			->setMethods(['getSmbclientPath'])
-			->getMock();
-		$share = new \Icewind\SMB\Share($this->server, 'dummy', $system);
-
-		$system->expects($this->any())
-			->method('getSmbclientPath')
-			->will($this->returnValue(''));
-
-		$share->mkdir('');
 	}
 }
