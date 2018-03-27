@@ -54,12 +54,18 @@ class Server extends AbstractServer {
 		if (!$connection->isValid()) {
 			throw new ConnectionException($connection->readLine());
 		}
+
+		$parser = new Parser($this->timezoneProvider);
+
 		$output = $connection->readAll();
+		if (isset($output[0])) {
+			$parser->checkConnectionError($output[0]);
+		}
+
 		// sometimes we get an empty line first
 		if (count($output) < 2) {
 			$output = $connection->readAll();
 		}
-		$parser = new Parser($this->timezoneProvider);
 
 		if (isset($output[0])) {
 			$parser->checkConnectionError($output[0]);
