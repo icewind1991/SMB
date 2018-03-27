@@ -49,6 +49,9 @@ class RawConnection {
 		$this->env = $env;
 	}
 
+	/**
+	 * @throws ConnectException
+	 */
 	public function connect() {
 		if (is_null($this->getAuthStream())) {
 			throw new ConnectException('Authentication not set before connecting');

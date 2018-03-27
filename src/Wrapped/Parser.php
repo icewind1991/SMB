@@ -166,6 +166,10 @@ class Parser {
 				if (strtolower($type) === 'disk') {
 					$shareNames[$name] = $description;
 				}
+			} else if (strpos($line, 'Disk')) {
+				// new output format
+				list($name, $description) = explode('Disk', $line);
+				$shareNames[trim($name)] = trim($description);
 			}
 		}
 		return $shareNames;

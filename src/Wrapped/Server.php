@@ -8,12 +8,18 @@
 namespace Icewind\SMB\Wrapped;
 
 use Icewind\SMB\AbstractServer;
+use Icewind\SMB\Exception\AuthenticationException;
+use Icewind\SMB\Exception\ConnectException;
+use Icewind\SMB\Exception\ConnectionException;
+use Icewind\SMB\Exception\InvalidHostException;
+use Icewind\SMB\IShare;
 use Icewind\SMB\System;
 
 class Server extends AbstractServer {
 	/**
 	 * Check if the smbclient php extension is available
 	 *
+	 * @param System $system
 	 * @return bool
 	 */
 	public static function available(System $system) {
@@ -29,10 +35,11 @@ class Server extends AbstractServer {
 	}
 
 	/**
-	 * @return \Icewind\SMB\IShare[]
+	 * @return IShare[]
 	 *
-	 * @throws \Icewind\SMB\Exception\AuthenticationException
-	 * @throws \Icewind\SMB\Exception\InvalidHostException
+	 * @throws AuthenticationException
+	 * @throws InvalidHostException
+	 * @throws ConnectException
 	 */
 	public function listShares() {
 		$command = sprintf('%s %s %s -L %s',
@@ -44,7 +51,14 @@ class Server extends AbstractServer {
 		$connection = new RawConnection($command);
 		$connection->writeAuthentication($this->getAuth()->getUsername(), $this->getAuth()->getPassword());
 		$connection->connect();
+		if (!$connection->isValid()) {
+			throw new ConnectionException($connection->readLine());
+		}
 		$output = $connection->readAll();
+		// sometimes we get an empty line first
+		if (count($output) === 0) {
+			$output = $connection->readAll();
+		}
 		$parser = new Parser($this->timezoneProvider);
 
 		if (isset($output[0])) {
@@ -62,7 +76,7 @@ class Server extends AbstractServer {
 
 	/**
 	 * @param string $name
-	 * @return \Icewind\SMB\IShare
+	 * @return IShare
 	 */
 	public function getShare($name) {
 		return new Share($this, $name, $this->system);
