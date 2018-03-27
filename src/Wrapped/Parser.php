@@ -83,6 +83,7 @@ class Parser {
 	 * @throws AuthenticationException
 	 * @throws InvalidHostException
 	 * @throws NoLoginServerException
+	 * @throws AccessDeniedException
 	 */
 	public function checkConnectionError($line) {
 		$line = rtrim($line, ')');
@@ -100,6 +101,9 @@ class Parser {
 		}
 		if (substr($line, -26) === ErrorCodes::NoLogonServers) {
 			throw new NoLoginServerException('No login server');
+		}
+		if (substr($line, -23) === ErrorCodes::AccessDenied) {
+			throw new AccessDeniedException('Access denied');
 		}
 	}
 
