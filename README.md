@@ -35,6 +35,14 @@ $share = $server->getShare('test');
 The server factory will automatically pick between the `smbclient` and `libsmbclient-php`
 based backend depending on what is available.
 
+### Using anonymous authentication ### 
+
+```php
+$serverFactory = new ServerFactory();
+$auth = new AnonymousAuth();
+$server = $serverFactory->createServer('localhost', $auth);
+```
+
 ### Using kerberos authentication ###
 
 ```php

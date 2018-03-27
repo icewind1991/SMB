@@ -128,7 +128,7 @@ class RawConnection {
 	 * @return array
 	 */
 	public function readAll() {
-		$output = array();
+		$output = [];
 		while ($line = $this->readLine()) {
 			$output[] = $line;
 		}

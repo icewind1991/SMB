@@ -56,7 +56,7 @@ class Server extends AbstractServer {
 		}
 		$output = $connection->readAll();
 		// sometimes we get an empty line first
-		if (count($output) === 0) {
+		if (count($output) < 2) {
 			$output = $connection->readAll();
 		}
 		$parser = new Parser($this->timezoneProvider);
