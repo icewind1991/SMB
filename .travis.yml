@@ -23,7 +23,7 @@ env:
     - BACKEND=libsmbclient
 
 before_install:
-  - pass=$(perl -e 'print crypt("test", "password")')
+  - pass=$(perl -e 'print crypt("test", "test")')
   - sudo useradd -m -p $pass test
   - if [ "$BACKEND" == 'libsmbclient' ]; then ./install_libsmbclient.sh; fi
   - cd $CURRENT_DIR
@@ -49,11 +49,8 @@ install:
   - composer install --dev --no-interaction
 
 script:
-  - mkdir -p build/logs
-  - cd tests
-  - phpunit --coverage-clover ../build/logs/clover.xml --configuration phpunit.xml
+  - vendor/bin/phpunit --coverage-clover clover.xml -c tests/phpunit.xml
 
 after_script:
- - cd $CURRENT_DIR
  - wget https://scrutinizer-ci.com/ocular.phar
- - php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
+ - php ocular.phar code-coverage:upload --format=php-clover clover.xml
