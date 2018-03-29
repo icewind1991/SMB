@@ -27,6 +27,7 @@ class ServerTest extends TestCase {
 			$this->config->host,
 			new BasicAuth(
 				$this->config->user,
+				'test',
 				$this->config->password
 			),
 			new System(),
@@ -53,6 +54,7 @@ class ServerTest extends TestCase {
 			$this->config->host,
 			new BasicAuth(
 				uniqid(),
+				'test',
 				uniqid()
 			),
 			new System(),
@@ -69,6 +71,7 @@ class ServerTest extends TestCase {
 			$this->config->host,
 			new BasicAuth(
 				$this->config->user,
+				'test',
 				uniqid()
 			),
 			new System(),
@@ -85,6 +88,7 @@ class ServerTest extends TestCase {
 			uniqid(),
 			new BasicAuth(
 				$this->config->user,
+				'test',
 				$this->config->password
 			),
 			new System(),
@@ -102,6 +106,7 @@ class ServerTest extends TestCase {
 			$this->config->host . ';asd',
 			new BasicAuth(
 				$this->config->user,
+				'test',
 				$this->config->password
 			),
 			new System(),

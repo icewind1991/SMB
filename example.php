@@ -6,11 +6,12 @@ use Icewind\SMB\Server;
 require('vendor/autoload.php');
 
 $host = 'localhost';
-$user = 'test\test';
+$user = 'test';
+$workgroup = 'test';
 $password = 'test';
 $share = 'test';
 
-$auth = new \Icewind\SMB\BasicAuth($user, $password);
+$auth = new \Icewind\SMB\BasicAuth($user, $workgroup, $password);
 $serverFactory = new \Icewind\SMB\ServerFactory();
 
 $server = $serverFactory->createServer($host, $auth);

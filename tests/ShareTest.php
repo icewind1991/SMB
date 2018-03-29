@@ -20,6 +20,7 @@ class ShareTest extends AbstractShareTest {
 			$this->config->host,
 			new BasicAuth(
 				$this->config->user,
+				'test',
 				$this->config->password
 			),
 			new System(),
@@ -44,6 +45,7 @@ class ShareTest extends AbstractShareTest {
 			$this->config->host . ';asd',
 			new BasicAuth(
 				$this->config->user,
+				'test',
 				$this->config->password
 			),
 			new System(),

@@ -40,6 +40,7 @@ class NativeStreamTest extends TestCase {
 			$this->config->host,
 			new BasicAuth(
 				$this->config->user,
+				'test',
 				$this->config->password
 			),
 			new System(),

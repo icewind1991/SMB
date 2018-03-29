@@ -34,29 +34,13 @@ class BasicAuth implements IAuth {
 	 * BasicAuth constructor.
 	 *
 	 * @param string $username
+	 * @param string $workgroup
 	 * @param string $password
 	 */
-	public function __construct($username, $password) {
-		list($workgroup, $username) = $this->splitUser($username);
+	public function __construct($username, $workgroup, $password) {
 		$this->username = $username;
 		$this->workgroup = $workgroup;
 		$this->password = $password;
-	}
-
-	/**
-	 * Split workgroup from username
-	 *
-	 * @param $user
-	 * @return string[] [$workgroup, $user]
-	 */
-	private function splitUser($user) {
-		if (strpos($user, '/')) {
-			return explode('/', $user, 2);
-		} elseif (strpos($user, '\\')) {
-			return explode('\\', $user);
-		} else {
-			return array(null, $user);
-		}
 	}
 
 	public function getUsername() {
