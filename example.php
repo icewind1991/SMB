@@ -1,8 +1,5 @@
 <?php
 
-use Icewind\SMB\NativeServer;
-use Icewind\SMB\Server;
-
 require('vendor/autoload.php');
 
 $host = 'localhost';
