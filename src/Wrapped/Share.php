@@ -45,6 +45,13 @@ class Share extends AbstractShare {
 	 */
 	private $system;
 
+	const MODE_MAP = [
+		FileInfo::MODE_READONLY => 'r',
+		FileInfo::MODE_HIDDEN   => 'h',
+		FileInfo::MODE_ARCHIVE  => 'a',
+		FileInfo::MODE_SYSTEM   => 's'
+	];
+
 	/**
 	 * @param IServer $server
 	 * @param string $name
@@ -327,13 +334,7 @@ class Share extends AbstractShare {
 	 */
 	public function setMode($path, $mode) {
 		$modeString = '';
-		$modeMap = array(
-			FileInfo::MODE_READONLY => 'r',
-			FileInfo::MODE_HIDDEN   => 'h',
-			FileInfo::MODE_ARCHIVE  => 'a',
-			FileInfo::MODE_SYSTEM   => 's'
-		);
-		foreach ($modeMap as $modeByte => $string) {
+		foreach (self::MODE_MAP as $modeByte => $string) {
 			if ($mode & $modeByte) {
 				$modeString .= $string;
 			}

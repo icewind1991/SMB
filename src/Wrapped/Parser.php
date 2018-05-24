@@ -45,6 +45,15 @@ class Parser {
 		ErrorCodes::InvalidParameter  => InvalidParameterException::class
 	];
 
+	const MODE_STRINGS = [
+		'R' => FileInfo::MODE_READONLY,
+		'H' => FileInfo::MODE_HIDDEN,
+		'S' => FileInfo::MODE_SYSTEM,
+		'D' => FileInfo::MODE_DIRECTORY,
+		'A' => FileInfo::MODE_ARCHIVE,
+		'N' => FileInfo::MODE_NORMAL
+	];
+
 	/**
 	 * @param TimeZoneProvider $timeZoneProvider
 	 */
@@ -109,15 +118,7 @@ class Parser {
 
 	public function parseMode($mode) {
 		$result = 0;
-		$modeStrings = array(
-			'R' => FileInfo::MODE_READONLY,
-			'H' => FileInfo::MODE_HIDDEN,
-			'S' => FileInfo::MODE_SYSTEM,
-			'D' => FileInfo::MODE_DIRECTORY,
-			'A' => FileInfo::MODE_ARCHIVE,
-			'N' => FileInfo::MODE_NORMAL
-		);
-		foreach ($modeStrings as $char => $val) {
+		foreach (self::MODE_STRINGS as $char => $val) {
 			if (strpos($mode, $char) !== false) {
 				$result |= $val;
 			}
