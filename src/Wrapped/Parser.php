@@ -135,7 +135,10 @@ class Parser {
 			$name = isset($words[0]) ? $words[0] : '';
 			$value = isset($words[1]) ? $words[1] : '';
 			$value = trim($value);
-			$data[$name] = $value;
+
+			if (!isset($data[$name])) {
+			    $data[$name] = $value;
+			}
 		}
 		return [
 			'mtime' => strtotime($data['write_time']),
