@@ -36,7 +36,7 @@ abstract class AbstractServer implements IServer {
 	protected $auth;
 
 	/**
-	 * @var \Icewind\SMB\System
+	 * @var ISystem
 	 */
 	protected $system;
 
@@ -45,41 +45,41 @@ abstract class AbstractServer implements IServer {
 	 */
 	protected $timezoneProvider;
 
+	/** @var IOptions */
+	protected $options;
+
 	/**
 	 * @param string $host
 	 * @param IAuth $auth
-	 * @param System $system
+	 * @param ISystem $system
 	 * @param TimeZoneProvider $timeZoneProvider
+	 * @param IOptions $options
 	 */
-	public function __construct($host, IAuth $auth, System $system, TimeZoneProvider $timeZoneProvider) {
+	public function __construct($host, IAuth $auth, ISystem $system, TimeZoneProvider $timeZoneProvider, IOptions $options) {
 		$this->host = $host;
 		$this->auth = $auth;
 		$this->system = $system;
 		$this->timezoneProvider = $timeZoneProvider;
+		$this->options = $options;
 	}
 
-	/**
-	 * @return IAuth
-	 */
 	public function getAuth() {
 		return $this->auth;
 	}
 
-	/**
-	 * return string
-	 */
 	public function getHost() {
 		return $this->host;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getTimeZone() {
-		return $this->timezoneProvider->get();
+		return $this->timezoneProvider->get($this->host);
 	}
 
 	public function getSystem() {
 		return $this->system;
+	}
+
+	public function getOptions() {
+		return $this->options;
 	}
 }

@@ -12,6 +12,7 @@ use Icewind\SMB\Change;
 use Icewind\SMB\Exception\AlreadyExistsException;
 use Icewind\SMB\INotifyHandler;
 use Icewind\SMB\IShare;
+use Icewind\SMB\Options;
 use Icewind\SMB\System;
 use Icewind\SMB\TimeZoneProvider;
 use Icewind\SMB\Wrapped\Server;
@@ -35,7 +36,8 @@ class NotifyHandlerTest extends TestCase {
 				$this->config->password
 			),
 			new System(),
-			new TimeZoneProvider($this->config->host, new System())
+			new TimeZoneProvider(new System()),
+			new Options()
 		);
 	}
 

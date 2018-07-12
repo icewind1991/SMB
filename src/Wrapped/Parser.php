@@ -19,15 +19,19 @@ use Icewind\SMB\Exception\InvalidTypeException;
 use Icewind\SMB\Exception\NoLoginServerException;
 use Icewind\SMB\Exception\NotEmptyException;
 use Icewind\SMB\Exception\NotFoundException;
-use Icewind\SMB\TimeZoneProvider;
 
 class Parser {
 	const MSG_NOT_FOUND = 'Error opening local file ';
 
 	/**
-	 * @var \Icewind\SMB\TimeZoneProvider
+	 * @var string
 	 */
-	protected $timeZoneProvider;
+	protected $timeZone;
+
+	/**
+	 * @var string
+	 */
+	private $host;
 
 	// todo replace with static once <5.6 support is dropped
 	// see error.h
@@ -55,10 +59,10 @@ class Parser {
 	];
 
 	/**
-	 * @param TimeZoneProvider $timeZoneProvider
+	 * @param string $timeZone
 	 */
-	public function __construct(TimeZoneProvider $timeZoneProvider) {
-		$this->timeZoneProvider = $timeZoneProvider;
+	public function __construct($timeZone) {
+		$this->timeZone = $timeZone;
 	}
 
 	private function getErrorCode($line) {
@@ -158,7 +162,7 @@ class Parser {
 				list(, $name, $mode, $size, $time) = $matches;
 				if ($name !== '.' and $name !== '..') {
 					$mode = $this->parseMode($mode);
-					$time = strtotime($time . ' ' . $this->timeZoneProvider->get());
+					$time = strtotime($time . ' ' . $this->timeZone);
 					$content[] = new FileInfo($basePath . '/' . $name, $name, $size, $time, $mode);
 				}
 			}

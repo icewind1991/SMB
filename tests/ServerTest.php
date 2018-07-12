@@ -8,6 +8,7 @@
 namespace Icewind\SMB\Test;
 
 use Icewind\SMB\BasicAuth;
+use Icewind\SMB\Options;
 use Icewind\SMB\System;
 use Icewind\SMB\TimeZoneProvider;
 use Icewind\SMB\Wrapped\Server;
@@ -31,7 +32,8 @@ class ServerTest extends TestCase {
 				$this->config->password
 			),
 			new System(),
-			new TimeZoneProvider($this->config->host, new System())
+			new TimeZoneProvider(new System()),
+			new Options()
 		);
 	}
 
@@ -58,7 +60,8 @@ class ServerTest extends TestCase {
 				uniqid()
 			),
 			new System(),
-			new TimeZoneProvider($this->config->host, new System())
+			new TimeZoneProvider(new System()),
+			new Options()
 		);
 		$server->listShares();
 	}
@@ -75,7 +78,8 @@ class ServerTest extends TestCase {
 				uniqid()
 			),
 			new System(),
-			new TimeZoneProvider($this->config->host, new System())
+			new TimeZoneProvider(new System()),
+			new Options()
 		);
 		$server->listShares();
 	}
@@ -92,7 +96,8 @@ class ServerTest extends TestCase {
 				$this->config->password
 			),
 			new System(),
-			new TimeZoneProvider($this->config->host, new System())
+			new TimeZoneProvider(new System()),
+			new Options()
 		);
 		$server->listShares();
 	}
@@ -110,7 +115,8 @@ class ServerTest extends TestCase {
 				$this->config->password
 			),
 			new System(),
-			new TimeZoneProvider($this->config->host, new System())
+			new TimeZoneProvider(new System()),
+			new Options()
 		);
 		$server->listShares();
 	}

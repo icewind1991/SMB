@@ -7,44 +7,41 @@
 
 namespace Icewind\SMB;
 
-class TimeZoneProvider {
+class TimeZoneProvider implements ITimeZoneProvider {
 	/**
-	 * @var string
+	 * @var string[]
 	 */
-	private $host;
+	private $timeZones = [];
 
 	/**
-	 * @var string
-	 */
-	private $timeZone;
-
-	/**
-	 * @var System
+	 * @var ISystem
 	 */
 	private $system;
 
 	/**
-	 * @param string $host
-	 * @param System $system
+	 * @param ISystem $system
 	 */
-	public function __construct($host, System $system) {
-		$this->host = $host;
+	public function __construct(ISystem $system) {
 		$this->system = $system;
 	}
 
-	public function get() {
-		if (!$this->timeZone) {
+	public function get($host) {
+		if (!isset($this->timeZones[$host])) {
 			$net = $this->system->getNetPath();
-			if ($net) {
+			if ($net && $host) {
 				$command = sprintf('%s time zone -S %s',
 					$net,
-					escapeshellarg($this->host)
+					escapeshellarg($host)
 				);
-				$this->timeZone = exec($command);
+				$timeZone = exec($command);
+				if (!$timeZone) {
+					$timeZone = date_default_timezone_get();
+				}
+				$this->timeZones[$host] = $timeZone;
 			} else { // fallback to server timezone
-				$this->timeZone = date_default_timezone_get();
+				$this->timeZones[$host] = date_default_timezone_get();
 			}
 		}
-		return $this->timeZone;
+		return $this->timeZones[$host];
 	}
 }

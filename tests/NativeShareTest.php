@@ -9,6 +9,7 @@ namespace Icewind\SMB\Test;
 
 use Icewind\SMB\BasicAuth;
 use Icewind\SMB\Native\NativeServer;
+use Icewind\SMB\Options;
 use Icewind\SMB\System;
 use Icewind\SMB\TimeZoneProvider;
 
@@ -27,7 +28,8 @@ class NativeShareTest extends AbstractShareTest {
 				$this->config->password
 			),
 			new System(),
-			new TimeZoneProvider($this->config->host, new System())
+			new TimeZoneProvider(new System()),
+			new Options()
 		);
 		$this->share = $this->server->getShare($this->config->share);
 		if ($this->config->root) {

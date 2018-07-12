@@ -304,7 +304,7 @@ class NativeShare extends AbstractShare {
 		if (!Server::available($this->server->getSystem())) {
 			throw new DependencyException('smbclient not found in path for notify command');
 		}
-		$share = new Share($this->server, $this->getName());
+		$share = new Share($this->server, $this->getName(), $this->server->getSystem());
 		return $share->notify($path);
 	}
 

@@ -21,49 +21,37 @@
 
 namespace Icewind\SMB;
 
-interface IServer {
+/**
+ * The `ISystem` interface provides a way to access system dependent information
+ * such as the availability and location of certain binaries.
+ */
+interface ISystem {
 	/**
-	 * @return IAuth
-	 */
-	public function getAuth();
-
-	/**
-	 * @return string
-	 */
-	public function getHost();
-
-	/**
-	 * @return \Icewind\SMB\IShare[]
+	 * Get the path to a file descriptor of the current process
 	 *
-	 * @throws \Icewind\SMB\Exception\AuthenticationException
-	 * @throws \Icewind\SMB\Exception\InvalidHostException
-	 */
-	public function listShares();
-
-	/**
-	 * @param string $name
-	 * @return \Icewind\SMB\IShare
-	 */
-	public function getShare($name);
-
-	/**
+	 * @param int $num the file descriptor id
 	 * @return string
 	 */
-	public function getTimeZone();
+	public function getFD($num);
 
 	/**
-	 * @return ISystem
+	 * Get the full path to the `smbclient` binary of false if the binary is not available
+	 *
+	 * @return string|bool
 	 */
-	public function getSystem();
+	public function getSmbclientPath();
 
 	/**
-	 * @return IOptions
+	 * Get the full path to the `net` binary of false if the binary is not available
+	 *
+	 * @return string|bool
 	 */
-	public function getOptions();
+	public function getNetPath();
 
 	/**
-	 * @param ISystem $system
+	 * Whether or not the `stdbuf` command is available in the path
+	 *
 	 * @return bool
 	 */
-	public static function available(ISystem $system);
+	public function hasStdBuf();
 }

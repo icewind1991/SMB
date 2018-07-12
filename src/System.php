@@ -9,14 +9,21 @@ namespace Icewind\SMB;
 
 use Icewind\SMB\Exception\Exception;
 
-class System {
+class System implements ISystem {
 	private $smbclient;
 
 	private $net;
 
 	private $stdbuf;
 
-	public static function getFD($num) {
+	/**
+	 * Get the path to a file descriptor of the current process
+	 *
+	 * @param int $num the file descriptor id
+	 * @return string
+	 * @throws Exception
+	 */
+	public function getFD($num) {
 		$folders = [
 			'/proc/self/fd',
 			'/dev/fd'

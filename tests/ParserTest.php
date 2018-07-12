@@ -24,26 +24,11 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 			array('RAH', IFileInfo::MODE_READONLY | IFileInfo::MODE_ARCHIVE | IFileInfo::MODE_HIDDEN)
 		);
 	}
-
-	/**
-	 * @param string $timeZone
-	 * @return \Icewind\SMB\TimeZoneProvider
-	 */
-	private function getTimeZoneProvider($timeZone) {
-		$mock = $this->getMockBuilder('\Icewind\SMB\TimeZoneProvider')
-			->disableOriginalConstructor()
-			->getMock();
-		$mock->expects($this->any())
-			->method('get')
-			->will($this->returnValue($timeZone));
-		return $mock;
-	}
-
 	/**
 	 * @dataProvider modeProvider
 	 */
 	public function testParseMode($string, $mode) {
-		$parser = new \Icewind\SMB\Wrapped\Parser($this->getTimeZoneProvider('UTC'));
+		$parser = new \Icewind\SMB\Wrapped\Parser('UTC');
 		$this->assertEquals($mode, $parser->parseMode($string), 'Failed parsing ' . $string);
 	}
 
@@ -104,7 +89,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 	 * @dataProvider statProvider
 	 */
 	public function testStat($output, $stat) {
-		$parser = new \Icewind\SMB\Wrapped\Parser($this->getTimeZoneProvider('UTC'));
+		$parser = new \Icewind\SMB\Wrapped\Parser('UTC');
 		$this->assertEquals($stat, $parser->parseStat($output));
 	}
 
@@ -130,7 +115,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 	 * @dataProvider dirProvider
 	 */
 	public function testDir($output, $dir) {
-		$parser = new \Icewind\SMB\Wrapped\Parser($this->getTimeZoneProvider('CEST'));
+		$parser = new \Icewind\SMB\Wrapped\Parser('CEST');
 		$this->assertEquals($dir, $parser->parseDir($output, ''));
 	}
 }

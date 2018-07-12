@@ -15,7 +15,7 @@ use Icewind\SMB\Exception\InvalidTypeException;
 use Icewind\SMB\Exception\NotFoundException;
 use Icewind\SMB\INotifyHandler;
 use Icewind\SMB\IServer;
-use Icewind\SMB\System;
+use Icewind\SMB\ISystem;
 use Icewind\SMB\TimeZoneProvider;
 use Icewind\Streams\CallbackWrapper;
 
@@ -41,7 +41,7 @@ class Share extends AbstractShare {
 	protected $parser;
 
 	/**
-	 * @var System
+	 * @var ISystem
 	 */
 	private $system;
 
@@ -55,28 +55,29 @@ class Share extends AbstractShare {
 	/**
 	 * @param IServer $server
 	 * @param string $name
-	 * @param System $system
+	 * @param ISystem $system
 	 */
-	public function __construct(IServer $server, $name, System $system = null) {
+	public function __construct(IServer $server, $name, ISystem $system) {
 		parent::__construct();
 		$this->server = $server;
 		$this->name = $name;
-		$this->system = (!is_null($system)) ? $system : new System();
-		$this->parser = new Parser(new TimeZoneProvider($this->server->getHost(), $this->system));
+		$this->system = $system;
+		$this->parser = new Parser($server->getTimeZone());
 	}
 
 	private function getAuthFileArgument() {
 		if ($this->server->getAuth()->getUsername()) {
-			return '--authentication-file=' . System::getFD(3);
+			return '--authentication-file=' . $this->system->getFD(3);
 		} else {
 			return '';
 		}
 	}
 
 	protected function getConnection() {
-		$command = sprintf('%s%s %s %s %s',
+		$command = sprintf('%s%s -t %s %s %s %s',
 			$this->system->hasStdBuf() ? 'stdbuf -o0 ' : '',
 			$this->system->getSmbclientPath(),
+			$this->server->getOptions()->getTimeout(),
 			$this->getAuthFileArgument(),
 			$this->server->getAuth()->getExtraCommandLineArguments(),
 			escapeshellarg('//' . $this->server->getHost() . '/' . $this->name)
@@ -294,7 +295,7 @@ class Share extends AbstractShare {
 		// since we can't re-use the same file descriptor over multiple calls
 		$connection = $this->getConnection();
 
-		$connection->write('get ' . $source . ' ' . System::getFD(5));
+		$connection->write('get ' . $source . ' ' . $this->system->getFD(5));
 		$connection->write('exit');
 		$fh = $connection->getFileOutputStream();
 		stream_context_set_option($fh, 'file', 'connection', $connection);
@@ -317,7 +318,7 @@ class Share extends AbstractShare {
 		$connection = $this->getConnection();
 
 		$fh = $connection->getFileInputStream();
-		$connection->write('put ' . System::getFD(4) . ' ' . $target);
+		$connection->write('put ' . $this->system->getFD(4) . ' ' . $target);
 		$connection->write('exit');
 
 		// use a close callback to ensure the upload is finished before continuing

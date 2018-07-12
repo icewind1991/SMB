@@ -32,8 +32,40 @@ class ServerFactory {
 		Server::class
 	];
 
-	/** @var System|null */
-	private $system = null;
+	/** @var System */
+	private $system;
+
+	/** @var IOptions */
+	private $options;
+
+	/** @var ITimeZoneProvider */
+	private $timeZoneProvider;
+
+	/**
+	 * ServerFactory constructor.
+	 *
+	 * @param IOptions|null $options
+	 * @param ISystem|null $system
+	 * @param ITimeZoneProvider|null $timeZoneProvider
+	 */
+	public function __construct(
+		IOptions $options = null,
+		ISystem $system = null,
+		ITimeZoneProvider $timeZoneProvider = null
+	) {
+		if (is_null($options)) {
+			$options = new Options();
+		}
+		if (is_null($system)) {
+			$system = new System();
+		}
+		if (is_null($timeZoneProvider)) {
+			$system = new TimeZoneProvider($system);
+		}
+		$this->options = $options;
+		$this->system = $system;
+	}
+
 
 	/**
 	 * @param $host
@@ -43,8 +75,8 @@ class ServerFactory {
 	 */
 	public function createServer($host, IAuth $credentials) {
 		foreach (self::BACKENDS as $backend) {
-			if (call_user_func("$backend::available", $this->getSystem())) {
-				return new $backend($host, $credentials, $this->getSystem(), new TimeZoneProvider($host, $this->getSystem()));
+			if (call_user_func("$backend::available", $this->system)) {
+				return new $backend($host, $credentials, $this->system, $this->timeZoneProvider);
 			}
 		}
 
@@ -55,10 +87,6 @@ class ServerFactory {
 	 * @return System
 	 */
 	private function getSystem() {
-		if (is_null($this->system)) {
-			$this->system = new System();
-		}
-
 		return $this->system;
 	}
 }

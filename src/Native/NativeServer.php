@@ -9,7 +9,8 @@ namespace Icewind\SMB\Native;
 
 use Icewind\SMB\AbstractServer;
 use Icewind\SMB\IAuth;
-use Icewind\SMB\System;
+use Icewind\SMB\IOptions;
+use Icewind\SMB\ISystem;
 use Icewind\SMB\TimeZoneProvider;
 
 class NativeServer extends AbstractServer {
@@ -18,14 +19,8 @@ class NativeServer extends AbstractServer {
 	 */
 	protected $state;
 
-	/**
-	 * @param string $host
-	 * @param IAuth $auth
-	 * @param System $system
-	 * @param TimeZoneProvider $timeZoneProvider
-	 */
-	public function __construct($host, IAuth $auth, System $system, TimeZoneProvider $timeZoneProvider) {
-		parent::__construct($host, $auth, $system, $timeZoneProvider);
+	public function __construct($host, IAuth $auth, ISystem $system, TimeZoneProvider $timeZoneProvider, IOptions $options) {
+		parent::__construct($host, $auth, $system, $timeZoneProvider, $options);
 		$this->state = new NativeState();
 	}
 
@@ -62,10 +57,10 @@ class NativeServer extends AbstractServer {
 	/**
 	 * Check if the smbclient php extension is available
 	 *
-	 * @param System $system
+	 * @param ISystem $system
 	 * @return bool
 	 */
-	public static function available(System $system) {
+	public static function available(ISystem $system) {
 		return function_exists('smbclient_state_new');
 	}
 }
