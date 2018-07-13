@@ -60,10 +60,11 @@ class ServerFactory {
 			$system = new System();
 		}
 		if (is_null($timeZoneProvider)) {
-			$system = new TimeZoneProvider($system);
+			$timeZoneProvider = new TimeZoneProvider($system);
 		}
 		$this->options = $options;
 		$this->system = $system;
+		$this->timeZoneProvider = $timeZoneProvider;
 	}
 
 
@@ -76,7 +77,7 @@ class ServerFactory {
 	public function createServer($host, IAuth $credentials) {
 		foreach (self::BACKENDS as $backend) {
 			if (call_user_func("$backend::available", $this->system)) {
-				return new $backend($host, $credentials, $this->system, $this->timeZoneProvider);
+				return new $backend($host, $credentials, $this->system, $this->timeZoneProvider, $this->options);
 			}
 		}
 
