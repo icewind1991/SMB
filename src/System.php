@@ -10,11 +10,8 @@ namespace Icewind\SMB;
 use Icewind\SMB\Exception\Exception;
 
 class System implements ISystem {
-	private $smbclient;
-
-	private $net;
-
-	private $stdbuf;
+	/** @var (string|bool)[] */
+	private $paths = [];
 
 	/**
 	 * Get the path to a file descriptor of the current process
@@ -37,26 +34,24 @@ class System implements ISystem {
 	}
 
 	public function getSmbclientPath() {
-		if (!$this->smbclient) {
-			$this->smbclient = trim(`which smbclient`);
-		}
-		return $this->smbclient;
+		return $this->getBinaryPath('smbclient');
 	}
 
 	public function getNetPath() {
-		if (!$this->net) {
-			$this->net = trim(`which net`);
-		}
-		return $this->net;
+		return $this->getBinaryPath('net');
 	}
 
-	public function hasStdBuf() {
-		if (!$this->stdbuf) {
+	public function getStdBufPath() {
+		return $this->getBinaryPath('stdbuf');
+	}
+
+	private function getBinaryPath($binary) {
+		if (!isset($this->paths[$binary])) {
 			$result = null;
 			$output = array();
-			exec('which stdbuf 2>&1', $output, $result);
-			$this->stdbuf = $result === 0;
+			exec("which $binary 2>&1", $output, $result);
+			$this->paths[$binary] = $result === 0 ? trim(implode('', $output)) : false;
 		}
-		return $this->stdbuf;
+		return $this->paths[$binary];
 	}
 }

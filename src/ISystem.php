@@ -49,9 +49,9 @@ interface ISystem {
 	public function getNetPath();
 
 	/**
-	 * Whether or not the `stdbuf` command is available in the path
+	 * Get the full path to the `stdbuf` binary of false if the binary is not available
 	 *
-	 * @return bool
+	 * @return string|bool
 	 */
-	public function hasStdBuf();
+	public function getStdBufPath();
 }

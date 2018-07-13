@@ -75,7 +75,7 @@ class Share extends AbstractShare {
 
 	protected function getConnection() {
 		$command = sprintf('%s%s -t %s %s %s %s',
-			$this->system->hasStdBuf() ? 'stdbuf -o0 ' : '',
+			$this->system->getStdBufPath() ? $this->system->getStdBufPath() . ' -o0 ' : '',
 			$this->system->getSmbclientPath(),
 			$this->server->getOptions()->getTimeout(),
 			$this->getAuthFileArgument(),
@@ -364,7 +364,7 @@ class Share extends AbstractShare {
 	 * @throws DependencyException
 	 */
 	public function notify($path) {
-		if (!$this->system->hasStdBuf()) { //stdbuf is required to disable smbclient's output buffering
+		if (!$this->system->getStdBufPath()) { //stdbuf is required to disable smbclient's output buffering
 			throw new DependencyException('stdbuf is required for usage of the notify command');
 		}
 		$connection = $this->getConnection(); // use a fresh connection since the notify command blocks the process
