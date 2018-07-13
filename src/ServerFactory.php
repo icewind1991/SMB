@@ -82,11 +82,4 @@ class ServerFactory {
 
 		throw new DependencyException('No valid backend available, ensure smbclient is in the path or php-smbclient is installed');
 	}
-
-	/**
-	 * @return System
-	 */
-	private function getSystem() {
-		return $this->system;
-	}
 }
