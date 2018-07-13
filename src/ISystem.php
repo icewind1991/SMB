@@ -54,4 +54,11 @@ interface ISystem {
 	 * @return string|bool
 	 */
 	public function getStdBufPath();
+
+	/**
+	 * Whether or not the smbclient php extension is enabled
+	 *
+	 * @return bool
+	 */
+	public function libSmbclientAvailable();
 }

@@ -61,6 +61,6 @@ class NativeServer extends AbstractServer {
 	 * @return bool
 	 */
 	public static function available(ISystem $system) {
-		return function_exists('smbclient_state_new');
+		return $system->libSmbclientAvailable();
 	}
 }

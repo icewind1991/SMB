@@ -45,7 +45,11 @@ class System implements ISystem {
 		return $this->getBinaryPath('stdbuf');
 	}
 
-	private function getBinaryPath($binary) {
+	public function libSmbclientAvailable() {
+		return function_exists('smbclient_state_new');
+	}
+
+	protected function getBinaryPath($binary) {
 		if (!isset($this->paths[$binary])) {
 			$result = null;
 			$output = array();
