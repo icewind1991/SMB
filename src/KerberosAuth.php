@@ -25,6 +25,16 @@ namespace Icewind\SMB;
  * Use existing kerberos ticket to authenticate
  */
 class KerberosAuth implements IAuth {
+        
+	private $ticketPath = "";
+
+	//not working with nextcloud
+        private $saveTicketInMemory = false;
+
+	public function __construct() {
+		$this->registerApacheKerberosTicket();
+	}
+
 	public function getUsername() {
 		return 'dummy';
 	}
@@ -44,6 +54,41 @@ class KerberosAuth implements IAuth {
 	public function setExtraSmbClientOptions($smbClientState) {
 		smbclient_option_set($smbClientState, SMBCLIENT_OPT_USE_KERBEROS, true);
 		smbclient_option_set($smbClientState, SMBCLIENT_OPT_FALLBACK_AFTER_KERBEROS, false);
+	}
+
+	private function registerApacheKerberosTicket() {
+		// inspired by https://git.typo3.org/TYPO3CMS/Extensions/fal_cifs.git
+	 
+		if (!extension_loaded("krb5")) {
+			return;
+		}
+		//read apache kerberos ticket cache
+		$cacheFile = getenv("KRB5CCNAME");
+		if(!$cacheFile) {
+			return;
+		}
+		$krb5 = new \KRB5CCache();
+		$krb5->open($cacheFile);
+		if(!$krb5->isValid()) {
+			return;
+		}
+		if($this->saveTicketInMemory) {
+			putenv("KRB5CCNAME=" . $krb5->getName());
+		}
+		else {
+			//workaround: smbclient is not working with the original apache ticket cache.
+			$tmpFilename = tempnam("/tmp", "krb5cc_php_");
+			$tmpCacheFile = "FILE:" . $tmpFilename;
+			$krb5->save($tmpCacheFile);
+			$this->ticketPath = $tmpFilename;
+			putenv("KRB5CCNAME=" . $tmpCacheFile);
+		}
+	}
+	
+	public function __destruct() {
+		if(!empty($this->ticketPath) && file_exists($this->ticketPath)  && is_file($this->ticketPath)) {
+			   unlink($this->ticketPath);
+		}
 	}
 
 }
