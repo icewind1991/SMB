@@ -38,6 +38,10 @@ class NativeState {
 	/** @var bool */
 	protected $connected = false;
 
+	// sync the garbage collection cycle
+        // __deconstruct() of KerberosAuth should not called too soon
+        protected $auth;
+
 	// see error.h
 	const EXCEPTION_MAP = [
 		1   => ForbiddenException::class,
@@ -108,6 +112,11 @@ class NativeState {
 
 		$auth->setExtraSmbClientOptions($this->state);
 		/** @var bool $result */
+
+		// sync the garbage collection cycle
+		// __deconstruct() of KerberosAuth should not called too soon
+		$this->auth = $auth;
+
 		$result = @smbclient_state_init($this->state, $auth->getWorkgroup(), $auth->getUsername(), $auth->getPassword());
 
 		$this->testResult($result, '');
