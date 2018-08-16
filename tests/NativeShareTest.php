@@ -14,7 +14,7 @@ use Icewind\SMB\System;
 use Icewind\SMB\TimeZoneProvider;
 
 class NativeShareTest extends AbstractShareTest {
-	public function setUp() {
+    public function setUp() {
 		$this->requireBackendEnv('libsmbclient');
 		if (!function_exists('smbclient_state_new')) {
 			$this->markTestSkipped('libsmbclient php extension not installed');
@@ -39,4 +39,19 @@ class NativeShareTest extends AbstractShareTest {
 		}
 		$this->share->mkdir($this->root);
 	}
+
+    public function testAppendStream() {
+        $fh = $this->share->append($this->root . '/' . $name);
+        fwrite($fh, 'foo');
+        fclose($fh);
+
+        $fh = $this->share->append($this->root . '/' . $name);
+        fwrite($fh, 'bar');
+        fclose($fh);
+
+        $tmpFile1 = tempnam('/tmp', 'smb_test_');
+        $this->assertEquals('foobar', file_get_contents($tmpFile1));
+        $this->share->del($this->root . '/' . $name);
+        unlink($tmpFile1);
+    }
 }
