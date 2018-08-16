@@ -102,6 +102,15 @@ fwrite($fh, 'bar');
 fclose($fh);
 ```
 
+**Note**: write() will truncate your file to 0bytes. You may open a writeable stream with append() which will point
+the cursor to the end of the file or create it if it does not exists yet. (append() is only compatible with libsmbclient-php)
+```php
+$fh = $share->append('test.txt');
+fwrite($fh, 'bar');
+fclose($fh);
+```
+
+
 ### Using notify
 
 ```php
