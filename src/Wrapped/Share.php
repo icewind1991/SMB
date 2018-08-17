@@ -19,6 +19,8 @@ use Icewind\SMB\IServer;
 use Icewind\SMB\ISystem;
 use Icewind\SMB\TimeZoneProvider;
 use Icewind\Streams\CallbackWrapper;
+use Icewind\SMB\Native\NativeShare;
+use Icewind\SMB\Native\NativeServer;
 
 class Share extends AbstractShare {
 	/**
@@ -330,14 +332,22 @@ class Share extends AbstractShare {
 	}
 
     /**
-     * Append on wrapped smbclient not supported
+     * Append to stream
+     * Note: smbclient does not support it so we use php-libsmbclient 
      *
-     * @param string $source
+     * @param string $target
      *
-     * @throws \Icewind\SMB\Exception\InvalidRequestException
-     */
-    public function append($source) {
-        throw new InvalidRequestException("Not supported, use Icewind\SMB\Native\NativeShare");
+     * @throws \Icewind\SMB\Exception\DependencyException
+     * @throws \Icewind\SMB\Exception\NotFoundException
+     * @throws \Icewind\SMB\Exception\InvalidTypeException
+	 */
+    public function append($target) {
+        if (!NativeServer::available($this->server->getSystem())) {
+          throw new DependencyException('php-libsmbclient not installed');
+        }
+
+        $share = new NativeShare($this->server, $this->getName());
+        return $share->append($target);
     }
 
 	/**

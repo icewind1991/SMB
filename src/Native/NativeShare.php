@@ -326,7 +326,7 @@ class NativeShare extends AbstractShare {
 	 * @return INotifyHandler
 	 */
 	public function notify($path) {
-		// php-smbclient does support notify (https://github.com/eduardok/libsmbclient-php/issues/29)
+		// php-smbclient does not support notify (https://github.com/eduardok/libsmbclient-php/issues/29)
 		// so we use the smbclient based backend for this
 		if (!Server::available($this->server->getSystem())) {
 			throw new DependencyException('smbclient not found in path for notify command');
