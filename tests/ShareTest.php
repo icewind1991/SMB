@@ -57,11 +57,4 @@ class ShareTest extends AbstractShareTest {
 		$share = $this->server->getShare($this->config->share);
 		$share->dir($this->root);
 	}
-
-	/**
-	 * @expectedException \Icewind\SMB\Exception\InvalidRequestException
-	 */
-    public function testAppendStream() {
-        $fh = $this->share->append($this->root . '/' . $name);
-    }
 }

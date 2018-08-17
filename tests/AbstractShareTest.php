@@ -474,6 +474,21 @@ abstract class AbstractShareTest extends TestCase {
 		unlink($tmpFile1);
 	}
 
+    public function testAppendStream() {
+        $fh = $this->share->append($this->root . '/' . $name);
+        fwrite($fh, 'foo');
+        fclose($fh);
+
+        $fh = $this->share->append($this->root . '/' . $name);
+        fwrite($fh, 'bar');
+        fclose($fh);
+
+        $tmpFile1 = tempnam('/tmp', 'smb_test_');
+        $this->assertEquals('foobar', file_get_contents($tmpFile1));
+        $this->share->del($this->root . '/' . $name);
+        unlink($tmpFile1);
+    }
+
 	/**
 	 * @dataProvider invalidPathProvider
 	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
