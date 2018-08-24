@@ -25,7 +25,7 @@ class NativeServer extends AbstractServer {
 	}
 
 	protected function connect() {
-		$this->state->init($this->getAuth());
+		$this->state->init($this->getAuth(), $this->getOptions());
 	}
 
 	/**
