@@ -53,7 +53,7 @@ class NativeShare extends AbstractShare {
 		}
 
 		$this->state = new NativeState();
-		$this->state->init($this->server->getAuth());
+		$this->state->init($this->server->getAuth(), $this->server->getOptions());
 		return $this->state;
 	}
 

@@ -13,11 +13,10 @@ use Icewind\SMB\Exception\DependencyException;
 use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\InvalidTypeException;
 use Icewind\SMB\Exception\NotFoundException;
-use Icewind\SMB\Exception\InvalidRequestException;
+use Icewind\SMB\IFileInfo;
 use Icewind\SMB\INotifyHandler;
 use Icewind\SMB\IServer;
 use Icewind\SMB\ISystem;
-use Icewind\SMB\TimeZoneProvider;
 use Icewind\Streams\CallbackWrapper;
 use Icewind\SMB\Native\NativeShare;
 use Icewind\SMB\Native\NativeServer;
@@ -157,6 +156,19 @@ class Share extends AbstractShare {
 	 * @return \Icewind\SMB\IFileInfo
 	 */
 	public function stat($path) {
+		// some windows server setups don't seem to like the allinfo command
+		// use the dir command instead to get the file info where possible
+		if ($path !== "" && $path !== "/") {
+			$parent = dirname($path);
+			$dir = $this->dir($parent);
+			$file = array_values(array_filter($dir, function(IFileInfo $info) use ($path) {
+				return $info->getPath() === $path;
+			}));
+			if ($file) {
+				return $file[0];
+			}
+		}
+
 		$escapedPath = $this->escapePath($path);
 		$output = $this->execute('allinfo ' . $escapedPath);
 		// Windows and non Windows Fileserver may respond different
