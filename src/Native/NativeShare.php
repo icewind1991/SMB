@@ -109,12 +109,12 @@ class NativeShare extends AbstractShare {
 		return new NativeFileInfo($this, $path, basename($path), $this->getStat($path));
 	}
 
-    /**
-     * Get fstat
-     *
-     * @param string $path
-     * @return array
-     */
+	/**
+	 * Get fstat
+	 *
+	 * @param string $path
+	 * @return array
+	 */
 	public function getStat($path) {
 		return $this->getState()->stat($this->buildUrl($path));
 	}
