@@ -21,7 +21,6 @@
 
 namespace Icewind\SMB;
 
-
 class Options implements IOptions {
 	/** @var int */
 	private $timeout = 20;

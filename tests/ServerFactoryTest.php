@@ -21,7 +21,6 @@
 
 namespace Icewind\SMB\Test;
 
-
 use Icewind\SMB\AnonymousAuth;
 use Icewind\SMB\IAuth;
 use Icewind\SMB\Native\NativeServer;

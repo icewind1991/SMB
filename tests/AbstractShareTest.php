@@ -44,47 +44,47 @@ abstract class AbstractShareTest extends TestCase {
 	}
 
 	public function nameProvider() {
-		return array(
-			array('simple'),
-			array('with spaces_and-underscores'),
-			array("single'quote'"),
-			array("foo ; asd -- bar"),
-			array('日本語'),
-			array('url %2F +encode'),
-			array('a somewhat longer filename than the other with more charaters as the all the other filenames'),
-			array('$as#d€££Ö€ßœĚęĘĞĜΣΥΦΩΫ')
-		);
+		return [
+			['simple'],
+			['with spaces_and-underscores'],
+			["single'quote'"],
+			["foo ; asd -- bar"],
+			['日本語'],
+			['url %2F +encode'],
+			['a somewhat longer filename than the other with more charaters as the all the other filenames'],
+			['$as#d€££Ö€ßœĚęĘĞĜΣΥΦΩΫ']
+		];
 	}
 
 	public function invalidPathProvider() {
 		// / ? < > \ : * | " are illegal characters in path on windows
-		return array(
-			array("new\nline"),
-			array("\rreturn"),
-			array('null' . chr(0) . 'byte'),
-			array('foo?bar'),
-			array('foo<bar>'),
-			array('foo:bar'),
-			array('foo*bar'),
-			array('foo|bar'),
-			array('foo"bar"')
-		);
+		return [
+			["new\nline"],
+			["\rreturn"],
+			['null' . chr(0) . 'byte'],
+			['foo?bar'],
+			['foo<bar>'],
+			['foo:bar'],
+			['foo*bar'],
+			['foo|bar'],
+			['foo"bar"']
+		];
 	}
 
 	public function fileDataProvider() {
-		return array(
-			array('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'),
-			array('Mixed language, 日本語　が　わからか and Various _/* characters \\|” €')
-		);
+		return [
+			['Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'],
+			['Mixed language, 日本語　が　わからか and Various _/* characters \\|” €']
+		];
 	}
 
 	public function nameAndDataProvider() {
 		$names = $this->nameProvider();
 		$data = $this->fileDataProvider();
-		$result = array();
+		$result = [];
 		foreach ($names as $name) {
 			foreach ($data as $text) {
-				$result[] = array($name[0], $text[0]);
+				$result[] = [$name[0], $text[0]];
 			}
 		}
 		return $result;
@@ -122,7 +122,7 @@ abstract class AbstractShareTest extends TestCase {
 	}
 
 	public function testRootStartsEmpty() {
-		$this->assertEquals(array(), $this->share->dir($this->root));
+		$this->assertEquals([], $this->share->dir($this->root));
 	}
 
 	/**
@@ -610,16 +610,16 @@ abstract class AbstractShareTest extends TestCase {
 
 	public function pathProvider() {
 		// / ? < > \ : * | " are illegal characters in path on windows
-		return array(
-			array('dir/sub/foo.txt'),
-			array('bar.txt'),
-			array("single'quote'/sub/foo.txt"),
-			array('日本語/url %2F +encode/asd.txt'),
-			array(
+		return [
+			['dir/sub/foo.txt'],
+			['bar.txt'],
+			["single'quote'/sub/foo.txt"],
+			['日本語/url %2F +encode/asd.txt'],
+			[
 				'a somewhat longer folder than the other with more charaters as the all the other filenames/' .
 				'followed by a somewhat long file name after that.txt'
-			)
-		);
+			]
+		];
 	}
 
 	/**

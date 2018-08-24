@@ -87,7 +87,7 @@ class NativeShare extends AbstractShare {
 	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function dir($path) {
-		$files = array();
+		$files = [];
 
 		$dh = $this->getState()->opendir($this->buildUrl($path));
 		while ($file = $this->getState()->readdir($dh)) {
@@ -277,7 +277,6 @@ class NativeShare extends AbstractShare {
 	 * @return string the attribute value
 	 */
 	public function setAttribute($path, $attribute, $value) {
-
 		if ($attribute === 'system.dos_attr.mode' and is_int($value)) {
 			$value = '0x' . dechex($value);
 		}

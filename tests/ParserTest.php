@@ -7,22 +7,21 @@
 
 namespace Icewind\SMB\Test;
 
-
 use Icewind\SMB\IFileInfo;
 use Icewind\SMB\Wrapped\FileInfo;
 
 class ParserTest extends \PHPUnit_Framework_TestCase {
 	public function modeProvider() {
-		return array(
-			array('D', IFileInfo::MODE_DIRECTORY),
-			array('A', IFileInfo::MODE_ARCHIVE),
-			array('S', IFileInfo::MODE_SYSTEM),
-			array('H', IFileInfo::MODE_HIDDEN),
-			array('R', IFileInfo::MODE_READONLY),
-			array('N', IFileInfo::MODE_NORMAL),
-			array('RA', IFileInfo::MODE_READONLY | IFileInfo::MODE_ARCHIVE),
-			array('RAH', IFileInfo::MODE_READONLY | IFileInfo::MODE_ARCHIVE | IFileInfo::MODE_HIDDEN)
-		);
+		return [
+			['D', IFileInfo::MODE_DIRECTORY],
+			['A', IFileInfo::MODE_ARCHIVE],
+			['S', IFileInfo::MODE_SYSTEM],
+			['H', IFileInfo::MODE_HIDDEN],
+			['R', IFileInfo::MODE_READONLY],
+			['N', IFileInfo::MODE_NORMAL],
+			['RA', IFileInfo::MODE_READONLY | IFileInfo::MODE_ARCHIVE],
+			['RAH', IFileInfo::MODE_READONLY | IFileInfo::MODE_ARCHIVE | IFileInfo::MODE_HIDDEN]
+		];
 	}
 	/**
 	 * @dataProvider modeProvider
@@ -33,9 +32,9 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function statProvider() {
-		return array(
-			array(
-				array(
+		return [
+			[
+				[
 					'altname: test.txt',
 					'create_time:    Sat Oct 12 07:05:58 PM 2013 CEST',
 					'access_time:    Tue Oct 15 02:58:48 PM 2013 CEST',
@@ -43,15 +42,15 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 					'change_time:    Sat Oct 12 07:05:58 PM 2013 CEST',
 					'attributes:  (80)',
 					'stream: [::$DATA], 29634 bytes'
-				),
-				array(
+				],
+				[
 					'mtime' => strtotime('12 Oct 2013 19:05:58 CEST'),
-					'mode' => IFileInfo::MODE_NORMAL,
-					'size' => 29634
-				)
-			),
-			array(
-				array(
+					'mode'  => IFileInfo::MODE_NORMAL,
+					'size'  => 29634
+				]
+			],
+			[
+				[
 					'altname: folder',
 					'create_time:    Sat Oct 12 07:05:58 PM 2013 CEST',
 					'access_time:    Tue Oct 15 02:58:48 PM 2013 CEST',
@@ -59,15 +58,15 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 					'change_time:    Sat Oct 12 07:05:58 PM 2013 CEST',
 					'attributes: D (10)',
 					'stream: [::$DATA], 29634 bytes'
-				),
-				array(
+				],
+				[
 					'mtime' => strtotime('12 Oct 2013 19:05:58 CEST'),
-					'mode' => IFileInfo::MODE_DIRECTORY,
-					'size' => 29634
-				)
-			),
-			array(
-				array(
+					'mode'  => IFileInfo::MODE_DIRECTORY,
+					'size'  => 29634
+				]
+			],
+			[
+				[
 					'altname: .hidden',
 					'create_time:    Sat Oct 12 07:05:58 PM 2013 CEST',
 					'access_time:    Tue Oct 15 02:58:48 PM 2013 CEST',
@@ -75,14 +74,14 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 					'change_time:    Sat Oct 12 07:05:58 PM 2013 CEST',
 					'attributes: HA (22)',
 					'stream: [::$DATA], 29634 bytes'
-				),
-				array(
+				],
+				[
 					'mtime' => strtotime('12 Oct 2013 19:05:58 CEST'),
-					'mode' => IFileInfo::MODE_HIDDEN + IFileInfo::MODE_ARCHIVE,
-					'size' => 29634
-				)
-			)
-		);
+					'mode'  => IFileInfo::MODE_HIDDEN + IFileInfo::MODE_ARCHIVE,
+					'size'  => 29634
+				]
+			]
+		];
 	}
 
 	/**
@@ -94,21 +93,26 @@ class ParserTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	public function dirProvider() {
-		return array(
-			array(
-				array(
+		return [
+			[
+				[
 					'  .                                   D        0  Tue Aug 26 19:11:56 2014',
 					'  ..                                 DR        0  Sun Oct 28 15:24:02 2012',
 					'  c.pdf                               N    29634  Sat Oct 12 19:05:58 2013',
 					'',
 					'                62536 blocks of size 8388608. 57113 blocks available'
-				),
-				array(
-					new FileInfo('/c.pdf', 'c.pdf', 29634, strtotime('12 Oct 2013 19:05:58 CEST'),
-						IFileInfo::MODE_NORMAL)
-				)
-			)
-		);
+				],
+				[
+					new FileInfo(
+						'/c.pdf',
+						'c.pdf',
+						29634,
+						strtotime('12 Oct 2013 19:05:58 CEST'),
+						IFileInfo::MODE_NORMAL
+					)
+				]
+			]
+		];
 	}
 
 	/**

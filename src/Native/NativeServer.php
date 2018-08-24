@@ -35,7 +35,7 @@ class NativeServer extends AbstractServer {
 	 */
 	public function listShares() {
 		$this->connect();
-		$shares = array();
+		$shares = [];
 		$dh = $this->state->opendir('smb://' . $this->getHost());
 		while ($share = $this->state->readdir($dh)) {
 			if ($share['type'] === 'file share') {
