@@ -26,9 +26,4 @@ interface IOptions {
 	 * @return int
 	 */
 	public function getTimeout();
-
-	/**
-	 * @param int $timeout
-	 */
-	public function setTimeout($timeout);
 }
