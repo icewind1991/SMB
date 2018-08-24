@@ -109,12 +109,12 @@ class NativeShare extends AbstractShare {
 		return new NativeFileInfo($this, $path, basename($path), $this->getStat($path));
 	}
 
-    /**
-     * Get fstat
-     *
-     * @param string $path
-     * @return array
-     */
+	/**
+	 * Get fstat
+	 *
+	 * @param string $path
+	 * @return array
+	 */
 	public function getStat($path) {
 		return $this->getState()->stat($this->buildUrl($path));
 	}
@@ -250,7 +250,7 @@ class NativeShare extends AbstractShare {
 
 	/**
 	 * Open a writeable stream to a remote file
-     * Note: This method will truncate the file to 0bytes first
+	 * Note: This method will truncate the file to 0bytes first
 	 *
 	 * @param string $source
 	 * @return resource a writeable stream
@@ -264,20 +264,20 @@ class NativeShare extends AbstractShare {
 		return NativeWriteStream::wrap($this->getState(), $handle, 'w', $url);
 	}
 
-    /**
-     * Open a writeable stream and set the cursor to the end of the stream
-     *
-     * @param string $source
-     * @return resource a writeable stream
-     *
-     * @throws \Icewind\SMB\Exception\NotFoundException
-     * @throws \Icewind\SMB\Exception\InvalidTypeException
-     */
-    public function append($source) {
-        $url = $this->buildUrl($source);
-        $handle = $this->getState()->open($url, "a");
-        return NativeWriteStream::wrap($this->getState(), $handle, "a", $url);
-    }
+	/**
+	 * Open a writeable stream and set the cursor to the end of the stream
+ 	 *
+ 	 * @param string $source
+	 * @return resource a writeable stream
+	 *
+	 * @throws \Icewind\SMB\Exception\NotFoundException
+ 	 * @throws \Icewind\SMB\Exception\InvalidTypeException
+ 	 */
+	public function append($source) {
+ 		$url = $this->buildUrl($source);
+ 		$handle = $this->getState()->open($url, "a");
+ 		return NativeWriteStream::wrap($this->getState(), $handle, "a", $url);
+	}
 
 	/**
 	 * Get extended attributes for the path
@@ -307,8 +307,8 @@ class NativeShare extends AbstractShare {
 	}
 
 	/**
-     * Set DOS comaptible node mode
-     *
+	 * Set DOS comaptible node mode
+	 *
 	 * @param string $path
 	 * @param int $mode a combination of FileInfo::MODE_READONLY, FileInfo::MODE_ARCHIVE, FileInfo::MODE_SYSTEM and FileInfo::MODE_HIDDEN, FileInfo::NORMAL
 	 * @return mixed
@@ -318,9 +318,9 @@ class NativeShare extends AbstractShare {
 	}
 
 	/**
-     * Start smb notify listener
-     * Note: This is a blocking call
-     *
+	 * Start smb notify listener
+	 * Note: This is a blocking call
+	 *
 	 * @param string $path
 	 * @return INotifyHandler
 	 */

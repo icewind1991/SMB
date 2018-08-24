@@ -14,7 +14,7 @@ use Icewind\SMB\System;
 use Icewind\SMB\TimeZoneProvider;
 
 class NativeShareTest extends AbstractShareTest {
-    public function setUp() {
+	public function setUp() {
 		$this->requireBackendEnv('libsmbclient');
 		if (!function_exists('smbclient_state_new')) {
 			$this->markTestSkipped('libsmbclient php extension not installed');

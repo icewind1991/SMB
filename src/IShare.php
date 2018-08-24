@@ -52,7 +52,7 @@ interface IShare {
 
 	/**
 	 * Open a writable stream to a remote file
-     * Note: This method will truncate the file to 0bytes
+	 * Note: This method will truncate the file to 0bytes
 	 *
 	 * @param string $target
 	 * @return resource a write only stream to upload a remote file
@@ -62,7 +62,7 @@ interface IShare {
 	 */
 	public function write($target);
 
-    /**
+	/**
 	 * Open a writable stream to a remote file and set the cursor to the end of the file
 	 *
 	 * @param string $target
