@@ -28,7 +28,8 @@ class TimeZoneProvider implements ITimeZoneProvider {
 	public function get($host) {
 		if (!isset($this->timeZones[$host])) {
 			$net = $this->system->getNetPath();
-			if ($net && $host) {
+			// for local domain names we can assume same timezone
+			if ($net && $host && strpos($host, '.') !== false) {
 				$command = sprintf('%s time zone -S %s',
 					$net,
 					escapeshellarg($host)
