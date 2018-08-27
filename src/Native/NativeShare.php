@@ -276,8 +276,8 @@ class NativeShare extends AbstractShare {
 	 *
 	 * @param string $path
 	 * @param string $attribute attribute to get the info
-	 * @param mixed $value
-	 * @return string the attribute value
+	 * @param string|int $value
+	 * @return mixed the attribute value
 	 */
 	public function setAttribute($path, $attribute, $value) {
 		if ($attribute === 'system.dos_attr.mode' and is_int($value)) {
