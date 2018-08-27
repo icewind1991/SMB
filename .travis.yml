@@ -50,6 +50,7 @@ install:
 
 script:
   - vendor/bin/phpunit --coverage-clover clover.xml -c tests/phpunit.xml
+  - vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix --dry-run --diff --diff-format udiff
 
 after_script:
  - wget https://scrutinizer-ci.com/ocular.phar

@@ -53,7 +53,7 @@ class NativeFileInfo implements IFileInfo {
 
 		if (is_array($stat)) {
 			$this->statCache = $stat;
-		} else if (is_callable($stat)) {
+		} elseif (is_callable($stat)) {
 			$this->statCallback = $stat;
 		} else {
 			throw new \InvalidArgumentException('$stat needs to be an array or callback');
