@@ -94,7 +94,7 @@ class NativeShare extends AbstractShare {
 			$name = $file['name'];
 			if ($name !== '.' and $name !== '..') {
 				$fullPath = $path . '/' . $name;
-				$files [] = new NativeFileInfo($this, $fullPath, $name, function() use ($fullPath) {
+				$files [] = new NativeFileInfo($this, $fullPath, $name, function () use ($fullPath) {
 					return $this->getStat($fullPath);
 				});
 			}
