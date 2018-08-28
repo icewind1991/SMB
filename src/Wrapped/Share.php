@@ -345,16 +345,16 @@ class Share extends AbstractShare {
 		});
 	}
 
- 	/**
+	/**
 	 * Append to stream
 	 * Note: smbclient does not support this (Use php-libsmbclient)
 	 *
 	 * @param string $target
- 	 *
- 	 * @throws \Icewind\SMB\Exception\DependencyException
+	 *
+	 * @throws \Icewind\SMB\Exception\DependencyException
 	 */
 	public function append($target) {
-		throw new DependencyException('php-libsmbclient not installed');
+		throw new DependencyException('php-libsmbclient is required for append');
 	}
 
 	/**

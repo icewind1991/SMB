@@ -263,17 +263,17 @@ class NativeShare extends AbstractShare {
 
 	/**
 	 * Open a writeable stream and set the cursor to the end of the stream
- 	 *
- 	 * @param string $source
+	 *
+	 * @param string $source
 	 * @return resource a writeable stream
 	 *
 	 * @throws \Icewind\SMB\Exception\NotFoundException
- 	 * @throws \Icewind\SMB\Exception\InvalidTypeException
- 	 */
+	 * @throws \Icewind\SMB\Exception\InvalidTypeException
+	 */
 	public function append($source) {
- 		$url = $this->buildUrl($source);
- 		$handle = $this->getState()->open($url, "a");
- 		return NativeWriteStream::wrap($this->getState(), $handle, "a", $url);
+		$url = $this->buildUrl($source);
+		$handle = $this->getState()->open($url, "a");
+		return NativeWriteStream::wrap($this->getState(), $handle, "a", $url);
 	}
 
 	/**
