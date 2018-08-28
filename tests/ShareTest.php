@@ -38,6 +38,13 @@ class ShareTest extends AbstractShareTest {
 	}
 
 	/**
+	 * @expectedException \Icewind\SMB\Exception\DependencyException
+	 */
+	public function testAppendStream() {
+		$this->share->append($this->root . '/foo');
+	}
+
+	/**
 	 * @expectedException \Icewind\SMB\Exception\ConnectException
 	 */
 	public function testHostEscape() {
