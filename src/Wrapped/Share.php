@@ -13,6 +13,7 @@ use Icewind\SMB\Exception\DependencyException;
 use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\InvalidTypeException;
 use Icewind\SMB\Exception\NotFoundException;
+use Icewind\SMB\Exception\InvalidRequestException;
 use Icewind\SMB\IFileInfo;
 use Icewind\SMB\INotifyHandler;
 use Icewind\SMB\IServer;
@@ -341,6 +342,17 @@ class Share extends AbstractShare {
 			$connection->close(false); // dont terminate, give the upload some time
 		});
 	}
+
+    /**
+     * Append on wrapped smbclient not supported
+     *
+     * @param string $source
+     *
+     * @throws \Icewind\SMB\Exception\InvalidRequestException
+     */
+    public function append($source) {
+        throw new InvalidRequestException("Not supported, use Icewind\SMB\Native\NativeShare");
+    }
 
 	/**
 	 * @param string $path
