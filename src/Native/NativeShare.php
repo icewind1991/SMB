@@ -93,7 +93,10 @@ class NativeShare extends AbstractShare {
 		while ($file = $this->getState()->readdir($dh)) {
 			$name = $file['name'];
 			if ($name !== '.' and $name !== '..') {
-				$files [] = new NativeFileInfo($this, $path . '/' . $name, $name);
+				$fullPath = $path . '/' . $name;
+				$files [] = new NativeFileInfo($this, $fullPath, $name, function() use ($fullPath) {
+					return $this->getStat($fullPath);
+				});
 			}
 		}
 
@@ -109,13 +112,7 @@ class NativeShare extends AbstractShare {
 		return new NativeFileInfo($this, $path, basename($path), $this->getStat($path));
 	}
 
-	/**
-	 * Get fstat
-	 *
-	 * @param string $path
-	 * @return array
-	 */
-	public function getStat($path) {
+	private function getStat($path) {
 		return $this->getState()->stat($this->buildUrl($path));
 	}
 
