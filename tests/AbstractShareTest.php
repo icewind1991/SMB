@@ -475,6 +475,7 @@ abstract class AbstractShareTest extends TestCase {
 	}
 
 	public function testAppendStream() {
+		$name = 'foo.txt';
 		$fh = $this->share->append($this->root . '/' . $name);
 		fwrite($fh, 'foo');
 		fclose($fh);
@@ -484,6 +485,7 @@ abstract class AbstractShareTest extends TestCase {
 		fclose($fh);
 
 		$tmpFile1 = tempnam('/tmp', 'smb_test_');
+		$this->share->get($this->root . '/' . $name, $tmpFile1);
 		$this->assertEquals('foobar', file_get_contents($tmpFile1));
 		$this->share->del($this->root . '/' . $name);
 		unlink($tmpFile1);
