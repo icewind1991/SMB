@@ -76,7 +76,8 @@ class Share extends AbstractShare {
 	}
 
 	protected function getConnection() {
-		$command = sprintf('%s%s -t %s %s %s %s',
+		$command = sprintf(
+			'%s%s -t %s %s %s %s',
 			$this->system->getStdBufPath() ? $this->system->getStdBufPath() . ' -o0 ' : '',
 			$this->system->getSmbclientPath(),
 			$this->server->getOptions()->getTimeout(),
@@ -161,7 +162,7 @@ class Share extends AbstractShare {
 		if ($path !== "" && $path !== "/") {
 			$parent = dirname($path);
 			$dir = $this->dir($parent);
-			$file = array_values(array_filter($dir, function(IFileInfo $info) use ($path) {
+			$file = array_values(array_filter($dir, function (IFileInfo $info) use ($path) {
 				return $info->getPath() === $path;
 			}));
 			if ($file) {

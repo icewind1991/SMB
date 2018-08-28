@@ -84,7 +84,6 @@ class NotifyHandlerTest extends TestCase {
 		try {
 			$share->mkdir('sub');
 		} catch (AlreadyExistsException $e) {
-
 		}
 		$process = $share->notify('sub');
 		usleep(1000 * 100);// give it some time to start listening

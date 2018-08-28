@@ -21,7 +21,6 @@
 
 namespace Icewind\SMB;
 
-
 use Icewind\SMB\Exception\DependencyException;
 use Icewind\SMB\Native\NativeServer;
 use Icewind\SMB\Wrapped\Server;

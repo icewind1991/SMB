@@ -42,7 +42,8 @@ class Server extends AbstractServer {
 	 * @throws ConnectException
 	 */
 	public function listShares() {
-		$command = sprintf('%s %s %s -L %s',
+		$command = sprintf(
+			'%s %s %s -L %s',
 			$this->system->getSmbclientPath(),
 			$this->getAuthFileArgument(),
 			$this->getAuth()->getExtraCommandLineArguments(),
@@ -73,7 +74,7 @@ class Server extends AbstractServer {
 
 		$shareNames = $parser->parseListShares($output);
 
-		$shares = array();
+		$shares = [];
 		foreach ($shareNames as $name => $description) {
 			$shares[] = $this->getShare($name);
 		}

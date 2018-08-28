@@ -10,7 +10,8 @@
 	],
 	"require"          : {
 		"php": ">=5.6",
-		"icewind/streams": ">=0.2.0"
+		"icewind/streams": ">=0.2.0",
+		"friendsofphp/php-cs-fixer": "^2.13"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^5.7"

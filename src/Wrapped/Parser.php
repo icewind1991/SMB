@@ -141,7 +141,7 @@ class Parser {
 			$value = trim($value);
 
 			if (!isset($data[$name])) {
-			    $data[$name] = $value;
+				$data[$name] = $value;
 			}
 		}
 		return [
@@ -156,7 +156,7 @@ class Parser {
 		array_pop($output);
 		$regex = '/^\s*(.*?)\s\s\s\s+(?:([NDHARS]*)\s+)?([0-9]+)\s+(.*)$/';
 		//2 spaces, filename, optional type, size, date
-		$content = array();
+		$content = [];
 		foreach ($output as $line) {
 			if (preg_match($regex, $line, $matches)) {
 				list(, $name, $mode, $size, $time) = $matches;
@@ -171,14 +171,14 @@ class Parser {
 	}
 
 	public function parseListShares($output) {
-		$shareNames = array();
+		$shareNames = [];
 		foreach ($output as $line) {
 			if (strpos($line, '|')) {
 				list($type, $name, $description) = explode('|', $line);
 				if (strtolower($type) === 'disk') {
 					$shareNames[$name] = $description;
 				}
-			} else if (strpos($line, 'Disk')) {
+			} elseif (strpos($line, 'Disk')) {
 				// new output format
 				list($name, $description) = explode('Disk', $line);
 				$shareNames[trim($name)] = trim($description);

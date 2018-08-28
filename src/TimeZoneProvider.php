@@ -30,7 +30,8 @@ class TimeZoneProvider implements ITimeZoneProvider {
 			$net = $this->system->getNetPath();
 			// for local domain names we can assume same timezone
 			if ($net && $host && strpos($host, '.') !== false) {
-				$command = sprintf('%s time zone -S %s',
+				$command = sprintf(
+					'%s time zone -S %s',
 					$net,
 					escapeshellarg($host)
 				);

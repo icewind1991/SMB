@@ -52,7 +52,7 @@ class System implements ISystem {
 	protected function getBinaryPath($binary) {
 		if (!isset($this->paths[$binary])) {
 			$result = null;
-			$output = array();
+			$output = [];
 			exec("which $binary 2>&1", $output, $result);
 			$this->paths[$binary] = $result === 0 ? trim(implode('', $output)) : false;
 		}
