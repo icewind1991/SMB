@@ -345,21 +345,14 @@ class Share extends AbstractShare {
 
  	/**
 	 * Append to stream
-	 * Note: smbclient does not support it so we use php-libsmbclient 
+	 * Note: smbclient does not support this (Use php-libsmbclient)
 	 *
 	 * @param string $target
  	 *
  	 * @throws \Icewind\SMB\Exception\DependencyException
-	 * @throws \Icewind\SMB\Exception\NotFoundException
-	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
 	public function append($target) {
-		if (!NativeServer::available($this->server->getSystem())) {
-			throw new DependencyException('php-libsmbclient not installed');
-		}
-
- 		$share = new NativeShare($this->server, $this->getName());
-		return $share->append($target);
+		throw new DependencyException('php-libsmbclient not installed');
 	}
 
 	/**
