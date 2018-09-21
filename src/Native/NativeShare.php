@@ -109,8 +109,24 @@ class NativeShare extends AbstractShare {
 	 * @return \Icewind\SMB\IFileInfo
 	 */
 	public function stat($path) {
-		return new NativeFileInfo($this, $path, basename($path), $this->getStat($path));
+		return new NativeFileInfo($this, $path, self::mb_basename($path), $this->getStat($path));
 	}
+
+    /**
+     * Multibyte unicode safe version of basename()
+     *
+     * @link http://php.net/manual/en/function.basename.php#121405
+     */
+    protected static function mb_basename($path): string
+    {
+        if (preg_match('@^.*[\\\\/]([^\\\\/]+)$@s', $path, $matches)) {
+            return $matches[1];
+        } else if (preg_match('@^([^\\\\/]+)$@s', $path, $matches)) {
+            return $matches[1];
+        }
+
+        return '';
+    }
 
 	private function getStat($path) {
 		return $this->getState()->stat($this->buildUrl($path));
