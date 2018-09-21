@@ -112,21 +112,22 @@ class NativeShare extends AbstractShare {
 		return new NativeFileInfo($this, $path, self::mb_basename($path), $this->getStat($path));
 	}
 
-    /**
-     * Multibyte unicode safe version of basename()
-     *
-     * @link http://php.net/manual/en/function.basename.php#121405
-     */
-    protected static function mb_basename($path): string
-    {
-        if (preg_match('@^.*[\\\\/]([^\\\\/]+)$@s', $path, $matches)) {
-            return $matches[1];
-        } else if (preg_match('@^([^\\\\/]+)$@s', $path, $matches)) {
-            return $matches[1];
-        }
+	/**
+	 * Multibyte unicode safe version of basename()
+	 *
+	 * @param string $path
+	 * @link http://php.net/manual/en/function.basename.php#121405
+	 * @return string
+	 */
+	protected static function mb_basename($path) {
+		if (preg_match('@^.*[\\\\/]([^\\\\/]+)$@s', $path, $matches)) {
+			return $matches[1];
+		} elseif (preg_match('@^([^\\\\/]+)$@s', $path, $matches)) {
+			return $matches[1];
+		}
 
-        return '';
-    }
+		return '';
+	}
 
 	private function getStat($path) {
 		return $this->getState()->stat($this->buildUrl($path));
