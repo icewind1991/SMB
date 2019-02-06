@@ -45,6 +45,10 @@ class System implements ISystem {
 		return $this->getBinaryPath('stdbuf');
 	}
 
+	public function getDatePath() {
+		return $this->getBinaryPath('date');
+	}
+
 	public function libSmbclientAvailable() {
 		return function_exists('smbclient_state_new');
 	}

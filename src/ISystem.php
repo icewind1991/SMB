@@ -56,6 +56,13 @@ interface ISystem {
 	public function getStdBufPath();
 
 	/**
+	 * Get the full path to the `date` binary of false if the binary is not available
+	 *
+	 * @return string|bool
+	 */
+	public function getDatePath();
+
+	/**
 	 * Whether or not the smbclient php extension is enabled
 	 *
 	 * @return bool

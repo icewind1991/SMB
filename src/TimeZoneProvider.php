@@ -27,6 +27,7 @@ class TimeZoneProvider implements ITimeZoneProvider {
 
 	public function get($host) {
 		if (!isset($this->timeZones[$host])) {
+			$timeZone = null;
 			$net = $this->system->getNetPath();
 			// for local domain names we can assume same timezone
 			if ($net && $host && strpos($host, '.') !== false) {
@@ -36,13 +37,17 @@ class TimeZoneProvider implements ITimeZoneProvider {
 					escapeshellarg($host)
 				);
 				$timeZone = exec($command);
-				if (!$timeZone) {
+			}
+
+			if (!$timeZone) {
+				$date = $this->system->getDatePath();
+				if ($date) {
+					$timeZone = exec($date . " +%z");
+				} else {
 					$timeZone = date_default_timezone_get();
 				}
-				$this->timeZones[$host] = $timeZone;
-			} else { // fallback to server timezone
-				$this->timeZones[$host] = date_default_timezone_get();
 			}
+			$this->timeZones[$host] = $timeZone;
 		}
 		return $this->timeZones[$host];
 	}
