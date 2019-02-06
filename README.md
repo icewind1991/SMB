@@ -119,6 +119,22 @@ $share->notify('')->listen(function (\Icewind\SMB\Change $change) {
 });
 ```
 
+### Changing network timeouts
+
+```php
+$options = new Options();
+$options->setTimeout(5);
+$serverFactory = new ServerFactory($options);
+```
+
+### Customizing system integration
+
+The `smbclient` backend needs to get various information about the system it's running on to function
+such as the paths of various binaries or the system timezone.
+While the default logic for getting this information should work on most systems, it possible to customize this behaviour.
+
+In order to customize the integration you provide a custom implementation of `ITimezoneProvider` and/or `ISystem` and pass them as arguments to the `ServerFactory`. 
+
 ## Testing SMB
 
 Use the following steps to check if the library can connect to your SMB share.
