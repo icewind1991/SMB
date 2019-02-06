@@ -158,7 +158,7 @@ class Share extends AbstractShare {
 		if ($path !== "" && $path !== "/") {
 			$parent = dirname($path);
 			$dir = $this->dir($parent);
-			$file = array_values(array_filter($dir, function(IFileInfo $info) use ($path) {
+			$file = array_values(array_filter($dir, function(FileInfo $info) use ($path) {
 				return $info->getPath() === $path;
 			}));
 			if ($file) {
