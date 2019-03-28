@@ -45,9 +45,8 @@ class Connection extends RawConnection {
 	 * @throws ConnectException
 	 */
 	public function clearTillPrompt(): void {
-		$this->write('');
 		do {
-			$promptLine = $this->readLine();
+			$promptLine = $this->readLine(6);
 			if ($promptLine === false) {
 				break;
 			}
@@ -75,7 +74,7 @@ class Connection extends RawConnection {
 		if (!$this->isValid()) {
 			throw new ConnectionException('Connection not valid');
 		}
-		$promptLine = $this->readLine(); //first line is prompt
+		$promptLine = $this->readLine(6); //first line is prompt
 		if ($promptLine === false) {
 			$this->unknownError($promptLine);
 		}

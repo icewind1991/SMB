@@ -112,10 +112,11 @@ class RawConnection {
 	/**
 	 * read a line of output
 	 *
+	 * @param  int $length
 	 * @return string|false
 	 */
-	public function readLine() {
-		return stream_get_line($this->getOutputStream(), 4086, "\n");
+	public function readLine($length=4086) {
+		return stream_get_line($this->getOutputStream(), $length, "\n");
 	}
 
 	/**
