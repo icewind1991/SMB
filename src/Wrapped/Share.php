@@ -55,6 +55,8 @@ class Share extends AbstractShare {
 		FileInfo::MODE_SYSTEM   => 's'
 	];
 
+	const EXEC_CMD = 'exec';
+
 	/**
 	 * @param IServer $server
 	 * @param string $name
@@ -78,7 +80,8 @@ class Share extends AbstractShare {
 
 	protected function getConnection() {
 		$command = sprintf(
-			'%s%s -t %s %s %s %s',
+			'%s %s%s -t %s %s %s %s',
+			self::EXEC_CMD,
 			$this->system->getStdBufPath() ? $this->system->getStdBufPath() . ' -o0 ' : '',
 			$this->system->getSmbclientPath(),
 			$this->server->getOptions()->getTimeout(),

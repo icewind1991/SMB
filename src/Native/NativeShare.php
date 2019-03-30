@@ -289,7 +289,7 @@ class NativeShare extends AbstractShare {
 	 */
 	public function append($source) {
 		$url = $this->buildUrl($source);
-		$handle = $this->getState()->open($url, "a");
+		$handle = $this->getState()->open($url, "a+");
 		return NativeWriteStream::wrap($this->getState(), $handle, "a", $url);
 	}
 
