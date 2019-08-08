@@ -223,6 +223,12 @@ class NativeShare extends AbstractShare {
 		if (!$target) {
 			throw new InvalidPathException('Invalid target path: Filename cannot be empty');
 		}
+
+		$sourceHandle = $this->getState()->open($this->buildUrl($source), 'r');
+		if (!$sourceHandle) {
+			throw new InvalidResourceException('Failed opening remote file "' . $source . '" for reading');
+		}
+
 		$targetHandle = @fopen($target, 'wb');
 		if (!$targetHandle) {
 			$error = error_get_last();
@@ -231,13 +237,8 @@ class NativeShare extends AbstractShare {
 			} else {
 				$reason = 'Unknown error';
 			}
+			$this->getState()->close($sourceHandle);
 			throw new InvalidResourceException('Failed opening local file "' . $target . '" for writing: ' . $reason);
-		}
-
-		$sourceHandle = $this->getState()->open($this->buildUrl($source), 'r');
-		if (!$sourceHandle) {
-			fclose($targetHandle);
-			throw new InvalidResourceException('Failed opening remote file "' . $source . '" for reading');
 		}
 
 		while ($data = $this->getState()->read($sourceHandle, NativeReadStream::CHUNK_SIZE)) {
