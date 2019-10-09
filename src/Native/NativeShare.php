@@ -265,17 +265,24 @@ class NativeShare extends AbstractShare {
 
 	/**
 	 * Open a writeable stream to a remote file
-	 * Note: This method will truncate the file to 0bytes first
+	 * Note: The default will truncate the file to 0 bytes.
 	 *
 	 * @param string $source
+	 * @param bool $truncate
 	 * @return resource a writeable stream
 	 *
 	 * @throws \Icewind\SMB\Exception\NotFoundException
 	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
-	public function write($source) {
+	public function write($source, $truncate=true) {
 		$url = $this->buildUrl($source);
-		$handle = $this->getState()->create($url);
+
+		if($truncate === true) {
+			$handle = $this->getState()->create($url);
+		} else {
+			$handle = $this->getState()->open($url, 'c');
+		}
+
 		return NativeWriteStream::wrap($this->getState(), $handle, 'w', $url);
 	}
 

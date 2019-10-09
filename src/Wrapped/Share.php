@@ -326,12 +326,18 @@ class Share extends AbstractShare {
 	 * Open a writable stream to a remote file
 	 *
 	 * @param string $target
+	 * @param bool $truncate
 	 * @return resource a write only stream to upload a remote file
 	 *
+	 * @throws \Icewind\SMB\Exception\DependencyException
 	 * @throws \Icewind\SMB\Exception\NotFoundException
 	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
-	public function write($target) {
+	public function write($target, $truncate=true) {
+		if($truncate === false) {
+			throw new DependencyException('truncate required by smbclient, use php-libsmbclient instead');
+		}
+
 		$target = $this->escapePath($target);
 		// since returned stream is closed by the caller we need to create a new instance
 		// since we can't re-use the same file descriptor over multiple calls
