@@ -333,8 +333,8 @@ class Share extends AbstractShare {
 	 * @throws \Icewind\SMB\Exception\NotFoundException
 	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
-	public function write($target, $truncate=true) {
-		if($truncate === false) {
+	public function write($target, $truncate = true) {
+		if ($truncate === false) {
 			throw new DependencyException('truncate required by smbclient, use php-libsmbclient instead');
 		}
 

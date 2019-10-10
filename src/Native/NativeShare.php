@@ -274,10 +274,10 @@ class NativeShare extends AbstractShare {
 	 * @throws \Icewind\SMB\Exception\NotFoundException
 	 * @throws \Icewind\SMB\Exception\InvalidTypeException
 	 */
-	public function write($source, $truncate=true) {
+	public function write($source, $truncate = true) {
 		$url = $this->buildUrl($source);
 
-		if($truncate === true) {
+		if ($truncate === true) {
 			$handle = $this->getState()->create($url);
 		} else {
 			$handle = $this->getState()->open($url, 'c');
