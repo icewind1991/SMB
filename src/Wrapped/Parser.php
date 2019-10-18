@@ -33,7 +33,6 @@ class Parser {
 	 */
 	private $host;
 
-	// todo replace with static once <5.6 support is dropped
 	// see error.h
 	const EXCEPTION_MAP = [
 		ErrorCodes::LogonFailure      => AuthenticationException::class,
