@@ -22,19 +22,19 @@
 namespace Icewind\SMB;
 
 class BasicAuth implements IAuth {
-	/** @var string */
+	/** @var string|null */
 	private $username;
-	/** @var string */
+	/** @var string|null */
 	private $workgroup;
-	/** @var string */
+	/** @var string|null */
 	private $password;
 
 	/**
 	 * BasicAuth constructor.
 	 *
-	 * @param string $username
-	 * @param string $workgroup
-	 * @param string $password
+	 * @param string|null $username
+	 * @param string|null $workgroup
+	 * @param string|null $password
 	 */
 	public function __construct($username, $workgroup, $password) {
 		$this->username = $username;
