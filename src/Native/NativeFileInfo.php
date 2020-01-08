@@ -113,9 +113,14 @@ class NativeFileInfo implements IFileInfo {
 	 */
 	protected function getMode() {
 		if (!$this->modeCache) {
-			$attribute = $this->share->getAttribute($this->path, 'system.dos_attr.mode');
-			// parse hex string
-			$this->modeCache = (int)hexdec(substr($attribute, 2));
+			$stat = $this->stat();
+			if (isset($stat['mode'])) {
+				$this->modeCache = ($stat['mode']);
+			} else {
+				$attribute = $this->share->getAttribute($this->path, 'system.dos_attr.mode');
+				// parse hex string
+				$this->modeCache = (int)hexdec(substr($attribute, 2));
+			}
 		}
 		return $this->modeCache;
 	}
