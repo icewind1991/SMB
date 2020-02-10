@@ -10,7 +10,7 @@ namespace Icewind\SMB\Test;
 use Icewind\SMB\IFileInfo;
 use Icewind\SMB\Wrapped\FileInfo;
 
-class ParserTest extends \PHPUnit_Framework_TestCase {
+class ParserTest extends \PHPUnit\Framework\TestCase {
 	public function modeProvider() {
 		return [
 			['D', IFileInfo::MODE_DIRECTORY],
