@@ -7,6 +7,7 @@
 
 namespace Icewind\SMB\Native;
 
+use Icewind\SMB\ACL;
 use Icewind\SMB\IFileInfo;
 
 class NativeFileInfo implements IFileInfo {
@@ -155,5 +156,23 @@ class NativeFileInfo implements IFileInfo {
 	public function isArchived() {
 		$mode = $this->getMode();
 		return (bool)($mode & IFileInfo::MODE_ARCHIVE);
+	}
+
+	/**
+	 * @return ACL[]
+	 */
+	public function getAcls(): array {
+		$acls = [];
+		$attribute = $this->share->getAttribute($this->path, 'system.nt_sec_desc.acl.*+');
+
+		foreach (explode(',', $attribute) as $acl) {
+			[$user, $permissions] = explode(':', $acl, 2);
+			[$type, $flags, $mask] = explode('/', $permissions);
+			$mask = hexdec($mask);
+
+			$acls[$user] = new ACL($type, $flags, $mask);
+		}
+
+		return $acls;
 	}
 }

@@ -516,7 +516,7 @@ abstract class AbstractShareTest extends TestCase {
 		}
 		$this->assertTrue($dirEntry->isDirectory());
 		$this->assertFalse($dirEntry->isReadOnly());
-		$this->assertFalse($dirEntry->isReadOnly());
+		$this->assertFalse($dirEntry->isHidden());
 
 		if ($dir[0]->getName() === 'file.txt') {
 			$fileEntry = $dir[0];
@@ -525,7 +525,7 @@ abstract class AbstractShareTest extends TestCase {
 		}
 		$this->assertFalse($fileEntry->isDirectory());
 		$this->assertFalse($fileEntry->isReadOnly());
-		$this->assertFalse($fileEntry->isReadOnly());
+		$this->assertFalse($fileEntry->isHidden());
 	}
 
 	/**
