@@ -498,7 +498,6 @@ class Share extends AbstractShare {
 		}
 
 		$rawAcls = $connection->readAll();
-		var_dump($rawAcls);
 
 		$acls = [];
 		foreach ($rawAcls as $acl) {
