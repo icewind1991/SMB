@@ -132,10 +132,6 @@ class NativeShare extends AbstractShare {
 		return '';
 	}
 
-	private function getStat($path) {
-		return $this->getState()->stat($this->buildUrl($path));
-	}
-
 	/**
 	 * Create a folder on the share
 	 *
