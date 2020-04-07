@@ -61,7 +61,11 @@ class NativeStream implements File {
 	}
 
 	public function stream_close() {
-		return $this->state->close($this->handle);
+		try {
+			return $this->state->close($this->handle);
+		} catch (\Exception $e) {
+			return false;
+		}
 	}
 
 	public function stream_eof() {

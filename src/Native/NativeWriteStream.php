@@ -79,8 +79,13 @@ class NativeWriteStream extends NativeStream {
 	}
 
 	public function stream_close() {
-		$this->flushWrite();
-		return parent::stream_close();
+		try {
+			$this->flushWrite();
+			$flushResult = true;
+		} catch (\Exception $e) {
+			$flushResult = false;
+		}
+		return parent::stream_close() && $flushResult;
 	}
 
 	public function stream_tell() {
