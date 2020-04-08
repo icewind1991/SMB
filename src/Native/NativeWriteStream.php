@@ -61,7 +61,7 @@ class NativeWriteStream extends NativeStream {
 
 	private function flushWrite() {
 		rewind($this->writeBuffer);
-		$this->state->write($this->handle, stream_get_contents($this->writeBuffer));
+		$this->state->write($this->handle, stream_get_contents($this->writeBuffer), $this->url);
 		$this->writeBuffer = fopen('php://memory', 'r+');
 		$this->bufferSize = 0;
 	}

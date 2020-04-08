@@ -62,7 +62,7 @@ class NativeStream implements File {
 
 	public function stream_close() {
 		try {
-			return $this->state->close($this->handle);
+			return $this->state->close($this->handle, $this->url);
 		} catch (\Exception $e) {
 			return false;
 		}
@@ -114,7 +114,7 @@ class NativeStream implements File {
 	}
 
 	public function stream_write($data) {
-		return $this->state->write($this->handle, $data);
+		return $this->state->write($this->handle, $data, $this->url);
 	}
 
 	public function stream_truncate($size) {

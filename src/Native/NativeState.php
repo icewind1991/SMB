@@ -240,13 +240,14 @@ class NativeState {
 	/**
 	 * @param resource $file
 	 * @param string $data
+	 * @param string $path
 	 * @param int $length
 	 * @return int
 	 */
-	public function write($file, $data, $length = null) {
+	public function write($file, $data, $path, $length = null) {
 		$result = @smbclient_write($this->state, $file, $data, $length);
 
-		$this->testResult($result, $file);
+		$this->testResult($result, $path);
 		return $result;
 	}
 
@@ -275,10 +276,10 @@ class NativeState {
 		return $result;
 	}
 
-	public function close($file) {
+	public function close($file, $path) {
 		$result = @smbclient_close($this->state, $file);
 
-		$this->testResult($result, $file);
+		$this->testResult($result, $path);
 		return $result;
 	}
 
