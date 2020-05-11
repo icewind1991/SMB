@@ -64,7 +64,7 @@ class NativeFileInfo implements IFileInfo {
 			$rawAttributes = explode(',', $this->share->getAttribute($this->path, 'system.dos_attr.*'));
 			$this->attributeCache = [];
 			foreach ($rawAttributes as $rawAttribute) {
-				[$name, $value] = explode(':', $rawAttribute);
+				list($name, $value) = explode(':', $rawAttribute);
 				$name = strtolower($name);
 				if ($name == 'mode') {
 					$this->attributeCache[$name] = (int)hexdec(substr($value, 2));
@@ -179,8 +179,8 @@ class NativeFileInfo implements IFileInfo {
 		$attribute = $this->share->getAttribute($this->path, 'system.nt_sec_desc.acl.*+');
 
 		foreach (explode(',', $attribute) as $acl) {
-			[$user, $permissions] = explode(':', $acl, 2);
-			[$type, $flags, $mask] = explode('/', $permissions);
+			list($user, $permissions) = explode(':', $acl, 2);
+			list($type, $flags, $mask) = explode('/', $permissions);
 			$mask = hexdec($mask);
 
 			$acls[$user] = new ACL($type, $flags, $mask);
