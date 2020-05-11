@@ -351,15 +351,6 @@ abstract class AbstractShareTest extends TestCase {
 	}
 
 	/**
-	 * @expectedException \Icewind\SMB\Exception\InvalidTypeException
-	 */
-	public function testDelFolder() {
-		$this->share->mkdir($this->root . '/foobar');
-		$this->share->del($this->root . '/foobar');
-		$this->share->rmdir($this->root . '/foobar');
-	}
-
-	/**
 	 * @dataProvider invalidPathProvider
 	 * @expectedException \Icewind\SMB\Exception\InvalidPathException
 	 */
