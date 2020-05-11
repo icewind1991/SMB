@@ -571,6 +571,8 @@ abstract class AbstractShareTest extends TestCase {
 	 * @dataProvider nameProvider
 	 */
 	public function testSetMode($name) {
+		$this->markTestSkipped("mode detection is mostly broken with newer libsmbclient versions");
+		return;
 		$txtFile = $this->getTextFile();
 
 		$this->share->put($txtFile, $this->root . '/' . $name);

@@ -32,11 +32,6 @@ class NativeFileInfo implements IFileInfo {
 	protected $attributeCache = null;
 
 	/**
-	 * @var int
-	 */
-	protected $modeCache;
-
-	/**
 	 * @param NativeShare $share
 	 * @param string $path
 	 * @param string $name
@@ -98,6 +93,18 @@ class NativeFileInfo implements IFileInfo {
 	}
 
 	/**
+	 * On "mode":
+	 *
+	 * different smbclient versions seem to return different mode values for 'system.dos_attr.mode'
+	 *
+	 * older versions return the dos permissions mask as defined in `IFileInfo::MODE_*` while
+	 * newer versions return the equivalent unix permission mask.
+	 *
+	 * Since the unix mask doesn't contain the proper hidden/archive/system flags we have to assume them
+	 * as false (except for `hidden` where we use the unix dotfile convention)
+	 */
+
+	/**
 	 * @return int
 	 */
 	protected function getMode() {
@@ -109,7 +116,11 @@ class NativeFileInfo implements IFileInfo {
 	 */
 	public function isDirectory() {
 		$mode = $this->getMode();
-		return (bool)($mode & IFileInfo::MODE_DIRECTORY);
+		if ($mode > 0x80) {
+			return (bool)($mode & 0x4000); // 0x80: unix directory flag
+		} else {
+			return (bool)($mode & IFileInfo::MODE_DIRECTORY);
+		}
 	}
 
 	/**
@@ -117,7 +128,11 @@ class NativeFileInfo implements IFileInfo {
 	 */
 	public function isReadOnly() {
 		$mode = $this->getMode();
-		return (bool)($mode & IFileInfo::MODE_READONLY);
+		if ($mode > 0x80) {
+			return !(bool)($mode & 0x80); // 0x80: owner write permissions
+		} else {
+			return (bool)($mode & IFileInfo::MODE_READONLY);
+		}
 	}
 
 	/**
@@ -125,7 +140,11 @@ class NativeFileInfo implements IFileInfo {
 	 */
 	public function isHidden() {
 		$mode = $this->getMode();
-		return (bool)($mode & IFileInfo::MODE_HIDDEN);
+		if ($mode > 0x80) {
+			return $this->name[0] === '.';
+		} else {
+			return (bool)($mode & IFileInfo::MODE_HIDDEN);
+		}
 	}
 
 	/**
@@ -133,7 +152,11 @@ class NativeFileInfo implements IFileInfo {
 	 */
 	public function isSystem() {
 		$mode = $this->getMode();
-		return (bool)($mode & IFileInfo::MODE_SYSTEM);
+		if ($mode > 0x80) {
+			return false;
+		} else {
+			return (bool)($mode & IFileInfo::MODE_SYSTEM);
+		}
 	}
 
 	/**
@@ -141,7 +164,11 @@ class NativeFileInfo implements IFileInfo {
 	 */
 	public function isArchived() {
 		$mode = $this->getMode();
-		return (bool)($mode & IFileInfo::MODE_ARCHIVE);
+		if ($mode > 0x80) {
+			return false;
+		} else {
+			return (bool)($mode & IFileInfo::MODE_ARCHIVE);
+		}
 	}
 
 	/**
