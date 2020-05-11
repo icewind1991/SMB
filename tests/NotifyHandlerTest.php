@@ -10,6 +10,7 @@ namespace Icewind\SMB\Test;
 use Icewind\SMB\BasicAuth;
 use Icewind\SMB\Change;
 use Icewind\SMB\Exception\AlreadyExistsException;
+use Icewind\SMB\Exception\RevisionMismatchException;
 use Icewind\SMB\INotifyHandler;
 use Icewind\SMB\IShare;
 use Icewind\SMB\Options;
@@ -66,7 +67,11 @@ class NotifyHandlerTest extends TestCase {
 		$share->del('target.txt');
 		usleep(1000 * 100);// give it some time
 
-		$changes = $process->getChanges();
+		try {
+			$changes = $process->getChanges();
+		} catch (RevisionMismatchException $e) {
+			$this->markTestSkipped("notify not supported with configured smb version");
+		}
 		$process->stop();
 		$expected = [
 			new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'),
@@ -91,7 +96,11 @@ class NotifyHandlerTest extends TestCase {
 		$share->del('sub/source.txt');
 		usleep(1000 * 100);// give it some time
 
-		$changes = $process->getChanges();
+		try {
+			$changes = $process->getChanges();
+		} catch (RevisionMismatchException $e) {
+			$this->markTestSkipped("notify not supported with configured smb version");
+		}
 		$process->stop();
 
 		$expected = [
@@ -115,10 +124,14 @@ class NotifyHandlerTest extends TestCase {
 		$results = [];
 
 		// the notify process buffers incoming messages so callback will be triggered for the above changes
-		$process->listen(function ($change) use (&$results) {
-			$results = $change;
-			return false; // stop listening
-		});
+		try {
+			$process->listen(function ($change) use (&$results) {
+				$results = $change;
+				return false; // stop listening
+			});
+		} catch (RevisionMismatchException $e) {
+			$this->markTestSkipped("notify not supported with configured smb version");
+		}
 		$this->assertEquals($results, new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'));
 	}
 
@@ -140,7 +153,11 @@ class NotifyHandlerTest extends TestCase {
 		$share->del('target.txt');
 		usleep(1000 * 100);// give it some time
 
-		$changes = $process->getChanges();
+		try {
+			$changes = $process->getChanges();
+		} catch (RevisionMismatchException $e) {
+			$this->markTestSkipped("notify not supported with configured smb version");
+		}
 		$expected = [
 			new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'),
 			new Change(INotifyHandler::NOTIFY_RENAMED_OLD, 'source.txt'),
