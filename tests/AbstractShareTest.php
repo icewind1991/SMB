@@ -34,7 +34,11 @@ abstract class AbstractShareTest extends TestCase {
 	public function tearDown() {
 		try {
 			if ($this->share) {
-				$this->cleanDir($this->root);
+				try {
+					$this->cleanDir($this->root);
+				} catch (\Exception $e) {
+					// ignore
+				}
 			}
 			unset($this->share);
 		} catch (\Exception $e) {
