@@ -108,6 +108,11 @@ class NativeFileInfo implements IFileInfo {
 	 * @return int
 	 */
 	protected function getMode() {
+		$mode = $this->stat()['mode'];
+
+		// Let us ignore the ATTR_NOT_CONTENT_INDEXED for now
+		$mode &= ~0x00002000;
+		
 		return $this->stat()['mode'];
 	}
 
