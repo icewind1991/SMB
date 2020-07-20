@@ -8,6 +8,7 @@
 namespace Icewind\SMB\Test;
 
 use Icewind\SMB\BasicAuth;
+use Icewind\SMB\IShare;
 use Icewind\SMB\Options;
 use Icewind\SMB\System;
 use Icewind\SMB\TimeZoneProvider;
@@ -39,12 +40,11 @@ class ServerTest extends TestCase {
 
 	public function testListShares() {
 		$shares = $this->server->listShares();
-		foreach ($shares as $share) {
-			if ($share->getName() === $this->config->share) {
-				return;
-			}
-		}
-		$this->fail('Share "' . $this->config->share . '" not found');
+		$names = array_map(function (IShare $share) {
+			return $share->getName();
+		}, $shares);
+
+		$this->assertContains($this->config->share, $names);
 	}
 
 	/**
