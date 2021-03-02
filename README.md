@@ -125,6 +125,17 @@ $options->setTimeout(5);
 $serverFactory = new ServerFactory($options);
 ```
 
+### Setting protocol version
+
+```php
+$options = new Options();
+$options->setMinProtocol(IOptions::PROTOCOL_SMB2);
+$options->setMaxProtocol(IOptions::PROTOCOL_SMB3);
+$serverFactory = new ServerFactory($options);
+```
+
+Note, setting the protocol version is not supported with php-smbclient version 1.0.1 or lower.
+
 ### Customizing system integration
 
 The `smbclient` backend needs to get various information about the system it's running on to function

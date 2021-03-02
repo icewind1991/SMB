@@ -43,11 +43,15 @@ class Server extends AbstractServer {
 	 * @throws ConnectException
 	 */
 	public function listShares() {
+		$maxProtocol = $this->options->getMaxProtocol();
+		$minProtocol = $this->options->getMinProtocol();
 		$command = sprintf(
-			'%s %s %s -L %s',
+			'%s %s %s %s %s -L %s',
 			$this->system->getSmbclientPath(),
 			$this->getAuthFileArgument(),
 			$this->getAuth()->getExtraCommandLineArguments(),
+			$maxProtocol ? "--option='client max protocol=" . $maxProtocol . "'" : "",
+			$minProtocol ? "--option='client min protocol=" . $minProtocol . "'" : "",
 			escapeshellarg('//' . $this->getHost())
 		);
 		$connection = new RawConnection($command);

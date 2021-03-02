@@ -10,7 +10,7 @@ namespace Icewind\SMB\Test;
 use Icewind\SMB\BasicAuth;
 use Icewind\SMB\Exception\AuthenticationException;
 use Icewind\SMB\Exception\ConnectionRefusedException;
-use Icewind\SMB\Exception\InvalidHostException;
+use Icewind\SMB\IOptions;
 use Icewind\SMB\IShare;
 use Icewind\SMB\Options;
 use Icewind\SMB\System;
@@ -111,6 +111,43 @@ class ServerTest extends TestCase {
 			new System(),
 			new TimeZoneProvider(new System()),
 			new Options()
+		);
+		$server->listShares();
+	}
+
+	public function testProtocolMatch() {
+		$options = new Options();
+		$options->setMinProtocol(IOptions::PROTOCOL_SMB2);
+		$options->setMaxProtocol(IOptions::PROTOCOL_SMB3);
+		$server = new Server(
+			$this->config->host,
+			new BasicAuth(
+				$this->config->user,
+				'test',
+				$this->config->password
+			),
+			new System(),
+			new TimeZoneProvider(new System()),
+			$options
+		);
+		$server->listShares();
+		$this->assertTrue(true);
+	}
+
+	public function testToLowMaxProtocol() {
+		$this->expectException(ConnectionRefusedException::class);
+		$options = new Options();
+		$options->setMaxProtocol(IOptions::PROTOCOL_NT1);
+		$server = new Server(
+			$this->config->host,
+			new BasicAuth(
+				$this->config->user,
+				'test',
+				$this->config->password
+			),
+			new System(),
+			new TimeZoneProvider(new System()),
+			$options
 		);
 		$server->listShares();
 	}
