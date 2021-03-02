@@ -122,7 +122,7 @@ class NativeState {
 	}
 
 	/**
-	 * @param $dir
+	 * @param resource $dir
 	 * @return bool
 	 */
 	public function closedir($dir) {

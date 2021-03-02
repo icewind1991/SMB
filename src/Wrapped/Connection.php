@@ -95,10 +95,10 @@ class Connection extends RawConnection {
 	/**
 	 * Check
 	 *
-	 * @param $line
+	 * @param string $line
 	 * @return bool
 	 */
-	private function isPrompt($line) {
+	private function isPrompt(string $line) {
 		return mb_substr($line, 0, self::DELIMITER_LENGTH) === self::DELIMITER || $line === false;
 	}
 
