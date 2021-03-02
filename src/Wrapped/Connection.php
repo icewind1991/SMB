@@ -82,7 +82,7 @@ class Connection extends RawConnection {
 					break;
 				}
 			} else {
-				$output[] .= $line;
+				$output[] = $line;
 			}
 			$line = $this->readLine();
 		}

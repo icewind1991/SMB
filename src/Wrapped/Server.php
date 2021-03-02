@@ -11,6 +11,7 @@ use Icewind\SMB\AbstractServer;
 use Icewind\SMB\Exception\AuthenticationException;
 use Icewind\SMB\Exception\ConnectException;
 use Icewind\SMB\Exception\ConnectionException;
+use Icewind\SMB\Exception\ConnectionRefusedException;
 use Icewind\SMB\Exception\InvalidHostException;
 use Icewind\SMB\IShare;
 use Icewind\SMB\ISystem;
@@ -62,6 +63,9 @@ class Server extends AbstractServer {
 		if (isset($output[0])) {
 			$parser->checkConnectionError($output[0]);
 		}
+//		if (count($output) === 0) {
+//			throw new ConnectionRefusedException();
+//		}
 
 		// sometimes we get an empty line first
 		if (count($output) < 2) {

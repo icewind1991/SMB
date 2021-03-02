@@ -72,6 +72,11 @@ class NotifyHandlerTest extends TestCase {
 		} catch (RevisionMismatchException $e) {
 			$this->markTestSkipped("notify not supported with configured smb version");
 		}
+
+		$changes = array_filter($changes, function (Change $change) {
+			return $change->getPath()[0] !== '.';
+		});
+		
 		$process->stop();
 		$expected = [
 			new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'),

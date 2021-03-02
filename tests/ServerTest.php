@@ -9,6 +9,7 @@ namespace Icewind\SMB\Test;
 
 use Icewind\SMB\BasicAuth;
 use Icewind\SMB\Exception\AuthenticationException;
+use Icewind\SMB\Exception\ConnectionRefusedException;
 use Icewind\SMB\Exception\InvalidHostException;
 use Icewind\SMB\IShare;
 use Icewind\SMB\Options;
@@ -83,7 +84,7 @@ class ServerTest extends TestCase {
 	}
 
 	public function testWrongHost() {
-		$this->expectException(InvalidHostException::class);
+		$this->expectException(ConnectionRefusedException::class);
 		$server = new Server(
 			uniqid(),
 			new BasicAuth(
@@ -99,7 +100,7 @@ class ServerTest extends TestCase {
 	}
 
 	public function testHostEscape() {
-		$this->expectException(InvalidHostException::class);
+		$this->expectException(ConnectionRefusedException::class);
 		$server = new Server(
 			$this->config->host . ';asd',
 			new BasicAuth(

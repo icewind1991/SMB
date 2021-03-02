@@ -9,6 +9,7 @@ namespace Icewind\SMB\Wrapped;
 
 use Icewind\SMB\Exception\ConnectException;
 use Icewind\SMB\Exception\ConnectionException;
+use Icewind\SMB\Exception\ConnectionResetException;
 
 class RawConnection {
 	/**
@@ -100,7 +101,13 @@ class RawConnection {
 	 * @param string $input
 	 */
 	public function write($input) {
-		fwrite($this->getInputStream(), $input);
+		if (@fwrite($this->getInputStream(), $input) === false) {
+			$error = error_get_last();
+			if ($error && strpos($error['message'], "errno=32")) {
+				error_clear_last();
+				throw new ConnectionResetException();
+			}
+		}
 		fflush($this->getInputStream());
 	}
 
