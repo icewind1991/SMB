@@ -60,7 +60,7 @@ class Parser {
 	/**
 	 * @param string $timeZone
 	 */
-	public function __construct($timeZone) {
+	public function __construct(string $timeZone) {
 		$this->timeZone = $timeZone;
 	}
 

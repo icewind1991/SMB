@@ -31,7 +31,7 @@ class ServerFactory {
 		Server::class
 	];
 
-	/** @var System */
+	/** @var ISystem */
 	private $system;
 
 	/** @var IOptions */

@@ -57,7 +57,7 @@ class Server extends AbstractServer {
 			throw new ConnectionException($connection->readLine());
 		}
 
-		$parser = new Parser($this->timezoneProvider);
+		$parser = new Parser($this->timezoneProvider->get($this->host));
 
 		$output = $connection->readAll();
 		if (isset($output[0])) {

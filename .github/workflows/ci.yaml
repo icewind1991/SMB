@@ -33,7 +33,7 @@ jobs:
         run: composer install
       - env:
           BACKEND: smbclient
-        run: php ./vendor/bin/phpstan analyse --level 2 src
+        run: php ./vendor/bin/phpstan analyse --level 5 src
 
   phpunit:
     runs-on: ubuntu-20.04

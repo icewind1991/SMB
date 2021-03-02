@@ -34,7 +34,7 @@ class RawConnection {
 	private $pipes;
 
 	/**
-	 * @var resource $process
+	 * @var resource|null $process
 	 */
 	private $process;
 

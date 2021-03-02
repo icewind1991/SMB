@@ -12,7 +12,7 @@ class Change {
 	private $code;
 	private $path;
 
-	public function __construct(string $code, int $path) {
+	public function __construct(int $code, string $path) {
 		$this->code = $code;
 		$this->path = $path;
 	}
