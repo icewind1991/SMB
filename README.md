@@ -2,6 +2,7 @@ SMB
 ===
 
 [![CI](https://github.com/icewind1991/SMB/actions/workflows/ci.yaml/badge.svg)](https://github.com/icewind1991/SMB/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/icewind1991/SMB/branch/master/graph/badge.svg?token=eTg0P466k6)](https://codecov.io/gh/icewind1991/SMB)
 
 PHP wrapper for `smbclient` and [`libsmbclient-php`](https://github.com/eduardok/libsmbclient-php)
 
