@@ -10,7 +10,7 @@
 	],
 	"require"          : {
 		"php": ">=7.3",
-		"icewind/streams": ">=0.7.0"
+		"icewind/streams": ">=0.7.3"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^9.3.8",
