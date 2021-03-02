@@ -63,9 +63,6 @@ class Server extends AbstractServer {
 		if (isset($output[0])) {
 			$parser->checkConnectionError($output[0]);
 		}
-//		if (count($output) === 0) {
-//			throw new ConnectionRefusedException();
-//		}
 
 		// sometimes we get an empty line first
 		if (count($output) < 2) {
@@ -74,6 +71,9 @@ class Server extends AbstractServer {
 
 		if (isset($output[0])) {
 			$parser->checkConnectionError($output[0]);
+		}
+		if (count($output) === 0) {
+			throw new ConnectionRefusedException();
 		}
 
 		$shareNames = $parser->parseListShares($output);

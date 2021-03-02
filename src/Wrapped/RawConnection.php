@@ -101,14 +101,9 @@ class RawConnection {
 	 * @param string $input
 	 */
 	public function write($input) {
-		if (@fwrite($this->getInputStream(), $input) === false) {
-			$error = error_get_last();
-			if ($error && strpos($error['message'], "errno=32")) {
-				error_clear_last();
-				throw new ConnectionResetException();
-			}
-		}
+		$result = @fwrite($this->getInputStream(), $input);
 		fflush($this->getInputStream());
+		return $result;
 	}
 
 	/**

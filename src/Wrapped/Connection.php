@@ -10,6 +10,7 @@ namespace Icewind\SMB\Wrapped;
 use Icewind\SMB\Exception\AuthenticationException;
 use Icewind\SMB\Exception\ConnectException;
 use Icewind\SMB\Exception\ConnectionException;
+use Icewind\SMB\Exception\ConnectionRefusedException;
 use Icewind\SMB\Exception\InvalidHostException;
 use Icewind\SMB\Exception\NoLoginServerException;
 
@@ -31,7 +32,7 @@ class Connection extends RawConnection {
 	 * @param string $input
 	 */
 	public function write($input) {
-		parent::write($input . PHP_EOL);
+		return parent::write($input . PHP_EOL);
 	}
 
 	/**
@@ -43,7 +44,9 @@ class Connection extends RawConnection {
 			$promptLine = $this->readLine();
 			$this->parser->checkConnectionError($promptLine);
 		} while (!$this->isPrompt($promptLine));
-		$this->write('');
+		if ($this->write('') === false) {
+			throw new ConnectionRefusedException();
+		}
 		$this->readLine();
 	}
 
