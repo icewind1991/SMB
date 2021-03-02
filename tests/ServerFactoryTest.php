@@ -22,6 +22,7 @@
 namespace Icewind\SMB\Test;
 
 use Icewind\SMB\AnonymousAuth;
+use Icewind\SMB\Exception\DependencyException;
 use Icewind\SMB\IAuth;
 use Icewind\SMB\Native\NativeServer;
 use Icewind\SMB\ServerFactory;
@@ -32,7 +33,7 @@ class ServerFactoryTest extends TestCase {
 	/** @var IAuth */
 	private $credentials;
 
-	protected function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 
 		$this->credentials = new AnonymousAuth();
@@ -59,10 +60,8 @@ class ServerFactoryTest extends TestCase {
 		$this->assertInstanceOf(NativeServer::class, $factory->createServer('localhost', $this->credentials));
 	}
 
-	/**
-	 * @expectedException \Icewind\SMB\Exception\DependencyException
-	 */
 	public function testNoBackend() {
+		$this->expectException(DependencyException::class);
 		$this->requireBackendEnv('smbclient');
 		$system = $this->getMockBuilder(System::class)
 			->setMethods(['libSmbclientAvailable', 'getSmbclientPath'])

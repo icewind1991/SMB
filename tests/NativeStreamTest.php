@@ -31,7 +31,7 @@ class NativeStreamTest extends TestCase {
 
 	protected $config;
 
-	public function setUp() {
+	public function setUp(): void {
 		$this->requireBackendEnv('libsmbclient');
 		if (!function_exists('smbclient_state_new')) {
 			$this->markTestSkipped('libsmbclient php extension not installed');
@@ -137,7 +137,7 @@ class NativeStreamTest extends TestCase {
 		$this->assertFalse(stream_set_blocking($fh, false));
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		if ($this->share) {
 			$this->cleanDir($this->root);
 		}

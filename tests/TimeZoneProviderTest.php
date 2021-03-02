@@ -30,7 +30,7 @@ class TimeZoneProviderTest extends TestCase {
 	/** @var TimeZoneProvider */
 	private $provider;
 
-	protected function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 
 		$this->system = $this->createMock(ISystem::class);

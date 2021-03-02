@@ -8,6 +8,8 @@
 namespace Icewind\SMB\Test;
 
 use Icewind\SMB\BasicAuth;
+use Icewind\SMB\Exception\AuthenticationException;
+use Icewind\SMB\Exception\InvalidHostException;
 use Icewind\SMB\IShare;
 use Icewind\SMB\Options;
 use Icewind\SMB\System;
@@ -22,7 +24,7 @@ class ServerTest extends TestCase {
 
 	private $config;
 
-	public function setUp() {
+	public function setUp(): void {
 		$this->requireBackendEnv('smbclient');
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
 		$this->server = new Server(
@@ -47,10 +49,8 @@ class ServerTest extends TestCase {
 		$this->assertContains($this->config->share, $names);
 	}
 
-	/**
-	 * @expectedException \Icewind\SMB\Exception\AuthenticationException
-	 */
 	public function testWrongUserName() {
+		$this->expectException(AuthenticationException::class);
 		$this->markTestSkipped('This fails for no reason on travis');
 		$server = new Server(
 			$this->config->host,
@@ -66,10 +66,8 @@ class ServerTest extends TestCase {
 		$server->listShares();
 	}
 
-	/**
-	 * @expectedException \Icewind\SMB\Exception\AuthenticationException
-	 */
 	public function testWrongPassword() {
+		$this->expectException(AuthenticationException::class);
 		$server = new Server(
 			$this->config->host,
 			new BasicAuth(
@@ -84,10 +82,8 @@ class ServerTest extends TestCase {
 		$server->listShares();
 	}
 
-	/**
-	 * @expectedException \Icewind\SMB\Exception\InvalidHostException
-	 */
 	public function testWrongHost() {
+		$this->expectException(InvalidHostException::class);
 		$server = new Server(
 			uniqid(),
 			new BasicAuth(
@@ -102,11 +98,8 @@ class ServerTest extends TestCase {
 		$server->listShares();
 	}
 
-
-	/**
-	 * @expectedException \Icewind\SMB\Exception\InvalidHostException
-	 */
 	public function testHostEscape() {
+		$this->expectException(InvalidHostException::class);
 		$server = new Server(
 			$this->config->host . ';asd',
 			new BasicAuth(

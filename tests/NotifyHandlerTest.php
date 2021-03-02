@@ -26,7 +26,7 @@ class NotifyHandlerTest extends TestCase {
 
 	private $config;
 
-	public function setUp() {
+	public function setUp(): void {
 		$this->requireBackendEnv('smbclient');
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
 		$this->server = new Server(
