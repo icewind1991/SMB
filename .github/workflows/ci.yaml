@@ -39,6 +39,12 @@ jobs:
     runs-on: ubuntu-20.04
     name: Unit tests
 
+    strategy:
+      matrix:
+        backend:
+          - smbclient
+          - libsmbclient
+
     services:
       samba:
         image: dperson/samba
@@ -66,5 +72,5 @@ jobs:
           echo '{"host": "localhost","user": "test","password": "test","share": "test","root": ""}' > tests/config.json
       - name: PHPUnit Tests
         env:
-          BACKEND: smbclient
+          BACKEND: ${{ matrix.backend }}
         run: php ./vendor/bin/phpunit tests
