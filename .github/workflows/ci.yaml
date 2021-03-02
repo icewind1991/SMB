@@ -65,6 +65,7 @@ jobs:
         with:
           php-version: '8.0'
           extensions: apcu, smbclient
+          coverage: pcov
       - name: Composer
         run: composer install
       - name: Config
@@ -73,4 +74,7 @@ jobs:
       - name: PHPUnit Tests
         env:
           BACKEND: ${{ matrix.backend }}
-        run: php ./vendor/bin/phpunit tests
+        run: php ./vendor/bin/phpunit tests -c tests/phpunit.xml --coverage-clover=coverage.xml
+      - uses: codecov/codecov-action@v1
+        with:
+          files: ./coverage.xml
