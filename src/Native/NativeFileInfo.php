@@ -185,6 +185,7 @@ class NativeFileInfo implements IFileInfo {
 
 		foreach (explode(',', $attribute) as $acl) {
 			list($user, $permissions) = explode(':', $acl, 2);
+			$user = trim($user, '\\');
 			list($type, $flags, $mask) = explode('/', $permissions);
 			$mask = hexdec($mask);
 

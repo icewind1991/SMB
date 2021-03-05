@@ -7,6 +7,7 @@
 
 namespace Icewind\SMB\Test;
 
+use Icewind\SMB\ACL;
 use Icewind\SMB\BasicAuth;
 use Icewind\SMB\Exception\InvalidArgumentException;
 use Icewind\SMB\IOptions;
@@ -80,5 +81,16 @@ class NativeShareTest extends AbstractShareTest {
 			$options
 		);
 		$server->listShares();
+	}
+
+	public function testACL() {
+		$this->share->mkdir($this->root . "/test");
+		$listing = $this->share->dir($this->root);
+
+		$this->assertCount(1, $listing);
+		$acls = $listing[0]->getAcls();
+		$acl = $acls['Everyone'];
+		$this->assertEquals($acl->getType(), ACL::TYPE_ALLOW);
+		$this->assertEquals(ACL::MASK_READ, $acl->getMask() & ACL::MASK_READ);
 	}
 }

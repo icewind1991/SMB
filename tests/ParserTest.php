@@ -10,6 +10,7 @@ namespace Icewind\SMB\Test;
 use Icewind\SMB\ACL;
 use Icewind\SMB\IFileInfo;
 use Icewind\SMB\Wrapped\FileInfo;
+use Icewind\SMB\Wrapped\Parser;
 
 class ParserTest extends \PHPUnit\Framework\TestCase {
 	public function modeProvider() {
@@ -29,7 +30,7 @@ class ParserTest extends \PHPUnit\Framework\TestCase {
 	 * @dataProvider modeProvider
 	 */
 	public function testParseMode($string, $mode) {
-		$parser = new \Icewind\SMB\Wrapped\Parser('UTC');
+		$parser = new Parser('UTC');
 		$this->assertEquals($mode, $parser->parseMode($string), 'Failed parsing ' . $string);
 	}
 
@@ -90,7 +91,7 @@ class ParserTest extends \PHPUnit\Framework\TestCase {
 	 * @dataProvider statProvider
 	 */
 	public function testStat($output, $stat) {
-		$parser = new \Icewind\SMB\Wrapped\Parser('UTC');
+		$parser = new Parser('UTC');
 		$this->assertEquals($stat, $parser->parseStat($output));
 	}
 
@@ -124,14 +125,14 @@ class ParserTest extends \PHPUnit\Framework\TestCase {
 	 * @dataProvider dirProvider
 	 */
 	public function testDir($output, $dir) {
-		$parser = new \Icewind\SMB\Wrapped\Parser('CEST');
+		$parser = new Parser('CEST');
 		$this->assertEquals($dir, $parser->parseDir($output, '', function () {
 			return [];
 		}));
 	}
 
-	public function testParseACL() {
-		$parser = new \Icewind\SMB\Wrapped\Parser('CEST');
+	public function testParseACLRealWorld() {
+		$parser = new Parser('CEST');
 		$raw = [
 			"lp_load_ex: refreshing parameters",
 			"Initialising global parameters",
@@ -172,6 +173,30 @@ class ParserTest extends \PHPUnit\Framework\TestCase {
 			"NT AUTHORITY\SYSTEM"    => new ACL(ACL::TYPE_ALLOW, ACL::FLAG_CONTAINER_INHERIT + ACL::FLAG_OBJECT_INHERIT, ACL::MASK_DELETE + ACL::MASK_EXECUTE + ACL::MASK_WRITE + ACL::MASK_READ),
 			"DESKTOP\\test"          => new ACL(ACL::TYPE_ALLOW, ACL::FLAG_CONTAINER_INHERIT + ACL::FLAG_OBJECT_INHERIT, ACL::MASK_READ),
 			"DESKTOP\\robin"         => new ACL(ACL::TYPE_ALLOW, ACL::FLAG_CONTAINER_INHERIT + ACL::FLAG_OBJECT_INHERIT, ACL::MASK_DELETE + ACL::MASK_EXECUTE + ACL::MASK_WRITE + ACL::MASK_READ),
+		];
+		$result = $parser->parseACLs($raw);
+		$this->assertEquals($expected, $result);
+	}
+
+	public function testParseACLConstructed() {
+		$parser = new Parser('CEST');
+		$raw = [
+			"REVISION:1",
+			"CONTROL:SR|PD|DI|DP",
+			"OWNER:DESKTOP-MLM38Q5\robin",
+			"GROUP:DESKTOP-MLM38Q5\None",
+			"ACL:Everyone:ALLOWED/0x0/READ",
+			"ACL:Test:DENIED/0x0/R",
+			"ACL:Multiple:ALLOWED/0x0/R|X|D",
+			"ACL:Numeric:ALLOWED/0x0/0x10",
+			"Maximum access: 0x120089"
+		];
+
+		$expected = [
+			"Everyone" => new ACL(ACL::TYPE_ALLOW, 0, ACL::MASK_READ + ACL::MASK_EXECUTE),
+			"Test"     => new ACL(ACL::TYPE_DENY, 0, ACL::MASK_READ),
+			"Multiple" => new ACL(ACL::TYPE_ALLOW, 0, ACL::MASK_READ + ACL::MASK_EXECUTE + ACL::MASK_DELETE),
+			"Numeric"  => new ACL(ACL::TYPE_ALLOW, 0, 0x10),
 		];
 		$result = $parser->parseACLs($raw);
 		$this->assertEquals($expected, $result);
