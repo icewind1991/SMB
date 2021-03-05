@@ -7,6 +7,7 @@
 
 namespace Icewind\SMB\Test;
 
+use Icewind\SMB\ACL;
 use Icewind\SMB\IFileInfo;
 use Icewind\SMB\Wrapped\FileInfo;
 
@@ -127,5 +128,52 @@ class ParserTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals($dir, $parser->parseDir($output, '', function () {
 			return [];
 		}));
+	}
+
+	public function testParseACL() {
+		$parser = new \Icewind\SMB\Wrapped\Parser('CEST');
+		$raw = [
+			"lp_load_ex: refreshing parameters",
+			"Initialising global parameters",
+			"Processing section \"[global]\"",
+			"added interface docker0 ip=172.17.0.1 bcast=172.17.255.255 netmask=255.255.0.0",
+			"added interface br-d8e07730e261 ip=172.18.0.1 bcast=172.18.255.255 netmask=255.255.0.0",
+			"Connecting to 192.168.10.187 at port 445",
+			"GENSEC backend 'gssapi_spnego' registered",
+			"GENSEC backend 'gssapi_krb5' registered",
+			"GENSEC backend 'gssapi_krb5_sasl' registered",
+			"GENSEC backend 'spnego' registered",
+			"GENSEC backend 'schannel' registered",
+			"GENSEC backend 'naclrpc_as_system' registered",
+			"Cannot do GSE to an IP address",
+			"Got challenge flags:",
+			"Got NTLMSSP neg_flags=0x628",
+			"NTLMSSP: Set final flags:",
+			"Got NTLMSSP neg_flags=0x620",
+			"NTLMSSP Sign/Seal - Initialising with flags:",
+			"Got NTLMSSP neg_flags=0x620",
+			"NTLMSSP Sign/Seal - Initialising with flags:",
+			"Got NTLMSSP neg_flags=0x620",
+			"REVISION:1",
+			"CONTROL:SR|PD|DI|DP",
+			"OWNER:DESKTOP-MLM38Q5\robin",
+			"GROUP:DESKTOP-MLM38Q5\None",
+			"ACL:Everyone:ALLOWED/OI|CI/R",
+			"ACL:NT AUTHORITY\SYSTEM:ALLOWED/OI|CI/FULL",
+			"ACL:DESKTOP\\robin:ALLOWED/OI|CI/FULL",
+			"ACL:DESKTOP\\test:ALLOWED/OI|CI/R",
+			"ACL:BUILTIN\Administrators:ALLOWED/OI|CI/FULL",
+			"Maximum access: 0x120089"
+		];
+
+		$expected = [
+			"BUILTIN\Administrators" => new ACL(ACL::TYPE_ALLOW, ACL::FLAG_CONTAINER_INHERIT + ACL::FLAG_OBJECT_INHERIT, ACL::MASK_DELETE + ACL::MASK_EXECUTE + ACL::MASK_WRITE + ACL::MASK_READ),
+			"Everyone"               => new ACL(ACL::TYPE_ALLOW, ACL::FLAG_CONTAINER_INHERIT + ACL::FLAG_OBJECT_INHERIT, ACL::MASK_READ),
+			"NT AUTHORITY\SYSTEM"    => new ACL(ACL::TYPE_ALLOW, ACL::FLAG_CONTAINER_INHERIT + ACL::FLAG_OBJECT_INHERIT, ACL::MASK_DELETE + ACL::MASK_EXECUTE + ACL::MASK_WRITE + ACL::MASK_READ),
+			"DESKTOP\\test"          => new ACL(ACL::TYPE_ALLOW, ACL::FLAG_CONTAINER_INHERIT + ACL::FLAG_OBJECT_INHERIT, ACL::MASK_READ),
+			"DESKTOP\\robin"         => new ACL(ACL::TYPE_ALLOW, ACL::FLAG_CONTAINER_INHERIT + ACL::FLAG_OBJECT_INHERIT, ACL::MASK_DELETE + ACL::MASK_EXECUTE + ACL::MASK_WRITE + ACL::MASK_READ),
+		];
+		$result = $parser->parseACLs($raw);
+		$this->assertEquals($expected, $result);
 	}
 }
