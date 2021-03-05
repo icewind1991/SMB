@@ -7,22 +7,21 @@
 
 namespace Icewind\SMB\Native;
 
+use Icewind\SMB\StringBuffer;
+
 /**
  * Stream optimized for read only usage
  */
 class NativeReadStream extends NativeStream {
 	const CHUNK_SIZE = 1048576; // 1MB chunks
-	/**
-	 * @var resource
-	 */
-	private $readBuffer = null;
 
-	private $bufferSize = 0;
+	/** @var StringBuffer */
+	private $readBuffer;
 
 	private $pos = 0;
 
 	public function stream_open($path, $mode, $options, &$opened_path) {
-		$this->readBuffer = fopen('php://memory', 'r+');
+		$this->readBuffer = new StringBuffer();
 
 		return parent::stream_open($path, $mode, $options, $opened_path);
 	}
@@ -54,17 +53,11 @@ class NativeReadStream extends NativeStream {
 		// php reads 8192 bytes at once
 		// however due to network latency etc, it's faster to read in larger chunks
 		// and buffer the result
-		if (!parent::stream_eof() && $this->bufferSize < $count) {
-			$remaining = $this->readBuffer;
-			$this->readBuffer = fopen('php://memory', 'r+');
-			$this->bufferSize = 0;
-			stream_copy_to_stream($remaining, $this->readBuffer);
-			$this->bufferSize += fwrite($this->readBuffer, parent::stream_read(self::CHUNK_SIZE));
-			fseek($this->readBuffer, 0);
+		if (!parent::stream_eof() && $this->readBuffer->remaining() < $count) {
+			$this->readBuffer->push(parent::stream_read(self::CHUNK_SIZE));
 		}
 
-		$result = fread($this->readBuffer, $count);
-		$this->bufferSize -= $count;
+		$result = $this->readBuffer->read($count);
 
 		$read = strlen($result);
 		$this->pos += $read;
@@ -75,15 +68,14 @@ class NativeReadStream extends NativeStream {
 	public function stream_seek($offset, $whence = SEEK_SET) {
 		$result = parent::stream_seek($offset, $whence);
 		if ($result) {
-			$this->readBuffer = fopen('php://memory', 'r+');
-			$this->bufferSize = 0;
+			$this->readBuffer->clear();
 			$this->pos = parent::stream_tell();
 		}
 		return $result;
 	}
 
 	public function stream_eof() {
-		return $this->bufferSize <= 0 && parent::stream_eof();
+		return $this->readBuffer->remaining() <= 0 && parent::stream_eof();
 	}
 
 	public function stream_tell() {

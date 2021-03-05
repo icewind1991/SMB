@@ -7,22 +7,21 @@
 
 namespace Icewind\SMB\Native;
 
+use Icewind\SMB\StringBuffer;
+
 /**
  * Stream optimized for write only usage
  */
 class NativeWriteStream extends NativeStream {
 	const CHUNK_SIZE = 1048576; // 1MB chunks
-	/**
-	 * @var resource
-	 */
-	private $writeBuffer = null;
 
-	private $bufferSize = 0;
+	/** @var StringBuffer */
+	private $writeBuffer;
 
 	private $pos = 0;
 
 	public function stream_open($path, $mode, $options, &$opened_path) {
-		$this->writeBuffer = fopen('php://memory', 'r+');
+		$this->writeBuffer = new StringBuffer();
 
 		return parent::stream_open($path, $mode, $options, $opened_path);
 	}
@@ -60,18 +59,14 @@ class NativeWriteStream extends NativeStream {
 	}
 
 	private function flushWrite() {
-		rewind($this->writeBuffer);
-		$this->state->write($this->handle, stream_get_contents($this->writeBuffer), $this->url);
-		$this->writeBuffer = fopen('php://memory', 'r+');
-		$this->bufferSize = 0;
+		$this->state->write($this->handle, $this->writeBuffer->flush(), $this->url);
 	}
 
 	public function stream_write($data) {
-		$written = fwrite($this->writeBuffer, $data);
-		$this->bufferSize += $written;
+		$written = $this->writeBuffer->push($data);
 		$this->pos += $written;
 
-		if ($this->bufferSize >= self::CHUNK_SIZE) {
+		if ($this->writeBuffer->remaining() >= self::CHUNK_SIZE) {
 			$this->flushWrite();
 		}
 

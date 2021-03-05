@@ -83,7 +83,8 @@ abstract class AbstractShareTest extends TestCase {
 	public function fileDataProvider() {
 		return [
 			['Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'],
-			['Mixed language, 日本語　が　わからか and Various _/* characters \\|” €']
+			['Mixed language, 日本語　が　わからか and Various _/* characters \\|” €'],
+			[str_repeat('Long text with lots of characters so we get a resulting string that tests the chunked writing and reading properly', 100)]
 		];
 	}
 
@@ -419,6 +420,23 @@ abstract class AbstractShareTest extends TestCase {
 	}
 
 	/**
+	 * @dataProvider nameAndDataProvider
+	 */
+	public function testReadStreamChunked($name, $text) {
+		$sourceFile = $this->getTextFile($text);
+		$this->share->put($sourceFile, $this->root . '/' . $name);
+		$fh = $this->share->read($this->root . '/' . $name);
+		$content = "";
+		while (!feof($fh)) {
+			$content .= fread($fh, 8192);
+		}
+		fclose($fh);
+		$this->share->del($this->root . '/' . $name);
+
+		$this->assertEquals(file_get_contents($sourceFile), $content);
+	}
+
+	/**
 	 * @dataProvider invalidPathProvider
 	 */
 	public function testReadStreamInvalidPath($name) {
@@ -432,6 +450,24 @@ abstract class AbstractShareTest extends TestCase {
 	public function testWriteStream($name, $text) {
 		$fh = $this->share->write($this->root . '/' . $name);
 		fwrite($fh, $text);
+		fclose($fh);
+
+		$tmpFile1 = tempnam('/tmp', 'smb_test_');
+		$this->share->get($this->root . '/' . $name, $tmpFile1);
+		$this->assertEquals($text, file_get_contents($tmpFile1));
+		$this->share->del($this->root . '/' . $name);
+		unlink($tmpFile1);
+	}
+
+	/**
+	 * @dataProvider nameAndDataProvider
+	 */
+	public function testWriteStreamChunked($name, $text) {
+		$fh = $this->share->write($this->root . '/' . $name);
+
+		foreach (str_split($text, 8192) as $chunk) {
+			fwrite($fh, $chunk);
+		}
 		fclose($fh);
 
 		$tmpFile1 = tempnam('/tmp', 'smb_test_');
