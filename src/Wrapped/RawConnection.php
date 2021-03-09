@@ -85,7 +85,7 @@ class RawConnection {
 	public function isValid(): bool {
 		if (is_resource($this->process)) {
 			$status = proc_get_status($this->process);
-			return $status['running'];
+			return (bool)$status['running'];
 		} else {
 			return false;
 		}

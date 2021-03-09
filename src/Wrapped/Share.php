@@ -355,9 +355,14 @@ class Share extends AbstractShare {
 
 		// use a close callback to ensure the upload is finished before continuing
 		// this also serves as a way to keep the connection in scope
-		return CallbackWrapper::wrap($fh, null, null, function () use ($connection) {
+		$stream = CallbackWrapper::wrap($fh, null, null, function () use ($connection) {
 			$connection->close(false); // dont terminate, give the upload some time
 		});
+		if (is_resource($stream)) {
+			return $stream;
+		} else {
+			throw new InvalidRequestException($target);
+		}
 	}
 
 	/**

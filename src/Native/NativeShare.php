@@ -316,8 +316,12 @@ class NativeShare extends AbstractShare {
 	 * @return mixed the attribute value
 	 */
 	public function setAttribute(string $path, string $attribute, $value) {
-		if ($attribute === 'system.dos_attr.mode' and is_int($value)) {
-			$value = '0x' . dechex($value);
+		if (is_int($value)) {
+			if ($attribute === 'system.dos_attr.mode') {
+				$value = '0x' . dechex($value);
+			} else {
+				throw new \InvalidArgumentException("Invalid value for attribute");
+			}
 		}
 
 		return $this->getState()->setxattr($this->buildUrl($path), $attribute, $value);

@@ -165,7 +165,7 @@ class Parser {
 					$mode = $this->parseMode($mode);
 					$time = strtotime($time . ' ' . $this->timeZone);
 					$path = $basePath . '/' . $name;
-					$content[] = new FileInfo($path, $name, $size, $time, $mode, function () use ($aclCallback, $path) {
+					$content[] = new FileInfo($path, $name, (int)$size, $time, $mode, function () use ($aclCallback, $path) {
 						return $aclCallback($path);
 					});
 				}
