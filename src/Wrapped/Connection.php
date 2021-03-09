@@ -22,7 +22,12 @@ class Connection extends RawConnection {
 	/** @var Parser */
 	private $parser;
 
-	public function __construct($command, Parser $parser, $env = []) {
+	/**
+	 * @param string $command
+	 * @param Parser $parser
+	 * @param array<string, string> $env
+	 */
+	public function __construct(string $command, Parser $parser, array $env = []) {
 		parent::__construct($command, $env);
 		$this->parser = $parser;
 	}
@@ -39,7 +44,7 @@ class Connection extends RawConnection {
 	/**
 	 * @throws ConnectException
 	 */
-	public function clearTillPrompt() {
+	public function clearTillPrompt(): void {
 		$this->write('');
 		do {
 			$promptLine = $this->readLine();
@@ -57,7 +62,7 @@ class Connection extends RawConnection {
 	/**
 	 * get all unprocessed output from smbclient until the next prompt
 	 *
-	 * @param callable|null $callback (optional) callback to call for every line read
+	 * @param (callable(string):bool)|null $callback (optional) callback to call for every line read
 	 * @return string[]
 	 * @throws AuthenticationException
 	 * @throws ConnectException
@@ -107,6 +112,7 @@ class Connection extends RawConnection {
 	/**
 	 * @param string|bool $promptLine (optional) prompt line that might contain some info about the error
 	 * @throws ConnectException
+	 * @return no-return
 	 */
 	private function unknownError($promptLine = '') {
 		if ($promptLine) { //maybe we have some error we missed on the previous line
@@ -121,7 +127,7 @@ class Connection extends RawConnection {
 		}
 	}
 
-	public function close(bool $terminate = true) {
+	public function close(bool $terminate = true): void {
 		if (get_resource_type($this->getInputStream()) === 'stream') {
 			// ignore any errors while trying to send the close command, the process might already be dead
 			@$this->write('close' . PHP_EOL);

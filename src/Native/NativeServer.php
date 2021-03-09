@@ -8,6 +8,8 @@
 namespace Icewind\SMB\Native;
 
 use Icewind\SMB\AbstractServer;
+use Icewind\SMB\Exception\AuthenticationException;
+use Icewind\SMB\Exception\InvalidHostException;
 use Icewind\SMB\IAuth;
 use Icewind\SMB\IOptions;
 use Icewind\SMB\IShare;
@@ -25,14 +27,14 @@ class NativeServer extends AbstractServer {
 		$this->state = new NativeState();
 	}
 
-	protected function connect() {
+	protected function connect(): void {
 		$this->state->init($this->getAuth(), $this->getOptions());
 	}
 
 	/**
-	 * @return \Icewind\SMB\IShare[]
-	 * @throws \Icewind\SMB\Exception\AuthenticationException
-	 * @throws \Icewind\SMB\Exception\InvalidHostException
+	 * @return IShare[]
+	 * @throws AuthenticationException
+	 * @throws InvalidHostException
 	 */
 	public function listShares(): array {
 		$this->connect();

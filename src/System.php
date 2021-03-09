@@ -57,7 +57,7 @@ class System implements ISystem {
 		return function_exists('smbclient_state_new');
 	}
 
-	protected function getBinaryPath($binary): ?string {
+	protected function getBinaryPath(string $binary): ?string {
 		if (!isset($this->paths[$binary])) {
 			$result = null;
 			$output = [];

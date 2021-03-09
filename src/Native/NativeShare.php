@@ -34,10 +34,8 @@ class NativeShare extends AbstractShare {
 	 */
 	private $name;
 
-	/**
-	 * @var ?NativeState $state
-	 */
-	private $state;
+	/** @var NativeState|null $state */
+	private $state = null;
 
 	public function __construct(IServer $server, string $name) {
 		parent::__construct();
@@ -51,7 +49,7 @@ class NativeShare extends AbstractShare {
 	 * @throws InvalidHostException
 	 */
 	protected function getState(): NativeState {
-		if ($this->state and $this->state instanceof NativeState) {
+		if ($this->state) {
 			return $this->state;
 		}
 
@@ -184,7 +182,7 @@ class NativeShare extends AbstractShare {
 	 * @throws NotFoundException
 	 * @throws AlreadyExistsException
 	 */
-	public function rename(string $from, string $to): bool{
+	public function rename(string $from, string $to): bool {
 		return $this->getState()->rename($this->buildUrl($from), $this->buildUrl($to));
 	}
 

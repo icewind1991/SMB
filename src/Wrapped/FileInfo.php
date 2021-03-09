@@ -21,9 +21,17 @@ class FileInfo implements IFileInfo {
 	protected $time;
 	/** @var int */
 	protected $mode;
-	/** @var callable */
+	/** @var callable(): ACL[] */
 	protected $aclCallback;
 
+	/**
+	 * @param string $path
+	 * @param string $name
+	 * @param int $size
+	 * @param int $time
+	 * @param int $mode
+	 * @param callable(): ACL[] $aclCallback
+	 */
 	public function __construct(string $path, string $name, int $size, int $time, int $mode, callable $aclCallback) {
 		$this->path = $path;
 		$this->name = $name;

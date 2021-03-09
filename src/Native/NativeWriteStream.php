@@ -18,11 +18,14 @@ class NativeWriteStream extends NativeStream {
 	/** @var StringBuffer */
 	private $writeBuffer;
 
+	/** @var int */
 	private $pos = 0;
 
-	public function stream_open($path, $mode, $options, &$opened_path) {
+	public function __construct() {
 		$this->writeBuffer = new StringBuffer();
+	}
 
+	public function stream_open($path, $mode, $options, &$opened_path): bool {
 		return parent::stream_open($path, $mode, $options, $opened_path);
 	}
 
@@ -53,12 +56,16 @@ class NativeWriteStream extends NativeStream {
 		$this->flushWrite();
 		$result = parent::stream_seek($offset, $whence);
 		if ($result) {
-			$this->pos = parent::stream_tell();
+			$pos = parent::stream_tell();
+			if ($pos === false) {
+				return false;
+			}
+			$this->pos = $pos;
 		}
 		return $result;
 	}
 
-	private function flushWrite() {
+	private function flushWrite(): void {
 		$this->state->write($this->handle, $this->writeBuffer->flush(), $this->url);
 	}
 

@@ -11,8 +11,10 @@ use Icewind\SMB\AbstractShare;
 use Icewind\SMB\ACL;
 use Icewind\SMB\Exception\AlreadyExistsException;
 use Icewind\SMB\Exception\AuthenticationException;
+use Icewind\SMB\Exception\ConnectException;
 use Icewind\SMB\Exception\ConnectionException;
 use Icewind\SMB\Exception\DependencyException;
+use Icewind\SMB\Exception\Exception;
 use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\InvalidHostException;
 use Icewind\SMB\Exception\InvalidTypeException;
@@ -38,9 +40,9 @@ class Share extends AbstractShare {
 	private $name;
 
 	/**
-	 * @var Connection $connection
+	 * @var Connection|null $connection
 	 */
-	public $connection;
+	public $connection = null;
 
 	/**
 	 * @var Parser
@@ -85,11 +87,16 @@ class Share extends AbstractShare {
 	protected function getConnection(): Connection {
 		$maxProtocol = $this->server->getOptions()->getMaxProtocol();
 		$minProtocol = $this->server->getOptions()->getMinProtocol();
+		$smbClient = $this->system->getSmbclientPath();
+		$stdBuf = $this->system->getStdBufPath();
+		if ($smbClient === null) {
+			throw new Exception("Backend not available");
+		}
 		$command = sprintf(
 			'%s %s%s -t %s %s %s %s %s %s',
 			self::EXEC_CMD,
-			$this->system->getStdBufPath() ? $this->system->getStdBufPath() . ' -o0 ' : '',
-			$this->system->getSmbclientPath(),
+			$stdBuf ? $stdBuf . ' -o0 ' : '',
+			$smbClient,
 			$this->server->getOptions()->getTimeout(),
 			$this->getAuthFileArgument(),
 			$this->server->getAuth()->getExtraCommandLineArguments(),
@@ -101,7 +108,7 @@ class Share extends AbstractShare {
 		$connection->writeAuthentication($this->server->getAuth()->getUsername(), $this->server->getAuth()->getPassword());
 		$connection->connect();
 		if (!$connection->isValid()) {
-			throw new ConnectionException($connection->readLine());
+			throw new ConnectionException((string)$connection->readLine());
 		}
 		// some versions of smbclient add a help message in first of the first prompt
 		$connection->clearTillPrompt();
@@ -112,18 +119,30 @@ class Share extends AbstractShare {
 	 * @throws ConnectionException
 	 * @throws AuthenticationException
 	 * @throws InvalidHostException
+	 * @psalm-assert Connection $this->connection
 	 */
-	protected function connect() {
-		if ($this->connection and $this->connection->isValid()) {
-			return;
+	protected function connect(): Connection {
+		if ($this->connection and $this->connect()->isValid()) {
+			return $this->connection;
 		}
 		$this->connection = $this->getConnection();
+		return $this->connection;
 	}
 
-	protected function reconnect() {
-		$this->connection->reconnect();
-		if (!$this->connection->isValid()) {
-			throw new ConnectionException();
+	/**
+	 * @throws ConnectionException
+	 * @throws AuthenticationException
+	 * @throws InvalidHostException
+	 * @psalm-assert Connection $this->connection
+	 */
+	protected function reconnect(): void {
+		if ($this->connection === null) {
+			$this->connect();
+		} else {
+			$this->connection->reconnect();
+			if (!$this->connection->isValid()) {
+				throw new ConnectionException();
+			}
 		}
 	}
 
@@ -161,7 +180,7 @@ class Share extends AbstractShare {
 
 		$this->execute('cd /');
 
-		return $this->parser->parseDir($output, $path, function ($path) {
+		return $this->parser->parseDir($output, $path, function (string $path) {
 			return $this->getAcls($path);
 		});
 	}
@@ -424,12 +443,11 @@ class Share extends AbstractShare {
 
 	/**
 	 * @param string $command
-	 * @return array
+	 * @return string[]
 	 */
 	protected function execute(string $command): array {
-		$this->connect();
-		$this->connection->write($command . PHP_EOL);
-		return $this->connection->read();
+		$this->connect()->write($command . PHP_EOL);
+		return $this->connect()->read();
 	}
 
 	/**
@@ -451,7 +469,6 @@ class Share extends AbstractShare {
 			return true;
 		} else {
 			$this->parser->checkForError($lines, $path);
-			return false;
 		}
 	}
 
@@ -487,6 +504,12 @@ class Share extends AbstractShare {
 		return '"' . $path . '"';
 	}
 
+	/**
+	 * @param string $path
+	 * @return ACL[]
+	 * @throws ConnectionException
+	 * @throws ConnectException
+	 */
 	protected function getAcls(string $path): array {
 		$commandPath = $this->system->getSmbcAclsPath();
 		if (!$commandPath) {
@@ -506,7 +529,7 @@ class Share extends AbstractShare {
 		$connection->writeAuthentication($this->server->getAuth()->getUsername(), $this->server->getAuth()->getPassword());
 		$connection->connect();
 		if (!$connection->isValid()) {
-			throw new ConnectionException($connection->readLine());
+			throw new ConnectionException((string)$connection->readLine());
 		}
 
 		$rawAcls = $connection->readAll();

@@ -18,11 +18,14 @@ class NativeReadStream extends NativeStream {
 	/** @var StringBuffer */
 	private $readBuffer;
 
+	public function __construct() {
+		$this->readBuffer = new StringBuffer();
+	}
+
+	/** @var int */
 	private $pos = 0;
 
 	public function stream_open($path, $mode, $options, &$opened_path) {
-		$this->readBuffer = new StringBuffer();
-
 		return parent::stream_open($path, $mode, $options, $opened_path);
 	}
 
@@ -54,7 +57,11 @@ class NativeReadStream extends NativeStream {
 		// however due to network latency etc, it's faster to read in larger chunks
 		// and buffer the result
 		if (!parent::stream_eof() && $this->readBuffer->remaining() < $count) {
-			$this->readBuffer->push(parent::stream_read(self::CHUNK_SIZE));
+			$chunk = parent::stream_read(self::CHUNK_SIZE);
+			if ($chunk === false) {
+				return false;
+			}
+			$this->readBuffer->push($chunk);
 		}
 
 		$result = $this->readBuffer->read($count);
@@ -69,7 +76,11 @@ class NativeReadStream extends NativeStream {
 		$result = parent::stream_seek($offset, $whence);
 		if ($result) {
 			$this->readBuffer->clear();
-			$this->pos = parent::stream_tell();
+			$pos = parent::stream_tell();
+			if ($pos === false) {
+				return false;
+			}
+			$this->pos = $pos;
 		}
 		return $result;
 	}

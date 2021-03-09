@@ -10,20 +10,24 @@ namespace Icewind\SMB\Native;
 use Icewind\SMB\Exception\Exception;
 use Icewind\SMB\Exception\InvalidRequestException;
 use Icewind\Streams\File;
+use InvalidArgumentException;
 
 class NativeStream implements File {
 	/**
 	 * @var resource
+	 * @psalm-suppress PropertyNotSetInConstructor
 	 */
 	public $context;
 
 	/**
 	 * @var NativeState
+	 * @psalm-suppress PropertyNotSetInConstructor
 	 */
 	protected $state;
 
 	/**
 	 * @var resource
+	 * @psalm-suppress PropertyNotSetInConstructor
 	 */
 	protected $handle;
 
@@ -35,7 +39,7 @@ class NativeStream implements File {
 	/**
 	 * @var string
 	 */
-	protected $url;
+	protected $url = '';
 
 	/**
 	 * Wrap a stream from libsmbclient-php into a regular php stream
@@ -79,9 +83,24 @@ class NativeStream implements File {
 
 	public function stream_open($path, $mode, $options, &$opened_path) {
 		$context = stream_context_get_options($this->context);
-		$this->state = $context['nativesmb']['state'];
-		$this->handle = $context['nativesmb']['handle'];
-		$this->url = $context['nativesmb']['url'];
+		if (!isset($context['nativesmb']) || !is_array($context['nativesmb'])) {
+			throw new InvalidArgumentException("context not set");
+		}
+		$state = $context['nativesmb']['state'];
+		if (!$state instanceof NativeState) {
+			throw new InvalidArgumentException("invalid context set");
+		}
+		$this->state = $state;
+		$handle = $context['nativesmb']['handle'];
+		if (!is_resource($handle)) {
+			throw new InvalidArgumentException("invalid context set");
+		}
+		$this->handle = $handle;
+		$url = $context['nativesmb']['url'];
+		if (!is_string($url)) {
+			throw new InvalidArgumentException("invalid context set");
+		}
+		$this->url = $url;
 		return true;
 	}
 

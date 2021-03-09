@@ -8,6 +8,7 @@
 namespace Icewind\SMB\Native;
 
 use Icewind\SMB\ACL;
+use Icewind\SMB\Exception\Exception;
 use Icewind\SMB\IFileInfo;
 
 class NativeFileInfo implements IFileInfo {
@@ -17,7 +18,7 @@ class NativeFileInfo implements IFileInfo {
 	protected $name;
 	/** @var NativeShare */
 	protected $share;
-	/** @var array|null */
+	/** @var array{"mode": int, "size": int, "write_time": int}|null */
 	protected $attributeCache = null;
 
 	public function __construct(NativeShare $share, string $path, string $name) {
@@ -34,19 +35,32 @@ class NativeFileInfo implements IFileInfo {
 		return $this->name;
 	}
 
+	/**
+	 * @return array{"mode": int, "size": int, "write_time": int}
+	 */
 	protected function stat(): array {
 		if (is_null($this->attributeCache)) {
 			$rawAttributes = explode(',', $this->share->getAttribute($this->path, 'system.dos_attr.*'));
-			$this->attributeCache = [];
+			$attributes = [];
 			foreach ($rawAttributes as $rawAttribute) {
 				list($name, $value) = explode(':', $rawAttribute);
 				$name = strtolower($name);
 				if ($name == 'mode') {
-					$this->attributeCache[$name] = (int)hexdec(substr($value, 2));
+					$attributes[$name] = (int)hexdec(substr($value, 2));
 				} else {
-					$this->attributeCache[$name] = (int)$value;
+					$attributes[$name] = (int)$value;
 				}
 			}
+			if (!isset($attributes['mode'])) {
+				throw new Exception("Invalid attribute response");
+			}
+			if (!isset($attributes['size'])) {
+				throw new Exception("Invalid attribute response");
+			}
+			if (!isset($attributes['write_time'])) {
+				throw new Exception("Invalid attribute response");
+			}
+			$this->attributeCache = $attributes;
 		}
 		return $this->attributeCache;
 	}

@@ -24,10 +24,12 @@ declare(strict_types=1);
 namespace Icewind\SMB;
 
 class StringBuffer {
+	/** @var string */
 	private $buffer = "";
+	/** @var int */
 	private $pos = 0;
 
-	public function clear() {
+	public function clear(): void {
 		$this->buffer = "";
 		$this->pos = 0;
 	}

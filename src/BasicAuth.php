@@ -51,7 +51,7 @@ class BasicAuth implements IAuth {
 		return ($this->workgroup) ? '-W ' . escapeshellarg($this->workgroup) : '';
 	}
 
-	public function setExtraSmbClientOptions($smbClientState) {
+	public function setExtraSmbClientOptions($smbClientState): void {
 		// noop
 	}
 }

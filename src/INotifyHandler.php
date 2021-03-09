@@ -32,7 +32,7 @@ interface INotifyHandler {
 	 *
 	 * Note that this is a blocking process and will cause the process to block forever if not explicitly terminated
 	 *
-	 * @param callable $callback
+	 * @param callable(Change):?bool $callback
 	 */
 	public function listen(callable $callback): void;
 
@@ -41,5 +41,5 @@ interface INotifyHandler {
 	 *
 	 * Note that any pending changes will be discarded
 	 */
-	public function stop();
+	public function stop(): void;
 }

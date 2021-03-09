@@ -38,7 +38,7 @@ class AnonymousAuth implements IAuth {
 		return '-N';
 	}
 
-	public function setExtraSmbClientOptions($smbClientState) {
+	public function setExtraSmbClientOptions($smbClientState): void {
 		smbclient_option_set($smbClientState, SMBCLIENT_OPT_AUTO_ANONYMOUS_LOGIN, true);
 	}
 }

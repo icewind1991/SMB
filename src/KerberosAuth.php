@@ -41,7 +41,7 @@ class KerberosAuth implements IAuth {
 		return '-k';
 	}
 
-	public function setExtraSmbClientOptions($smbClientState) {
+	public function setExtraSmbClientOptions($smbClientState): void {
 		smbclient_option_set($smbClientState, SMBCLIENT_OPT_USE_KERBEROS, true);
 		smbclient_option_set($smbClientState, SMBCLIENT_OPT_FALLBACK_AFTER_KERBEROS, false);
 	}

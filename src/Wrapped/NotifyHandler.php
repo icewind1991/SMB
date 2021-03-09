@@ -14,16 +14,13 @@ use Icewind\SMB\Exception\RevisionMismatchException;
 use Icewind\SMB\INotifyHandler;
 
 class NotifyHandler implements INotifyHandler {
-	/**
-	 * @var Connection
-	 */
+	/** @var Connection */
 	private $connection;
 
-	/**
-	 * @var string
-	 */
+	/** @var string */
 	private $path;
 
+	/** @var bool */
 	private $listening = true;
 
 	// see error.h
@@ -64,15 +61,18 @@ class NotifyHandler implements INotifyHandler {
 	 *
 	 * Note that this is a blocking process and will cause the process to block forever if not explicitly terminated
 	 *
-	 * @param callable $callback
+	 * @param callable(Change):?bool $callback
 	 */
 	public function listen(callable $callback): void {
 		if ($this->listening) {
-			$this->connection->read(function ($line) use ($callback) {
+			$this->connection->read(function (string $line) use ($callback): bool {
 				$this->checkForError($line);
 				$change = $this->parseChangeLine($line);
 				if ($change) {
-					return $callback($change);
+					$result = $callback($change);
+					return $result === false ? false : true;
+				} else {
+					return true;
 				}
 			});
 		}
@@ -91,14 +91,14 @@ class NotifyHandler implements INotifyHandler {
 		}
 	}
 
-	private function checkForError(string $line) {
+	private function checkForError(string $line): void {
 		if (substr($line, 0, 16) === 'notify returned ') {
 			$error = substr($line, 16);
 			throw Exception::fromMap(array_merge(self::EXCEPTION_MAP, Parser::EXCEPTION_MAP), $error, 'Notify is not supported with the used smb version');
 		}
 	}
 
-	public function stop() {
+	public function stop(): void {
 		$this->listening = false;
 		$this->connection->close();
 	}

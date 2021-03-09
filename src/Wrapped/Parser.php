@@ -70,6 +70,14 @@ class Parser {
 		return null;
 	}
 
+	/**
+	 * @param string[] $output
+	 * @param string $path
+	 * @return no-return
+	 * @throws Exception
+	 * @throws InvalidResourceException
+	 * @throws NotFoundException
+	 */
 	public function checkForError(array $output, string $path): void {
 		if (strpos($output[0], 'does not exist')) {
 			throw new NotFoundException($path);
@@ -125,6 +133,11 @@ class Parser {
 		return $result;
 	}
 
+	/**
+	 * @param string[] $output
+	 * @return array{"mtime": int, "mode": int, "size": int}
+	 * @throws Exception
+	 */
 	public function parseStat(array $output): array {
 		$data = [];
 		foreach ($output as $line) {
@@ -139,17 +152,21 @@ class Parser {
 				$data[$name] = $value;
 			}
 		}
+		$attributeStart = strpos($data['attributes'], '(');
+		if ($attributeStart === false) {
+			throw new Exception("Malformed state response from server");
+		}
 		return [
 			'mtime' => strtotime($data['write_time']),
-			'mode'  => hexdec(substr($data['attributes'], strpos($data['attributes'], '(') + 1, -1)),
+			'mode'  => hexdec(substr($data['attributes'], $attributeStart + 1, -1)),
 			'size'  => isset($data['stream']) ? (int)(explode(' ', $data['stream'])[1]) : 0
 		];
 	}
 
 	/**
-	 * @param array $output
+	 * @param string[] $output
 	 * @param string $basePath
-	 * @param callable $aclCallback
+	 * @param callable(string):ACL[] $aclCallback
 	 * @return FileInfo[]
 	 */
 	public function parseDir(array $output, string $basePath, callable $aclCallback): array {
@@ -165,7 +182,7 @@ class Parser {
 					$mode = $this->parseMode($mode);
 					$time = strtotime($time . ' ' . $this->timeZone);
 					$path = $basePath . '/' . $name;
-					$content[] = new FileInfo($path, $name, (int)$size, $time, $mode, function () use ($aclCallback, $path) {
+					$content[] = new FileInfo($path, $name, (int)$size, $time, $mode, function () use ($aclCallback, $path): array {
 						return $aclCallback($path);
 					});
 				}
@@ -175,8 +192,8 @@ class Parser {
 	}
 
 	/**
-	 * @param array $output
-	 * @return string[]
+	 * @param string[] $output
+	 * @return array<string, string>
 	 */
 	public function parseListShares(array $output): array {
 		$shareNames = [];
