@@ -122,7 +122,7 @@ class Share extends AbstractShare {
 	 * @psalm-assert Connection $this->connection
 	 */
 	protected function connect(): Connection {
-		if ($this->connection and $this->connect()->isValid()) {
+		if ($this->connection and $this->connection->isValid()) {
 			return $this->connection;
 		}
 		$this->connection = $this->getConnection();

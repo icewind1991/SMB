@@ -71,7 +71,7 @@ class ServerFactoryTest extends TestCase {
 			->willReturn(false);
 		$system->expects($this->any())
 			->method('getSmbclientPath')
-			->willReturn(false);
+			->willReturn(null);
 		$factory = new ServerFactory(null, $system);
 		$factory->createServer('localhost', $this->credentials);
 	}
