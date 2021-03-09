@@ -89,7 +89,7 @@ class NativeFileInfo implements IFileInfo {
 	 */
 	public function getMTime() {
 		$stat = $this->stat();
-		return $stat['change_time'];
+		return $stat['write_time'];
 	}
 
 	/**
