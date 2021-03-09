@@ -7,6 +7,7 @@
 
 namespace Icewind\SMB\Wrapped;
 
+use Icewind\SMB\Exception\AccessDeniedException;
 use Icewind\SMB\Exception\AuthenticationException;
 use Icewind\SMB\Exception\ConnectException;
 use Icewind\SMB\Exception\ConnectionException;
@@ -31,7 +32,7 @@ class Connection extends RawConnection {
 	 *
 	 * @param string $input
 	 */
-	public function write($input) {
+	public function write(string $input) {
 		return parent::write($input . PHP_EOL);
 	}
 
@@ -56,15 +57,16 @@ class Connection extends RawConnection {
 	/**
 	 * get all unprocessed output from smbclient until the next prompt
 	 *
-	 * @param callable $callback (optional) callback to call for every line read
+	 * @param callable|null $callback (optional) callback to call for every line read
 	 * @return string[]
 	 * @throws AuthenticationException
 	 * @throws ConnectException
 	 * @throws ConnectionException
 	 * @throws InvalidHostException
 	 * @throws NoLoginServerException
+	 * @throws AccessDeniedException
 	 */
-	public function read(callable $callback = null) {
+	public function read(callable $callback = null): array {
 		if (!$this->isValid()) {
 			throw new ConnectionException('Connection not valid');
 		}
@@ -98,13 +100,7 @@ class Connection extends RawConnection {
 		return $output;
 	}
 
-	/**
-	 * Check
-	 *
-	 * @param string $line
-	 * @return bool
-	 */
-	private function isPrompt(string $line) {
+	private function isPrompt(string $line): bool {
 		return mb_substr($line, 0, self::DELIMITER_LENGTH) === self::DELIMITER;
 	}
 
@@ -125,7 +121,7 @@ class Connection extends RawConnection {
 		}
 	}
 
-	public function close($terminate = true) {
+	public function close(bool $terminate = true) {
 		if (get_resource_type($this->getInputStream()) === 'stream') {
 			// ignore any errors while trying to send the close command, the process might already be dead
 			@$this->write('close' . PHP_EOL);

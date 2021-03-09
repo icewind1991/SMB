@@ -8,7 +8,7 @@
 namespace Icewind\SMB\Exception;
 
 class Exception extends \Exception {
-	public static function unknown($path, $error) {
+	public static function unknown(?string $path, $error) {
 		$message = 'Unknown error (' . $error . ')';
 		if ($path) {
 			$message .= ' for ' . $path;
@@ -17,13 +17,7 @@ class Exception extends \Exception {
 		return new Exception($message, is_string($error) ? 0 : $error);
 	}
 
-	/**
-	 * @param array $exceptionMap
-	 * @param mixed $error
-	 * @param string $path
-	 * @return Exception
-	 */
-	public static function fromMap(array $exceptionMap, $error, $path) {
+	public static function fromMap(array $exceptionMap, $error, ?string $path): Exception {
 		if (isset($exceptionMap[$error])) {
 			$exceptionClass = $exceptionMap[$error];
 			if (is_numeric($error)) {

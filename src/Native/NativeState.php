@@ -58,7 +58,7 @@ class NativeState {
 		113 => NoRouteToHostException::class
 	];
 
-	protected function handleError($path) {
+	protected function handleError(?string $path) {
 		$error = smbclient_state_errno($this->state);
 		if ($error === 0) {
 			return;
@@ -66,7 +66,7 @@ class NativeState {
 		throw Exception::fromMap(self::EXCEPTION_MAP, $error, $path);
 	}
 
-	protected function testResult($result, $uri) {
+	protected function testResult($result, ?string $uri) {
 		if ($result === false or $result === null) {
 			// smb://host/share/path
 			if (is_string($uri) && count(explode('/', $uri, 5)) > 4) {
@@ -111,32 +111,24 @@ class NativeState {
 	 * @param string $uri
 	 * @return resource
 	 */
-	public function opendir($uri) {
+	public function opendir(string $uri) {
 		$result = @smbclient_opendir($this->state, $uri);
 
 		$this->testResult($result, $uri);
 		return $result;
 	}
 
-	/**
-	 * @param resource $dir
-	 * @return array
-	 */
-	public function readdir($dir) {
+	public function readdir($dir, string $path): array {
 		$result = @smbclient_readdir($this->state, $dir);
 
-		$this->testResult($result, $dir);
+		$this->testResult($result, $path);
 		return $result;
 	}
 
-	/**
-	 * @param resource $dir
-	 * @return bool
-	 */
-	public function closedir($dir) {
+	public function closedir($dir, string $path): bool {
 		$result = smbclient_closedir($this->state, $dir);
 
-		$this->testResult($result, $dir);
+		$this->testResult($result, $path);
 		return $result;
 	}
 
@@ -145,7 +137,7 @@ class NativeState {
 	 * @param string $new
 	 * @return bool
 	 */
-	public function rename($old, $new) {
+	public function rename(string $old, string $new): bool {
 		$result = @smbclient_rename($this->state, $old, $this->state, $new);
 
 		$this->testResult($result, $new);
@@ -156,7 +148,7 @@ class NativeState {
 	 * @param string $uri
 	 * @return bool
 	 */
-	public function unlink($uri) {
+	public function unlink(string $uri): bool {
 		$result = @smbclient_unlink($this->state, $uri);
 
 		$this->testResult($result, $uri);
@@ -168,7 +160,7 @@ class NativeState {
 	 * @param int $mask
 	 * @return bool
 	 */
-	public function mkdir($uri, $mask = 0777) {
+	public function mkdir(string $uri, int $mask = 0777): bool {
 		$result = @smbclient_mkdir($this->state, $uri, $mask);
 
 		$this->testResult($result, $uri);
@@ -179,7 +171,7 @@ class NativeState {
 	 * @param string $uri
 	 * @return bool
 	 */
-	public function rmdir($uri) {
+	public function rmdir(string $uri): bool {
 		$result = @smbclient_rmdir($this->state, $uri);
 
 		$this->testResult($result, $uri);
@@ -190,21 +182,17 @@ class NativeState {
 	 * @param string $uri
 	 * @return array
 	 */
-	public function stat($uri) {
+	public function stat(string $uri): array {
 		$result = @smbclient_stat($this->state, $uri);
 
 		$this->testResult($result, $uri);
 		return $result;
 	}
 
-	/**
-	 * @param resource $file
-	 * @return array
-	 */
-	public function fstat($file) {
+	public function fstat($file, string $path): array {
 		$result = @smbclient_fstat($this->state, $file);
 
-		$this->testResult($result, $file);
+		$this->testResult($result, $path);
 		return $result;
 	}
 
@@ -214,7 +202,7 @@ class NativeState {
 	 * @param int $mask
 	 * @return resource
 	 */
-	public function open($uri, $mode, $mask = 0666) {
+	public function open(string $uri, string $mode, int $mask = 0666) {
 		$result = @smbclient_open($this->state, $uri, $mode, $mask);
 
 		$this->testResult($result, $uri);
@@ -226,22 +214,17 @@ class NativeState {
 	 * @param int $mask
 	 * @return resource
 	 */
-	public function create($uri, $mask = 0666) {
+	public function create(string $uri, int $mask = 0666) {
 		$result = @smbclient_creat($this->state, $uri, $mask);
 
 		$this->testResult($result, $uri);
 		return $result;
 	}
 
-	/**
-	 * @param resource $file
-	 * @param int $bytes
-	 * @return string
-	 */
-	public function read($file, $bytes) {
+	public function read($file, int $bytes, string $path): string {
 		$result = @smbclient_read($this->state, $file, $bytes);
 
-		$this->testResult($result, $file);
+		$this->testResult($result, $path);
 		return $result;
 	}
 
@@ -249,10 +232,10 @@ class NativeState {
 	 * @param resource $file
 	 * @param string $data
 	 * @param string $path
-	 * @param int $length
+	 * @param int|null $length
 	 * @return int
 	 */
-	public function write($file, $data, $path, $length = null) {
+	public function write($file, string $data, string $path, ?int $length = null): int {
 		$result = @smbclient_write($this->state, $file, $data, $length);
 
 		$this->testResult($result, $path);
@@ -263,28 +246,24 @@ class NativeState {
 	 * @param resource $file
 	 * @param int $offset
 	 * @param int $whence SEEK_SET | SEEK_CUR | SEEK_END
+	 * @param string|null $path
 	 * @return int|bool new file offset as measured from the start of the file on success, false on failure.
 	 */
-	public function lseek($file, $offset, $whence = SEEK_SET) {
+	public function lseek($file, int $offset, int $whence = SEEK_SET, string $path = null) {
 		$result = @smbclient_lseek($this->state, $file, $offset, $whence);
 
-		$this->testResult($result, $file);
+		$this->testResult($result, $path);
 		return $result;
 	}
 
-	/**
-	 * @param resource $file
-	 * @param int $size
-	 * @return bool
-	 */
-	public function ftruncate($file, $size) {
+	public function ftruncate($file, int $size, string $path): bool {
 		$result = @smbclient_ftruncate($this->state, $file, $size);
 
-		$this->testResult($result, $file);
+		$this->testResult($result, $path);
 		return $result;
 	}
 
-	public function close($file, $path) {
+	public function close($file, string $path) {
 		$result = @smbclient_close($this->state, $file);
 
 		$this->testResult($result, $path);
@@ -296,7 +275,7 @@ class NativeState {
 	 * @param string $key
 	 * @return string
 	 */
-	public function getxattr($uri, $key) {
+	public function getxattr(string $uri, string $key) {
 		$result = @smbclient_getxattr($this->state, $uri, $key);
 
 		$this->testResult($result, $uri);
@@ -310,7 +289,7 @@ class NativeState {
 	 * @param int $flags
 	 * @return mixed
 	 */
-	public function setxattr($uri, $key, $value, $flags = 0) {
+	public function setxattr(string $uri, string $key, string $value, int $flags = 0) {
 		$result = @smbclient_setxattr($this->state, $uri, $key, $value, $flags);
 
 		$this->testResult($result, $uri);

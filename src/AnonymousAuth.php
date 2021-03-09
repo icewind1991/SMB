@@ -22,19 +22,19 @@
 namespace Icewind\SMB;
 
 class AnonymousAuth implements IAuth {
-	public function getUsername() {
+	public function getUsername(): ?string {
 		return null;
 	}
 
-	public function getWorkgroup() {
+	public function getWorkgroup(): ?string {
 		return 'dummy';
 	}
 
-	public function getPassword() {
+	public function getPassword(): ?string {
 		return null;
 	}
 
-	public function getExtraCommandLineArguments() {
+	public function getExtraCommandLineArguments(): string {
 		return '-N';
 	}
 

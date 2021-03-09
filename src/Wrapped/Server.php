@@ -23,11 +23,11 @@ class Server extends AbstractServer {
 	 * @param ISystem $system
 	 * @return bool
 	 */
-	public static function available(ISystem $system) {
-		return $system->getSmbclientPath();
+	public static function available(ISystem $system): bool {
+		return $system->getSmbclientPath() !== null;
 	}
 
-	private function getAuthFileArgument() {
+	private function getAuthFileArgument(): string {
 		if ($this->getAuth()->getUsername()) {
 			return '--authentication-file=' . $this->system->getFD(3);
 		} else {
@@ -42,7 +42,7 @@ class Server extends AbstractServer {
 	 * @throws InvalidHostException
 	 * @throws ConnectException
 	 */
-	public function listShares() {
+	public function listShares(): array {
 		$maxProtocol = $this->options->getMaxProtocol();
 		$minProtocol = $this->options->getMinProtocol();
 		$command = sprintf(
@@ -93,7 +93,7 @@ class Server extends AbstractServer {
 	 * @param string $name
 	 * @return IShare
 	 */
-	public function getShare($name) {
+	public function getShare(string $name): IShare {
 		return new Share($this, $name, $this->system);
 	}
 }

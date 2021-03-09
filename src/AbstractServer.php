@@ -54,7 +54,7 @@ abstract class AbstractServer implements IServer {
 	 * @param ITimeZoneProvider $timeZoneProvider
 	 * @param IOptions $options
 	 */
-	public function __construct($host, IAuth $auth, ISystem $system, ITimeZoneProvider $timeZoneProvider, IOptions $options) {
+	public function __construct(string $host, IAuth $auth, ISystem $system, ITimeZoneProvider $timeZoneProvider, IOptions $options) {
 		$this->host = $host;
 		$this->auth = $auth;
 		$this->system = $system;
@@ -62,23 +62,23 @@ abstract class AbstractServer implements IServer {
 		$this->options = $options;
 	}
 
-	public function getAuth() {
+	public function getAuth(): IAuth {
 		return $this->auth;
 	}
 
-	public function getHost() {
+	public function getHost(): string {
 		return $this->host;
 	}
 
-	public function getTimeZone() {
+	public function getTimeZone(): string {
 		return $this->timezoneProvider->get($this->host);
 	}
 
-	public function getSystem() {
+	public function getSystem(): ISystem {
 		return $this->system;
 	}
 
-	public function getOptions() {
+	public function getOptions(): IOptions {
 		return $this->options;
 	}
 }

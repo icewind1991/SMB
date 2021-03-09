@@ -9,7 +9,6 @@ namespace Icewind\SMB\Wrapped;
 
 use Icewind\SMB\Exception\ConnectException;
 use Icewind\SMB\Exception\ConnectionException;
-use Icewind\SMB\Exception\ConnectionResetException;
 
 class RawConnection {
 	/**
@@ -43,9 +42,7 @@ class RawConnection {
 	 */
 	private $authStream = null;
 
-	private $connected = false;
-
-	public function __construct($command, array $env = []) {
+	public function __construct(string $command, array $env = []) {
 		$this->command = $command;
 		$this->env = $env;
 	}
@@ -78,7 +75,6 @@ class RawConnection {
 		if (!$this->isValid()) {
 			throw new ConnectionException();
 		}
-		$this->connected = true;
 	}
 
 	/**
@@ -86,7 +82,7 @@ class RawConnection {
 	 *
 	 * @return bool
 	 */
-	public function isValid() {
+	public function isValid(): bool {
 		if (is_resource($this->process)) {
 			$status = proc_get_status($this->process);
 			return $status['running'];
@@ -99,8 +95,9 @@ class RawConnection {
 	 * send input to the process
 	 *
 	 * @param string $input
+	 * @return int|bool
 	 */
-	public function write($input) {
+	public function write(string $input) {
 		$result = @fwrite($this->getInputStream(), $input);
 		fflush($this->getInputStream());
 		return $result;
@@ -118,7 +115,7 @@ class RawConnection {
 	/**
 	 * read a line of output
 	 *
-	 * @return string
+	 * @return string|false
 	 */
 	public function readError() {
 		return trim(stream_get_line($this->getErrorStream(), 4086));
@@ -127,9 +124,9 @@ class RawConnection {
 	/**
 	 * get all output until the process closes
 	 *
-	 * @return array
+	 * @return string[]
 	 */
-	public function readAll() {
+	public function readAll(): array {
 		$output = [];
 		while ($line = $this->readLine()) {
 			$output[] = $line;
@@ -161,8 +158,8 @@ class RawConnection {
 		return $this->pipes[5];
 	}
 
-	public function writeAuthentication($user, $password) {
-		$auth = ($password === false)
+	public function writeAuthentication(?string $user, ?string $password) {
+		$auth = ($password === null)
 			? "username=$user"
 			: "username=$user\npassword=$password\n";
 
@@ -170,7 +167,7 @@ class RawConnection {
 		fwrite($this->getAuthStream(), $auth);
 	}
 
-	public function close($terminate = true) {
+	public function close(bool $terminate = true) {
 		if (!is_resource($this->process)) {
 			return;
 		}

@@ -29,11 +29,6 @@ class Parser {
 	 */
 	protected $timeZone;
 
-	/**
-	 * @var string
-	 */
-	private $host;
-
 	// see error.h
 	const EXCEPTION_MAP = [
 		ErrorCodes::LogonFailure      => AuthenticationException::class,
@@ -65,17 +60,17 @@ class Parser {
 		$this->timeZone = $timeZone;
 	}
 
-	private function getErrorCode($line) {
+	private function getErrorCode(string $line): ?string {
 		$parts = explode(' ', $line);
 		foreach ($parts as $part) {
 			if (substr($part, 0, 9) === 'NT_STATUS') {
 				return $part;
 			}
 		}
-		return false;
+		return null;
 	}
 
-	public function checkForError($output, $path) {
+	public function checkForError(array $output, string $path): void {
 		if (strpos($output[0], 'does not exist')) {
 			throw new NotFoundException($path);
 		}
@@ -98,7 +93,7 @@ class Parser {
 	 * @throws NoLoginServerException
 	 * @throws AccessDeniedException
 	 */
-	public function checkConnectionError(string $line) {
+	public function checkConnectionError(string $line): void {
 		$line = rtrim($line, ')');
 		if (substr($line, -23) === ErrorCodes::LogonFailure) {
 			throw new AuthenticationException('Invalid login');
@@ -120,7 +115,7 @@ class Parser {
 		}
 	}
 
-	public function parseMode($mode) {
+	public function parseMode(string $mode): int {
 		$result = 0;
 		foreach (self::MODE_STRINGS as $char => $val) {
 			if (strpos($mode, $char) !== false) {
@@ -130,7 +125,7 @@ class Parser {
 		return $result;
 	}
 
-	public function parseStat($output) {
+	public function parseStat(array $output): array {
 		$data = [];
 		foreach ($output as $line) {
 			// A line = explode statement may not fill all array elements
@@ -151,7 +146,13 @@ class Parser {
 		];
 	}
 
-	public function parseDir($output, $basePath, callable $aclCallback) {
+	/**
+	 * @param array $output
+	 * @param string $basePath
+	 * @param callable $aclCallback
+	 * @return FileInfo[]
+	 */
+	public function parseDir(array $output, string $basePath, callable $aclCallback): array {
 		//last line is used space
 		array_pop($output);
 		$regex = '/^\s*(.*?)\s\s\s\s+(?:([NDHARS]*)\s+)?([0-9]+)\s+(.*)$/';
@@ -173,7 +174,11 @@ class Parser {
 		return $content;
 	}
 
-	public function parseListShares($output) {
+	/**
+	 * @param array $output
+	 * @return string[]
+	 */
+	public function parseListShares(array $output): array {
 		$shareNames = [];
 		foreach ($output as $line) {
 			if (strpos($line, '|')) {

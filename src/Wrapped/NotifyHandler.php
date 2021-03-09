@@ -35,7 +35,7 @@ class NotifyHandler implements INotifyHandler {
 	 * @param Connection $connection
 	 * @param string $path
 	 */
-	public function __construct(Connection $connection, $path) {
+	public function __construct(Connection $connection, string $path) {
 		$this->connection = $connection;
 		$this->path = $path;
 	}
@@ -45,7 +45,7 @@ class NotifyHandler implements INotifyHandler {
 	 *
 	 * @return Change[]
 	 */
-	public function getChanges() {
+	public function getChanges(): array {
 		if (!$this->listening) {
 			return [];
 		}
@@ -66,7 +66,7 @@ class NotifyHandler implements INotifyHandler {
 	 *
 	 * @param callable $callback
 	 */
-	public function listen($callback) {
+	public function listen(callable $callback): void {
 		if ($this->listening) {
 			$this->connection->read(function ($line) use ($callback) {
 				$this->checkForError($line);
@@ -78,7 +78,7 @@ class NotifyHandler implements INotifyHandler {
 		}
 	}
 
-	private function parseChangeLine($line) {
+	private function parseChangeLine(string $line): ?Change {
 		$code = (int)substr($line, 0, 4);
 		if ($code === 0) {
 			return null;
@@ -91,7 +91,7 @@ class NotifyHandler implements INotifyHandler {
 		}
 	}
 
-	private function checkForError($line) {
+	private function checkForError(string $line) {
 		if (substr($line, 0, 16) === 'notify returned ') {
 			$error = substr($line, 16);
 			throw Exception::fromMap(array_merge(self::EXCEPTION_MAP, Parser::EXCEPTION_MAP), $error, 'Notify is not supported with the used smb version');

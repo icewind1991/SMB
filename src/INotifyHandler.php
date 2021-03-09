@@ -25,7 +25,7 @@ interface INotifyHandler {
 	 *
 	 * @return Change[]
 	 */
-	public function getChanges();
+	public function getChanges(): array;
 
 	/**
 	 * Listen actively to all incoming changes
@@ -34,7 +34,7 @@ interface INotifyHandler {
 	 *
 	 * @param callable $callback
 	 */
-	public function listen($callback);
+	public function listen(callable $callback): void;
 
 	/**
 	 * Stop listening for changes

@@ -32,7 +32,7 @@ class StringBuffer {
 		$this->pos = 0;
 	}
 
-	public function push(string $data) {
+	public function push(string $data): int {
 		$this->buffer = $this->flush() . $data;
 		return strlen($data);
 	}

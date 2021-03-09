@@ -29,32 +29,25 @@ class BasicAuth implements IAuth {
 	/** @var string */
 	private $password;
 
-	/**
-	 * BasicAuth constructor.
-	 *
-	 * @param string $username
-	 * @param string $workgroup
-	 * @param string $password
-	 */
-	public function __construct($username, $workgroup, $password) {
+	public function __construct(string $username, string $workgroup, string $password) {
 		$this->username = $username;
 		$this->workgroup = $workgroup;
 		$this->password = $password;
 	}
 
-	public function getUsername() {
+	public function getUsername(): ?string {
 		return $this->username;
 	}
 
-	public function getWorkgroup() {
+	public function getWorkgroup(): ?string {
 		return $this->workgroup;
 	}
 
-	public function getPassword() {
+	public function getPassword(): ?string {
 		return $this->password;
 	}
 
-	public function getExtraCommandLineArguments() {
+	public function getExtraCommandLineArguments(): string {
 		return ($this->workgroup) ? '-W ' . escapeshellarg($this->workgroup) : '';
 	}
 

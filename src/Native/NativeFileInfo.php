@@ -11,55 +11,30 @@ use Icewind\SMB\ACL;
 use Icewind\SMB\IFileInfo;
 
 class NativeFileInfo implements IFileInfo {
-	/**
-	 * @var string
-	 */
+	/** @var string */
 	protected $path;
-
-	/**
-	 * @var string
-	 */
+	/** @var string */
 	protected $name;
-
-	/**
-	 * @var NativeShare
-	 */
+	/** @var NativeShare */
 	protected $share;
-
-	/**
-	 * @var array|null
-	 */
+	/** @var array|null */
 	protected $attributeCache = null;
 
-	/**
-	 * @param NativeShare $share
-	 * @param string $path
-	 * @param string $name
-	 */
-	public function __construct($share, $path, $name) {
+	public function __construct(NativeShare $share, string $path, string $name) {
 		$this->share = $share;
 		$this->path = $path;
 		$this->name = $name;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getPath() {
+	public function getPath(): string {
 		return $this->path;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getName() {
+	public function getName(): string {
 		return $this->name;
 	}
 
-	/**
-	 * @return array
-	 */
-	protected function stat() {
+	protected function stat(): array {
 		if (is_null($this->attributeCache)) {
 			$rawAttributes = explode(',', $this->share->getAttribute($this->path, 'system.dos_attr.*'));
 			$this->attributeCache = [];
@@ -76,18 +51,12 @@ class NativeFileInfo implements IFileInfo {
 		return $this->attributeCache;
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getSize() {
+	public function getSize(): int {
 		$stat = $this->stat();
 		return $stat['size'];
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getMTime() {
+	public function getMTime(): int {
 		$stat = $this->stat();
 		return $stat['write_time'];
 	}
@@ -104,10 +73,7 @@ class NativeFileInfo implements IFileInfo {
 	 * as false (except for `hidden` where we use the unix dotfile convention)
 	 */
 
-	/**
-	 * @return int
-	 */
-	protected function getMode() {
+	protected function getMode(): int {
 		$mode = $this->stat()['mode'];
 
 		// Let us ignore the ATTR_NOT_CONTENT_INDEXED for now
@@ -116,10 +82,7 @@ class NativeFileInfo implements IFileInfo {
 		return $mode;
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function isDirectory() {
+	public function isDirectory(): bool {
 		$mode = $this->getMode();
 		if ($mode > 0x1000) {
 			return (bool)($mode & 0x4000); // 0x4000: unix directory flag
@@ -128,10 +91,7 @@ class NativeFileInfo implements IFileInfo {
 		}
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function isReadOnly() {
+	public function isReadOnly(): bool {
 		$mode = $this->getMode();
 		if ($mode > 0x1000) {
 			return !(bool)($mode & 0x80); // 0x80: owner write permissions
@@ -140,10 +100,7 @@ class NativeFileInfo implements IFileInfo {
 		}
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function isHidden() {
+	public function isHidden(): bool {
 		$mode = $this->getMode();
 		if ($mode > 0x1000) {
 			return strlen($this->name) > 0 && $this->name[0] === '.';
@@ -152,10 +109,7 @@ class NativeFileInfo implements IFileInfo {
 		}
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function isSystem() {
+	public function isSystem(): bool {
 		$mode = $this->getMode();
 		if ($mode > 0x1000) {
 			return false;
@@ -164,10 +118,7 @@ class NativeFileInfo implements IFileInfo {
 		}
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function isArchived() {
+	public function isArchived(): bool {
 		$mode = $this->getMode();
 		if ($mode > 0x1000) {
 			return false;

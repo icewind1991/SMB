@@ -86,7 +86,7 @@ class NativeStream implements File {
 	}
 
 	public function stream_read($count) {
-		$result = $this->state->read($this->handle, $count);
+		$result = $this->state->read($this->handle, $count, $this->url);
 		if (strlen($result) < $count) {
 			$this->eof = true;
 		}
@@ -96,7 +96,7 @@ class NativeStream implements File {
 	public function stream_seek($offset, $whence = SEEK_SET) {
 		$this->eof = false;
 		try {
-			return $this->state->lseek($this->handle, $offset, $whence) !== false;
+			return $this->state->lseek($this->handle, $offset, $whence, $this->url) !== false;
 		} catch (InvalidRequestException $e) {
 			return false;
 		}
@@ -111,7 +111,7 @@ class NativeStream implements File {
 	}
 
 	public function stream_tell() {
-		return $this->state->lseek($this->handle, 0, SEEK_CUR);
+		return $this->state->lseek($this->handle, 0, SEEK_CUR, $this->url);
 	}
 
 	public function stream_write($data) {
@@ -119,7 +119,7 @@ class NativeStream implements File {
 	}
 
 	public function stream_truncate($size) {
-		return $this->state->ftruncate($this->handle, $size);
+		return $this->state->ftruncate($this->handle, $size, $this->url);
 	}
 
 	public function stream_set_option($option, $arg1, $arg2) {
