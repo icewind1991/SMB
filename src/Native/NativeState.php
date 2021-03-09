@@ -118,13 +118,23 @@ class NativeState {
 		return $result;
 	}
 
-	public function readdir($dir, string $path): array {
+	/**
+	 * @param resource $dir
+	 * @param string $path
+	 * @return array|false
+	 */
+	public function readdir($dir, string $path) {
 		$result = @smbclient_readdir($this->state, $dir);
 
 		$this->testResult($result, $path);
 		return $result;
 	}
 
+	/**
+	 * @param resource $dir
+	 * @param string $path
+	 * @return bool
+	 */
 	public function closedir($dir, string $path): bool {
 		$result = smbclient_closedir($this->state, $dir);
 
