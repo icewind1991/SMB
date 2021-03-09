@@ -79,7 +79,7 @@ class NativeState {
 				list(, , , , $path) = explode('/', $uri, 5);
 				$path = '/' . $path;
 			} else {
-				$path = null;
+				$path = $uri;
 			}
 			$this->handleError($path);
 		}
