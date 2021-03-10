@@ -38,18 +38,8 @@ class NativeReadStream extends NativeStream {
 	 * @param string $url
 	 * @return resource
 	 */
-	public static function wrap($state, $smbStream, $mode, $url) {
-		stream_wrapper_register('nativesmb', NativeReadStream::class);
-		$context = stream_context_create([
-			'nativesmb' => [
-				'state'  => $state,
-				'handle' => $smbStream,
-				'url'    => $url
-			]
-		]);
-		$fh = fopen('nativesmb://', $mode, false, $context);
-		stream_wrapper_unregister('nativesmb');
-		return $fh;
+	public static function wrap(NativeState $state, $smbStream, string $mode, string $url) {
+		return parent::wrapClass($state, $smbStream, $mode, $url, NativeReadStream::class);
 	}
 
 	public function stream_read($count) {

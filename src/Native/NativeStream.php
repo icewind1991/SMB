@@ -12,7 +12,7 @@ use Icewind\SMB\Exception\InvalidRequestException;
 use Icewind\Streams\File;
 use InvalidArgumentException;
 
-class NativeStream implements File {
+abstract class NativeStream implements File {
 	/**
 	 * @var resource
 	 * @psalm-suppress PropertyNotSetInConstructor
@@ -48,10 +48,11 @@ class NativeStream implements File {
 	 * @param resource $smbStream
 	 * @param string $mode
 	 * @param string $url
+	 * @param class-string<NativeStream> $class
 	 * @return resource
 	 */
-	public static function wrap($state, $smbStream, $mode, $url) {
-		stream_wrapper_register('nativesmb', NativeStream::class);
+	protected static function wrapClass(NativeState $state, $smbStream, string $mode, string $url, string $class) {
+		stream_wrapper_register('nativesmb', $class);
 		$context = stream_context_create([
 			'nativesmb' => [
 				'state'  => $state,

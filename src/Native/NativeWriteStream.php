@@ -38,18 +38,8 @@ class NativeWriteStream extends NativeStream {
 	 * @param string $url
 	 * @return resource
 	 */
-	public static function wrap($state, $smbStream, $mode, $url) {
-		stream_wrapper_register('nativesmb', NativeWriteStream::class);
-		$context = stream_context_create([
-			'nativesmb' => [
-				'state'  => $state,
-				'handle' => $smbStream,
-				'url'    => $url
-			]
-		]);
-		$fh = fopen('nativesmb://', $mode, false, $context);
-		stream_wrapper_unregister('nativesmb');
-		return $fh;
+	public static function wrap(NativeState $state, $smbStream, string $mode, string $url) {
+		return parent::wrapClass($state, $smbStream, $mode, $url, NativeWriteStream::class);
 	}
 
 	public function stream_seek($offset, $whence = SEEK_SET) {
@@ -66,7 +56,7 @@ class NativeWriteStream extends NativeStream {
 	}
 
 	private function flushWrite(): void {
-		$this->state->write($this->handle, $this->writeBuffer->flush(), $this->url);
+		parent::stream_write($this->writeBuffer->flush());
 	}
 
 	public function stream_write($data) {
