@@ -122,6 +122,9 @@ abstract class NativeStream implements File {
 		}
 	}
 
+	/**
+	 * @return array{"mtime": int, "size": int, "mode": int}|false
+	 */
 	public function stream_stat() {
 		try {
 			return $this->state->stat($this->url);

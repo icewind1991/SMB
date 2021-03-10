@@ -24,24 +24,16 @@ namespace Icewind\SMB;
 abstract class AbstractServer implements IServer {
 	const LOCALE = 'en_US.UTF-8';
 
-	/**
-	 * @var string $host
-	 */
+	/** @var string */
 	protected $host;
 
-	/**
-	 * @var IAuth $user
-	 */
+	/** @var IAuth */
 	protected $auth;
 
-	/**
-	 * @var ISystem
-	 */
+	/** @var ISystem */
 	protected $system;
 
-	/**
-	 * @var ITimeZoneProvider
-	 */
+	/** @var ITimeZoneProvider */
 	protected $timezoneProvider;
 
 	/** @var IOptions */

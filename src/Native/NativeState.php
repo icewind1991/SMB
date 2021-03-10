@@ -206,10 +206,10 @@ class NativeState {
 
 	/**
 	 * @param string $uri
-	 * @return array
+	 * @return array{"mtime": int, "size": int, "mode": int}
 	 */
 	public function stat(string $uri): array {
-		/** @var array $result */
+		/** @var array{"mtime": int, "size": int, "mode": int} $result */
 		$result = @smbclient_stat($this->state, $uri);
 
 		$this->testResult($result, $uri);
@@ -219,10 +219,10 @@ class NativeState {
 	/**
 	 * @param resource $file
 	 * @param string $path
-	 * @return array
+	 * @return array{"mtime": int, "size": int, "mode": int}
 	 */
 	public function fstat($file, string $path): array {
-		/** @var array $result */
+		/** @var array{"mtime": int, "size": int, "mode": int} $result */
 		$result = @smbclient_fstat($this->state, $file);
 
 		$this->testResult($result, $path);
