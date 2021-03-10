@@ -10,6 +10,7 @@ namespace Icewind\SMB\Test;
 use Icewind\SMB\BasicAuth;
 use Icewind\SMB\Change;
 use Icewind\SMB\Exception\AlreadyExistsException;
+use Icewind\SMB\Exception\Exception;
 use Icewind\SMB\Exception\RevisionMismatchException;
 use Icewind\SMB\INotifyHandler;
 use Icewind\SMB\IShare;
@@ -76,7 +77,7 @@ class NotifyHandlerTest extends TestCase {
 		$changes = array_filter($changes, function (Change $change) {
 			return $change->getPath()[0] !== '.';
 		});
-		
+
 		$process->stop();
 		$expected = [
 			new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'),
@@ -185,5 +186,30 @@ class NotifyHandlerTest extends TestCase {
 			return false; // stop listening
 		});
 		$this->assertNotNull($results);
+	}
+
+	public function testNoStdBuf(): void {
+		$this->requireBackendEnv('smbclient');
+		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
+		$system = $this->getMockBuilder(System::class)
+			->onlyMethods(['getStdBufPath'])
+			->getMock();
+		$system->method('getStdBufPath')
+			->willReturn(null);
+		$server = new Server(
+			$this->config->host,
+			new BasicAuth(
+				$this->config->user,
+				'test',
+				$this->config->password
+			),
+			$system,
+			new TimeZoneProvider(new System()),
+			new Options()
+		);
+		$share = $server->getShare($this->config->share);
+
+		$this->expectException(Exception::class);
+		$share->notify('');
 	}
 }

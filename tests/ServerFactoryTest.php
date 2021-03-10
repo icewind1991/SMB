@@ -42,7 +42,7 @@ class ServerFactoryTest extends TestCase {
 	public function testSmbClient() {
 		$this->requireBackendEnv('smbclient');
 		$system = $this->getMockBuilder(System::class)
-			->setMethods(['libSmbclientAvailable'])
+			->onlyMethods(['libSmbclientAvailable'])
 			->getMock();
 		$system->expects($this->any())
 			->method('libSmbclientAvailable')

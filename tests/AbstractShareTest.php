@@ -7,6 +7,7 @@
 
 namespace Icewind\SMB\Test;
 
+use Icewind\SMB\ACL;
 use Icewind\SMB\Exception\AlreadyExistsException;
 use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\InvalidPathException;
@@ -697,5 +698,26 @@ abstract class AbstractShareTest extends TestCase {
 		$this->expectException(FileInUseException::class);
 		$this->share->mkdir($this->root . '/folder');
 		$this->share->rename($this->root . '/folder', $this->root . '/folder/subfolder');
+	}
+
+	public function testDirACL() {
+		$this->share->mkdir($this->root . "/test");
+		$listing = $this->share->dir($this->root);
+
+		$this->assertCount(1, $listing);
+		$acls = $listing[0]->getAcls();
+		$acl = $acls['Everyone'];
+		$this->assertEquals($acl->getType(), ACL::TYPE_ALLOW);
+		$this->assertEquals(ACL::MASK_READ, $acl->getMask() & ACL::MASK_READ);
+	}
+
+	public function testStatACL() {
+		$this->share->mkdir($this->root . "/test");
+		$info = $this->share->stat($this->root);
+
+		$acls = $info->getAcls();
+		$acl = $acls['Everyone'];
+		$this->assertEquals($acl->getType(), ACL::TYPE_ALLOW);
+		$this->assertEquals(ACL::MASK_READ, $acl->getMask() & ACL::MASK_READ);
 	}
 }
