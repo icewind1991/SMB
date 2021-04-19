@@ -33,7 +33,9 @@ class StringBufferTest extends TestCase {
 		$this->assertEquals(6, $buffer->remaining());
 		$this->assertEquals("foo", $buffer->read(3));
 		$this->assertEquals(3, $buffer->remaining());
-		$this->assertEquals("bar", $buffer->read(10));
+		$this->assertEquals("b", $buffer->read(1));
+		$this->assertEquals(2, $buffer->remaining());
+		$this->assertEquals("ar", $buffer->read(10));
 		$this->assertEquals(0, $buffer->remaining());
 	}
 
