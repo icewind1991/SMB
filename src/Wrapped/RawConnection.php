@@ -91,7 +91,7 @@ class RawConnection {
 	public function isValid(): bool {
 		if (is_resource($this->process)) {
 			$status = proc_get_status($this->process);
-			return (bool)$status['running'];
+			return $status['running'];
 		} else {
 			return false;
 		}
@@ -202,6 +202,14 @@ class RawConnection {
 	 * @psalm-assert null $this->process
 	 */
 	public function close(bool $terminate = true): void {
+		$this->close_process($terminate);
+	}
+
+	/**
+	 * @param bool $terminate
+	 * @psalm-assert null $this->process
+	 */
+	protected function close_process(bool $terminate = true): void {
 		if (!is_resource($this->process)) {
 			return;
 		}

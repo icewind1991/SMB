@@ -82,6 +82,7 @@ jobs:
         run: |
           echo '{"host": "localhost","user": "test","password": "test","share": "test","root": ""}' > tests/config.json
       - name: PHPUnit Tests
+        timeout-minutes: 2
         env:
           BACKEND: ${{ matrix.backend }}
         run: php ./vendor/bin/phpunit tests -c tests/phpunit.xml --coverage-clover=coverage.xml

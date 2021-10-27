@@ -132,6 +132,6 @@ class Connection extends RawConnection {
 			// ignore any errors while trying to send the close command, the process might already be dead
 			@$this->write('close' . PHP_EOL);
 		}
-		parent::close($terminate);
+		$this->close_process($terminate);
 	}
 }
