@@ -52,10 +52,11 @@ jobs:
 
     services:
       samba:
-        image: dperson/samba
+        image: servercontainers/samba
         env:
-          USER: "test;test"
-          SHARE: "test;/tmp;yes;no;yes;all;none"
+          ACCOUNT_test: test
+          UID_test: 1000
+          SAMBA_VOLUME_CONFIG_test: "[test]; path=/tmp; valid users = test; guest ok = no; read only = no; browseable = yes"
         ports:
           - 139:139
           - 445:445
