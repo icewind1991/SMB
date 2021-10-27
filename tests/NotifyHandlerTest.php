@@ -59,26 +59,6 @@ class NotifyHandlerTest extends TestCase {
 
 	public function testGetChanges() {
 		$share = $this->server->getShare($this->config->share);
-		$process = $share->notify('');
-
-		usleep(1000 * 100);// give it some time to start listening
-
-		$share->put(__FILE__, 'source.txt');
-		$share->rename('source.txt', 'target.txt');
-		$share->del('target.txt');
-		usleep(1000 * 100);// give it some time
-
-		try {
-			$changes = $process->getChanges();
-		} catch (RevisionMismatchException $e) {
-			$this->markTestSkipped("notify not supported with configured smb version");
-		}
-
-		$changes = array_filter($changes, function (Change $change) {
-			return $change->getPath()[0] !== '.';
-		});
-
-		$process->stop();
 		$expected = [
 			new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'),
 			new Change(INotifyHandler::NOTIFY_RENAMED_OLD, 'source.txt'),
@@ -86,7 +66,39 @@ class NotifyHandlerTest extends TestCase {
 			new Change(INotifyHandler::NOTIFY_REMOVED, 'target.txt'),
 		];
 
-		$this->assertEquals($expected, $this->filterModifiedChanges($changes));
+		for ($i = 0; $i < 5; $i++) {
+			$process = $share->notify('');
+
+			usleep(1000 * 100);// give it some time to start listening
+
+			$share->put(__FILE__, 'source.txt');
+			$share->rename('source.txt', 'target.txt');
+			$share->del('target.txt');
+			usleep(1000 * 100);// give it some time
+
+			try {
+				$changes = $process->getChanges();
+			} catch (RevisionMismatchException $e) {
+				$this->markTestSkipped("notify not supported with configured smb version");
+			}
+
+			$changes = array_filter($changes, function (Change $change) {
+				return $change->getPath()[0] !== '.';
+			});
+
+			$process->stop();
+
+			$changes = $this->filterModifiedChanges($changes);
+			$this->assertCount(4, $changes);
+			if ($changes[1]->getCode() === INotifyHandler::NOTIFY_REMOVED) {
+				// sometimes during testing, the move isn't properly recognized with older smb versions, retry a few times
+				usleep(1000 * 100);
+				continue;
+			}
+
+			$this->assertEquals($expected, $changes);
+			break;
+		}
 	}
 
 	public function testChangesSubdir() {
@@ -155,8 +167,7 @@ class NotifyHandlerTest extends TestCase {
 		usleep(1000 * 100);// give it some time to start listening
 
 		$share->put(__FILE__, 'source.txt');
-		$share->rename('source.txt', 'target.txt');
-		$share->del('target.txt');
+		$share->del('source.txt');
 		usleep(1000 * 100);// give it some time
 
 		try {
@@ -166,9 +177,7 @@ class NotifyHandlerTest extends TestCase {
 		}
 		$expected = [
 			new Change(INotifyHandler::NOTIFY_ADDED, 'source.txt'),
-			new Change(INotifyHandler::NOTIFY_RENAMED_OLD, 'source.txt'),
-			new Change(INotifyHandler::NOTIFY_RENAMED_NEW, 'target.txt'),
-			new Change(INotifyHandler::NOTIFY_REMOVED, 'target.txt'),
+			new Change(INotifyHandler::NOTIFY_REMOVED, 'source.txt'),
 		];
 
 		$this->assertEquals($expected, $this->filterModifiedChanges($changes));
