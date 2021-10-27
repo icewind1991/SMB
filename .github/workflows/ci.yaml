@@ -49,10 +49,14 @@ jobs:
           - "7.3"
           - "7.4"
           - "8.0"
+        server-version:
+          - "latest"
+          - "4.9.4"
+          - "4.8.5"
 
     services:
       samba:
-        image: servercontainers/samba
+        image: "servercontainers/samba:${{ matrix.server-version }}"
         env:
           ACCOUNT_test: test
           UID_test: 1000
