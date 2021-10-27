@@ -82,10 +82,14 @@ jobs:
         run: |
           echo '{"host": "localhost","user": "test","password": "test","share": "test","root": ""}' > tests/config.json
       - name: PHPUnit Tests
-        timeout-minutes: 2
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 2
+          max_attempts: 3
+          retry_on: timeout
+          command: php ./vendor/bin/phpunit tests -c tests/phpunit.xml --coverage-clover=coverage.xml
         env:
           BACKEND: ${{ matrix.backend }}
-        run: php ./vendor/bin/phpunit tests -c tests/phpunit.xml --coverage-clover=coverage.xml
       - uses: codecov/codecov-action@v1
         with:
           files: ./coverage.xml
