@@ -51,22 +51,6 @@ class ServerTest extends TestCase {
 		$this->assertContains($this->config->share, $names);
 	}
 
-	public function testWrongUserName() {
-		$this->expectException(AuthenticationException::class);
-		$server = new Server(
-			$this->config->host,
-			new BasicAuth(
-				uniqid(),
-				'test',
-				uniqid()
-			),
-			new System(),
-			new TimeZoneProvider(new System()),
-			new Options()
-		);
-		$server->listShares();
-	}
-
 	public function testWrongPassword() {
 		$this->expectException(AuthenticationException::class);
 		$server = new Server(
@@ -165,8 +149,6 @@ class ServerTest extends TestCase {
 			$this->markTestSkipped("Server seems to accept NT1 connections");
 		} catch (ConnectionRefusedException $e) {
 			$this->assertTrue(true);
-		} catch (\Exception $e) {
-			$this->fail("Wrong exception");
 		}
 	}
 }

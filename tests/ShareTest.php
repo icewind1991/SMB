@@ -16,27 +16,9 @@ use Icewind\SMB\TimeZoneProvider;
 use Icewind\SMB\Wrapped\Server as NormalServer;
 
 class ShareTest extends AbstractShareTest {
-	public function setUp(): void {
+	public function getServerClass(): string {
 		$this->requireBackendEnv('smbclient');
-		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
-		$this->server = new NormalServer(
-			$this->config->host,
-			new BasicAuth(
-				$this->config->user,
-				'test',
-				$this->config->password
-			),
-			new System(),
-			new TimeZoneProvider(new System()),
-			new Options()
-		);
-		$this->share = $this->server->getShare($this->config->share);
-		if ($this->config->root) {
-			$this->root = '/' . $this->config->root . '/' . uniqid();
-		} else {
-			$this->root = '/' . uniqid();
-		}
-		$this->share->mkdir($this->root);
+		return NormalServer::class;
 	}
 
 	public function testAppendStream() {

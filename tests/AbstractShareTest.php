@@ -8,6 +8,8 @@
 namespace Icewind\SMB\Test;
 
 use Icewind\SMB\ACL;
+use Icewind\SMB\BasicAuth;
+use Icewind\SMB\Exception\AccessDeniedException;
 use Icewind\SMB\Exception\AlreadyExistsException;
 use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\InvalidPathException;
@@ -15,10 +17,12 @@ use Icewind\SMB\Exception\InvalidResourceException;
 use Icewind\SMB\Exception\InvalidTypeException;
 use Icewind\SMB\Exception\NotEmptyException;
 use Icewind\SMB\Exception\NotFoundException;
-use Icewind\SMB\FileInfo;
 use Icewind\SMB\IFileInfo;
+use Icewind\SMB\IOptions;
 use Icewind\SMB\IShare;
+use Icewind\SMB\Options;
 use Icewind\SMB\System;
+use Icewind\SMB\TimeZoneProvider;
 
 abstract class AbstractShareTest extends TestCase {
 	/**
@@ -37,6 +41,34 @@ abstract class AbstractShareTest extends TestCase {
 	protected $root;
 
 	protected $config;
+
+	abstract public function getServerClass(): string;
+
+	public function setUp(): void {
+		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
+		$options = new Options();
+		$options->setMinProtocol(IOptions::PROTOCOL_SMB2);
+		$options->setMaxProtocol(IOptions::PROTOCOL_SMB3);
+		$serverClass = $this->getServerClass();
+		$this->server = new $serverClass(
+			$this->config->host,
+			new BasicAuth(
+				$this->config->user,
+				'test',
+				$this->config->password
+			),
+			new System(),
+			new TimeZoneProvider(new System()),
+			$options
+		);
+		$this->share = $this->server->getShare($this->config->share);
+		if ($this->config->root) {
+			$this->root = '/' . $this->config->root . '/' . uniqid();
+		} else {
+			$this->root = '/' . uniqid();
+		}
+		$this->share->mkdir($this->root);
+	}
 
 	public function tearDown(): void {
 		try {
@@ -728,5 +760,23 @@ abstract class AbstractShareTest extends TestCase {
 		$acl = $acls['Everyone'];
 		$this->assertEquals($acl->getType(), ACL::TYPE_ALLOW);
 		$this->assertEquals(ACL::MASK_READ, $acl->getMask() & ACL::MASK_READ);
+	}
+
+	public function testWrongUserName() {
+		$this->expectException(AccessDeniedException::class);
+		$serverClass = $this->getServerClass();
+		$server = new $serverClass(
+			$this->config->host,
+			new BasicAuth(
+				uniqid(),
+				'test',
+				uniqid()
+			),
+			new System(),
+			new TimeZoneProvider(new System()),
+			new Options()
+		);
+		$share = $server->getShare($this->config->share);
+		$share->dir("");
 	}
 }
