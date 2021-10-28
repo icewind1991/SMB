@@ -18,6 +18,7 @@ use Icewind\SMB\Exception\NotFoundException;
 use Icewind\SMB\FileInfo;
 use Icewind\SMB\IFileInfo;
 use Icewind\SMB\IShare;
+use Icewind\SMB\System;
 
 abstract class AbstractShareTest extends TestCase {
 	/**
@@ -701,6 +702,10 @@ abstract class AbstractShareTest extends TestCase {
 	}
 
 	public function testDirACL() {
+		$system = new System();
+		if ($system->getSmbcAclsPath() === null) {
+			$this->markTestSkipped("smbcacls not installed");
+		}
 		$this->share->mkdir($this->root . "/test");
 		$listing = $this->share->dir($this->root);
 
@@ -712,6 +717,10 @@ abstract class AbstractShareTest extends TestCase {
 	}
 
 	public function testStatACL() {
+		$system = new System();
+		if ($system->getSmbcAclsPath() === null) {
+			$this->markTestSkipped("smbcacls not installed");
+		}
 		$this->share->mkdir($this->root . "/test");
 		$info = $this->share->stat($this->root);
 
