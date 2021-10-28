@@ -12,6 +12,7 @@ use Icewind\SMB\BasicAuth;
 use Icewind\SMB\Exception\AccessDeniedException;
 use Icewind\SMB\Exception\AlreadyExistsException;
 use Icewind\SMB\Exception\FileInUseException;
+use Icewind\SMB\Exception\ForbiddenException;
 use Icewind\SMB\Exception\InvalidPathException;
 use Icewind\SMB\Exception\InvalidResourceException;
 use Icewind\SMB\Exception\InvalidTypeException;
@@ -385,10 +386,14 @@ abstract class AbstractShareTest extends TestCase {
 	}
 
 	public function testRmdirNotEmpty() {
-		$this->expectException(NotEmptyException::class);
 		$this->share->mkdir($this->root . '/foobar');
 		$this->share->put($this->getTextFile(), $this->root . '/foobar/asd');
-		$this->share->rmdir($this->root . '/foobar');
+		try {
+			$this->share->rmdir($this->root . '/foobar');
+			$this->markTestSkipped("Old client versions don't throw this error");
+		} catch (NotEmptyException $e) {
+			$this->assertTrue(true);
+		}
 	}
 
 	/**
@@ -763,7 +768,6 @@ abstract class AbstractShareTest extends TestCase {
 	}
 
 	public function testWrongUserName() {
-		$this->expectException(AccessDeniedException::class);
 		$serverClass = $this->getServerClass();
 		$server = new $serverClass(
 			$this->config->host,
@@ -776,7 +780,14 @@ abstract class AbstractShareTest extends TestCase {
 			new TimeZoneProvider(new System()),
 			new Options()
 		);
-		$share = $server->getShare($this->config->share);
-		$share->dir("");
+		try {
+			$share = $server->getShare($this->config->share);
+			$share->dir("");
+			$this->fail("Expected exception");
+		} catch (AccessDeniedException $e) {
+			$this->assertTrue(true);
+		} catch (ForbiddenException $e) {
+			$this->assertTrue(true);
+		}
 	}
 }
