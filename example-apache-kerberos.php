@@ -2,8 +2,12 @@
 
 require('vendor/autoload.php');
 
+if (php_sapi_name() == "cli") {
+	echo "Note: this example shouldn't be called from cli as it expects apache to setup the keberos ticket\n";
+}
+
 // dfs paths not working
-$host = 'dc.domain.local';
+$host = 'krb.domain.test';
 $share = 'netlogon';
 
 $auth = new \Icewind\SMB\KerberosApacheAuth();
