@@ -24,22 +24,18 @@ namespace Icewind\SMB;
 use Icewind\SMB\Exception\DependencyException;
 use Icewind\SMB\Exception\Exception;
 
-
 /**
- * Use existing kerberos ticket to authenticate and reuse the apache ticket cache (mod_auth_kerb) 
+ * Use existing kerberos ticket to authenticate and reuse the apache ticket cache (mod_auth_kerb)
  */
 class KerberosApacheAuth extends KerberosAuth implements IAuth {
+	private $ticketPath = "";
 
-        private $ticketPath = "";
-
-        //only working with specific library (mod_auth_kerb, krb5, smbclient) versions
-        private $saveTicketInMemory = false;
+	//only working with specific library (mod_auth_kerb, krb5, smbclient) versions
+	private $saveTicketInMemory = false;
 
 	public function __construct($saveTicketInMemory = false) {
-
 		$this->saveTicketInMemory = $saveTicketInMemory;
 		$this->registerApacheKerberosTicket();
-
 	}
 
 	private function registerApacheKerberosTicket() {
@@ -54,23 +50,20 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 
 		//read apache kerberos ticket cache
 		$cacheFile = getenv("KRB5CCNAME");
-		if(!$cacheFile) {
-
+		if (!$cacheFile) {
 			throw new Exception('No kerberos ticket cache environment variable (KRB5CCNAME) found.');
-
 		}
 
 		$krb5 = new \KRB5CCache();
 		$krb5->open($cacheFile);
-		if(!$krb5->isValid()) {
+		if (!$krb5->isValid()) {
 			throw new Exception('Kerberos ticket cache is not valid.');
 		}
 
 
-		if($this->saveTicketInMemory) {
+		if ($this->saveTicketInMemory) {
 			putenv("KRB5CCNAME=" . $krb5->getName());
-		}
-		else {
+		} else {
 			//workaround: smbclient is not working with the original apache ticket cache.
 			$tmpFilename = tempnam("/tmp", "krb5cc_php_");
 			$tmpCacheFile = "FILE:" . $tmpFilename;
@@ -78,17 +71,12 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 			$this->ticketPath = $tmpFilename;
 			putenv("KRB5CCNAME=" . $tmpCacheFile);
 		}
-
 	}
 
 
 	public function __destruct() {
-
-		if(!empty($this->ticketPath) && file_exists($this->ticketPath)  && is_file($this->ticketPath)) {
-
-			   unlink($this->ticketPath);
-
+		if (!empty($this->ticketPath) && file_exists($this->ticketPath) && is_file($this->ticketPath)) {
+			unlink($this->ticketPath);
 		}
 	}
-
 }
