@@ -155,6 +155,38 @@ jobs:
         with:
           files: ./coverage.xml
 
+  kerberos-sso:
+    runs-on: ubuntu-20.04
+    name: Kerberos SSO tests
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.0
+      - name: Composer
+        run: composer install
+      - name: Pull images
+        run: |
+          docker pull icewind1991/samba-krb-test-dc
+          docker pull icewind1991/samba-krb-test-apache
+          docker pull icewind1991/samba-krb-test-client
+      - name: Setup AD-DC
+        run: |
+          tests/setup-krb.sh
+      - name: Test kerberos auth
+        run: |
+          DC_IP=$(docker inspect dc --format '{{.NetworkSettings.IPAddress}}')
+          LIST=$(docker run --rm --name client -v /tmp/shared:/shared --dns $DC_IP --hostname client.domain.test icewind1991/samba-krb-test-client \
+            curl -s --negotiate -u testuser@DOMAIN.TEST: --delegation always http://httpd.domain.test/example-apache-kerberos.php)
+          echo $LIST
+          LIST=$(echo $LIST | tr -d '[:space:]')
+          [[ $LIST == "test.txt" ]]
+      - name: Apache logs
+        if: always()
+        run: |
+          docker logs apache
+
   static-psalm-analysis:
     runs-on: ubuntu-latest
     name: Psalm static analysis
