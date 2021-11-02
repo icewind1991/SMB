@@ -28,22 +28,25 @@ use Icewind\SMB\Exception\Exception;
  * Use existing kerberos ticket to authenticate and reuse the apache ticket cache (mod_auth_kerb)
  */
 class KerberosApacheAuth extends KerberosAuth implements IAuth {
+	/** @var string */
 	private $ticketPath = "";
 
-	//only working with specific library (mod_auth_kerb, krb5, smbclient) versions
+	// only working with specific library (mod_auth_kerb, krb5, smbclient) versions
+	/** @var bool */
 	private $saveTicketInMemory = false;
 
-	public function __construct($saveTicketInMemory = false) {
+	/**
+	 * @param bool $saveTicketInMemory
+	 */
+	public function __construct(bool $saveTicketInMemory = false) {
 		$this->saveTicketInMemory = $saveTicketInMemory;
 		$this->registerApacheKerberosTicket();
 	}
 
-	private function registerApacheKerberosTicket() {
-
+	private function registerApacheKerberosTicket(): void {
 		// inspired by https://git.typo3.org/TYPO3CMS/Extensions/fal_cifs.git
 
 		if (!extension_loaded("krb5")) {
-
 			// https://pecl.php.net/package/krb5
 			throw new DependencyException('Ensure php-krb5 is installed.');
 		}
@@ -62,7 +65,7 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 
 
 		if ($this->saveTicketInMemory) {
-			putenv("KRB5CCNAME=" . $krb5->getName());
+			putenv("KRB5CCNAME=" . (string)$krb5->getName());
 		} else {
 			//workaround: smbclient is not working with the original apache ticket cache.
 			$tmpFilename = tempnam("/tmp", "krb5cc_php_");
