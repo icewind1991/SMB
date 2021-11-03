@@ -11,6 +11,7 @@ use Icewind\SMB\ACL;
 use Icewind\SMB\BasicAuth;
 use Icewind\SMB\Exception\AccessDeniedException;
 use Icewind\SMB\Exception\AlreadyExistsException;
+use Icewind\SMB\Exception\ConnectException;
 use Icewind\SMB\Exception\ConnectionException;
 use Icewind\SMB\Exception\ConnectionRefusedException;
 use Icewind\SMB\Exception\FileInUseException;
@@ -788,13 +789,9 @@ abstract class AbstractShareTest extends TestCase {
 			$share = $server->getShare($this->config->share);
 			$share->dir("");
 			$this->fail("Expected exception");
-		} catch (AccessDeniedException $e) {
-			$this->assertTrue(true);
 		} catch (ForbiddenException $e) {
 			$this->assertTrue(true);
-		} catch (ConnectionRefusedException $e) {
-			$this->assertTrue(true);
-		} catch (ConnectionException $e) {
+		} catch (ConnectException $e) {
 			$this->assertTrue(true);
 		}
 	}
