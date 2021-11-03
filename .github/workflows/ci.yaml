@@ -138,6 +138,39 @@ jobs:
         with:
           files: ./coverage.xml
 
+  alpine-test:
+    runs-on: ubuntu-20.04
+    name: Unit tests (alpine)
+
+    services:
+      samba:
+        image: "servercontainers/samba"
+        env:
+          ACCOUNT_test: test
+          UID_test: 1000
+          SAMBA_VOLUME_CONFIG_test: "[test]; path=/tmp; valid users = test; guest ok = no; read only = no; browseable = yes"
+        ports:
+          - 139:139
+          - 445:445
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.0
+      - name: Composer
+        run: composer install
+      - name: Pull images
+        run: |
+          docker pull icewind1991/smbclient-php-alpine
+      - name: Config
+        run: |
+          echo '{"host": "localhost","user": "test","password": "test","share": "test","root": ""}' > tests/config.json
+      - name: PHPUnit Tests
+        run: |
+          docker run --network "host" --rm -v $PWD:/smb icewind1991/smbclient-php-alpine /smb/vendor/bin/phpunit -c /smb/tests/phpunit.xml /smb/tests
+
   kerberos-sso:
     runs-on: ubuntu-20.04
     name: Kerberos SSO tests
