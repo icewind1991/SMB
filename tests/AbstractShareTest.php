@@ -11,6 +11,8 @@ use Icewind\SMB\ACL;
 use Icewind\SMB\BasicAuth;
 use Icewind\SMB\Exception\AccessDeniedException;
 use Icewind\SMB\Exception\AlreadyExistsException;
+use Icewind\SMB\Exception\ConnectionException;
+use Icewind\SMB\Exception\ConnectionRefusedException;
 use Icewind\SMB\Exception\FileInUseException;
 use Icewind\SMB\Exception\ForbiddenException;
 use Icewind\SMB\Exception\InvalidPathException;
@@ -46,6 +48,8 @@ abstract class AbstractShareTest extends TestCase {
 	abstract public function getServerClass(): string;
 
 	public function setUp(): void {
+//		ob_end_flush();
+//		var_dump($this->getName());
 		$this->config = json_decode(file_get_contents(__DIR__ . '/config.json'));
 		$options = new Options();
 		$options->setMinProtocol(IOptions::PROTOCOL_SMB2);
@@ -787,6 +791,10 @@ abstract class AbstractShareTest extends TestCase {
 		} catch (AccessDeniedException $e) {
 			$this->assertTrue(true);
 		} catch (ForbiddenException $e) {
+			$this->assertTrue(true);
+		} catch (ConnectionRefusedException $e) {
+			$this->assertTrue(true);
+		} catch (ConnectionException $e) {
 			$this->assertTrue(true);
 		}
 	}
