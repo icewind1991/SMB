@@ -35,15 +35,38 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 	/** @var bool */
 	private $saveTicketInMemory = false;
 
+	/** @var bool */
+	private $init = false;
+
 	/**
 	 * @param bool $saveTicketInMemory
 	 */
 	public function __construct(bool $saveTicketInMemory = false) {
 		$this->saveTicketInMemory = $saveTicketInMemory;
-		$this->registerApacheKerberosTicket();
 	}
 
-	private function registerApacheKerberosTicket(): void {
+	/**
+	 * Check if a valid kerberos ticket is present
+	 *
+	 * @return bool
+	 */
+	public function checkTicket(): bool {
+		//read apache kerberos ticket cache
+		$cacheFile = getenv("KRB5CCNAME");
+		if (!$cacheFile) {
+			return false;
+		}
+
+		$krb5 = new \KRB5CCache();
+		$krb5->open($cacheFile);
+		return (bool)$krb5->isValid();
+	}
+
+	private function init(): void {
+		if ($this->init) {
+			return;
+		}
+		$this->init = true;
 		// inspired by https://git.typo3.org/TYPO3CMS/Extensions/fal_cifs.git
 
 		if (!extension_loaded("krb5")) {
@@ -76,6 +99,15 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 		}
 	}
 
+	public function getExtraCommandLineArguments(): string {
+		$this->init();
+		return parent::getExtraCommandLineArguments();
+	}
+
+	public function setExtraSmbClientOptions($smbClientState): void {
+		$this->init();
+		parent::setExtraSmbClientOptions($smbClientState);
+	}
 
 	public function __destruct() {
 		if (!empty($this->ticketPath) && file_exists($this->ticketPath) && is_file($this->ticketPath)) {
