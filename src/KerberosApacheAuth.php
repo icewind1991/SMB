@@ -106,7 +106,11 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 
 	public function setExtraSmbClientOptions($smbClientState): void {
 		$this->init();
-		parent::setExtraSmbClientOptions($smbClientState);
+		try {
+			parent::setExtraSmbClientOptions($smbClientState);
+		} catch (Exception $e) {
+			// suppress
+		}
 	}
 
 	public function __destruct() {
