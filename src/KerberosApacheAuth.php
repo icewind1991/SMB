@@ -59,7 +59,7 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 
 		$krb5 = new \KRB5CCache();
 		$krb5->open($cacheFile);
-		return (bool)$krb5->isValid();
+		return count($krb5->getEntries()) > 0;
 	}
 
 	private function init(): void {
