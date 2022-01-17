@@ -76,27 +76,10 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 
 		//read apache kerberos ticket cache
 		$cacheFile = getenv("KRB5CCNAME");
-		if (!$cacheFile) {
+		if (!$this->checkTicket()) {
 			throw new Exception('No kerberos ticket cache environment variable (KRB5CCNAME) found.');
 		}
-
-		$krb5 = new \KRB5CCache();
-		$krb5->open($cacheFile);
-		if (!$krb5->isValid()) {
-			throw new Exception('Kerberos ticket cache is not valid.');
-		}
-
-
-		if ($this->saveTicketInMemory) {
-			putenv("KRB5CCNAME=" . (string)$krb5->getName());
-		} else {
-			//workaround: smbclient is not working with the original apache ticket cache.
-			$tmpFilename = tempnam("/tmp", "krb5cc_php_");
-			$tmpCacheFile = "FILE:" . $tmpFilename;
-			$krb5->save($tmpCacheFile);
-			$this->ticketPath = $tmpFilename;
-			putenv("KRB5CCNAME=" . $tmpCacheFile);
-		}
+		putenv("KRB5CCNAME=" . $cacheFile);
 	}
 
 	public function getExtraCommandLineArguments(): string {
