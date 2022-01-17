@@ -31,19 +31,8 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 	/** @var string */
 	private $ticketPath = "";
 
-	// only working with specific library (mod_auth_kerb, krb5, smbclient) versions
-	/** @var bool */
-	private $saveTicketInMemory = false;
-
 	/** @var bool */
 	private $init = false;
-
-	/**
-	 * @param bool $saveTicketInMemory
-	 */
-	public function __construct(bool $saveTicketInMemory = false) {
-		$this->saveTicketInMemory = $saveTicketInMemory;
-	}
 
 	/**
 	 * Check if a valid kerberos ticket is present
