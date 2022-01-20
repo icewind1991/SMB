@@ -34,6 +34,46 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 	/** @var bool */
 	private $init = false;
 
+	/** @var string|false */
+	private $ticketName;
+
+	public function __construct() {
+		$this->ticketName = getenv("KRB5CCNAME");
+	}
+
+
+	/**
+	 * Copy the ticket to a temporary location and use that ticket for authentication
+	 *
+	 * @return void
+	 */
+	public function copyTicket(): void {
+		if (!$this->checkTicket()) {
+			return;
+		}
+		$krb5 = new \KRB5CCache();
+		$krb5->open($this->ticketName);
+		$tmpFilename = tempnam("/tmp", "krb5cc_php_");
+		$tmpCacheFile = "FILE:" . $tmpFilename;
+		$krb5->save($tmpCacheFile);
+		$this->ticketPath = $tmpFilename;
+		$this->ticketName = $tmpCacheFile;
+	}
+
+	/**
+	 * Pass the ticket to smbclient by memory instead of path
+	 *
+	 * @return void
+	 */
+	public function passTicketFromMemory(): void {
+		if (!$this->checkTicket()) {
+			return;
+		}
+		$krb5 = new \KRB5CCache();
+		$krb5->open($this->ticketName);
+		$this->ticketName = (string)$krb5->getName();
+	}
+
 	/**
 	 * Check if a valid kerberos ticket is present
 	 *
@@ -41,13 +81,12 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 	 */
 	public function checkTicket(): bool {
 		//read apache kerberos ticket cache
-		$cacheFile = getenv("KRB5CCNAME");
-		if (!$cacheFile) {
+		if (!$this->ticketName) {
 			return false;
 		}
 
 		$krb5 = new \KRB5CCache();
-		$krb5->open($cacheFile);
+		$krb5->open($this->ticketName);
 		return count($krb5->getEntries()) > 0;
 	}
 
@@ -64,11 +103,13 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 		}
 
 		//read apache kerberos ticket cache
-		$cacheFile = getenv("KRB5CCNAME");
 		if (!$this->checkTicket()) {
 			throw new Exception('No kerberos ticket cache environment variable (KRB5CCNAME) found.');
 		}
-		putenv("KRB5CCNAME=" . $cacheFile);
+
+		// note that even if the ticketname is the value we got from `getenv("KRB5CCNAME")` we still need to set the env variable ourselves
+		// this is because `getenv` also reads the variables passed from the SAPI (apache-php) and we need to set the variable in the OS's env
+		putenv("KRB5CCNAME=" . $this->ticketName);
 	}
 
 	public function getExtraCommandLineArguments(): string {
