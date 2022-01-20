@@ -78,6 +78,7 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 	 * Check if a valid kerberos ticket is present
 	 *
 	 * @return bool
+	 * @psalm-assert-if-true string $this->ticketName
 	 */
 	public function checkTicket(): bool {
 		//read apache kerberos ticket cache
@@ -87,6 +88,7 @@ class KerberosApacheAuth extends KerberosAuth implements IAuth {
 
 		$krb5 = new \KRB5CCache();
 		$krb5->open($this->ticketName);
+		/** @psalm-suppress MixedArgument */
 		return count($krb5->getEntries()) > 0;
 	}
 
