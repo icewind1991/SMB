@@ -179,6 +179,8 @@ class Share extends AbstractShare {
 		$output = $this->execute('dir');
 
 		$this->execute('cd /');
+		//check output for errors
+		$this->parseOutput($output, $path);
 
 		return $this->parser->parseDir($output, $path, function (string $path) {
 			return $this->getAcls($path);
