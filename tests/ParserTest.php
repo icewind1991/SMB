@@ -117,6 +117,27 @@ class ParserTest extends \PHPUnit\Framework\TestCase {
 						}
 					)
 				]
+			],
+			[
+				[
+					'  .                                   D        0  Tue Aug 26 19:11:56 2014',
+					'  ..                                 DR        0  Sun Oct 28 15:24:02 2012',
+					'  a.txt                             ARc       10  Fri May 27 16:51:21 2022',
+					'',
+					'                62536 blocks of size 8388608. 57113 blocks available'
+				],
+				[
+					new FileInfo(
+						'/a.txt',
+						'a.txt',
+						10,
+						strtotime('Fri May 27 16:51:21 2022 CEST'),
+						IFileInfo::MODE_ARCHIVE + IFileInfo::MODE_READONLY,
+						function () {
+							return [];
+						}
+					)
+				]
 			]
 		];
 	}
