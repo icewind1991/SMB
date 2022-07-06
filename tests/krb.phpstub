@@ -1,0 +1,12 @@
+<?php
+
+class KRB5CCache {
+    public function getEntries(): array { return [];}
+    public function getName(): string {return "";}
+    public function initKeytab(string $principal, string $keytab, array $flags = []): void {}
+    public function initPassword(string $principal, string $password, array $flags = []): void {}
+    public function isValid(): bool {return false;}
+    public function open(string $source): void {}
+    public function save(string $destination): void {}
+    public function setConfig(string $destination): void {}
+}
