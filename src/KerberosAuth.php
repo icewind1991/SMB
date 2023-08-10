@@ -34,7 +34,7 @@ class KerberosAuth implements IAuth {
 		return $this->ticket;
 	}
 
-	public function setTicket(KerberosTicket $ticket): void {
+	public function setTicket(?KerberosTicket $ticket): void {
 		$this->ticket = $ticket;
 	}
 
