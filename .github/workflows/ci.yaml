@@ -7,7 +7,7 @@ jobs:
     name: PHP-CS-Fixer
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -49,7 +49,7 @@ jobs:
       - name: Install packages
         run: |
           sudo apt-get install smbclient
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -70,7 +70,7 @@ jobs:
           command: php ./vendor/bin/phpunit tests -c tests/phpunit.xml --coverage-clover=coverage.xml
         env:
           BACKEND: ${{ matrix.backend }}
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
 
@@ -116,7 +116,7 @@ jobs:
           echo "[global]\nclient min protocol = SMB2\nclient max protocol = SMB3" | sudo tee /etc/samba/smb.conf
           sudo wget "https://github.com/icewind1991/smbclient-builder/releases/download/v0.1.2/smbclient-${{ matrix.client-version }}" -O /usr/local/bin/smbclient
           sudo chmod +x /usr/local/bin/smbclient
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -137,7 +137,7 @@ jobs:
           command: php ./vendor/bin/phpunit tests -c tests/phpunit.xml --coverage-clover=coverage.xml
         env:
           BACKEND: smbclient
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
 
@@ -157,7 +157,7 @@ jobs:
           - 445:445
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -178,7 +178,7 @@ jobs:
     runs-on: ubuntu-20.04
     name: Kerberos SSO tests
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -207,7 +207,7 @@ jobs:
           docker logs apache
 
   static-psalm-analysis:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: Psalm static analysis
 
     strategy:
@@ -225,7 +225,7 @@ jobs:
       - name: krb5-dev
         run: sudo apt-get install -y libkrb5-dev
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v3
       - name: Set up php
         uses: shivammathur/setup-php@master
         with:
@@ -247,7 +247,7 @@ jobs:
     steps:
       - name: krb5-dev
         run: sudo apt-get install -y libkrb5-dev
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
