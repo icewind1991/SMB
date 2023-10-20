@@ -28,11 +28,14 @@ class BasicAuth implements IAuth {
 	private $workgroup;
 	/** @var string */
 	private $password;
+	/** @var int|null */
+	private $port = null;
 
-	public function __construct(string $username, ?string $workgroup, string $password) {
+	public function __construct(string $username, ?string $workgroup, string $password, int $port = null) {
 		$this->username = $username;
 		$this->workgroup = $workgroup;
 		$this->password = $password;
+		$this->port = $port;
 	}
 
 	public function getUsername(): ?string {
@@ -48,7 +51,10 @@ class BasicAuth implements IAuth {
 	}
 
 	public function getExtraCommandLineArguments(): string {
-		return ($this->workgroup) ? '-W ' . escapeshellarg($this->workgroup) : '';
+		$ret = '';
+		if ($this->workgroup) $ret .= ' -W ' . escapeshellarg($this->workgroup);
+		if ($this->port) $ret .= ' -p ' . escapeshellarg($this->port);
+		return $ret;
 	}
 
 	public function setExtraSmbClientOptions($smbClientState): void {
