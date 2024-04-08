@@ -23,7 +23,7 @@ interface IShare {
 	/**
 	 * Download a remote file
 	 *
-	 * @param string $source remove file
+	 * @param string $source remote file
 	 * @param string $target local file
 	 * @return bool
 	 *
@@ -36,7 +36,7 @@ interface IShare {
 	 * Upload a local file
 	 *
 	 * @param string $source local file
-	 * @param string $target remove file
+	 * @param string $target remote file
 	 * @return bool
 	 *
 	 * @throws NotFoundException
