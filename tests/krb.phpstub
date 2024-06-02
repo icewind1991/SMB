@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * SPDX-FileCopyrightText: 2022 Robin Appelman <robin@icewind.nl>
+ * SPDX-License-Identifier: MIT
+ */
+
 class KRB5CCache {
     public function getEntries(): array { return [];}
     public function getName(): string {return "";}

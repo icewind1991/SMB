@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * SPDX-FileCopyrightText: 2015 Robin Appelman <robin@icewind.nl>
+ * SPDX-License-Identifier: MIT
+ */
 require('vendor/autoload.php');
 
 $host = 'localhost';
