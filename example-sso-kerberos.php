@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * SPDX-FileCopyrightText: 2023 Robin Appelman <robin@icewind.nl>
+ * SPDX-License-Identifier: MIT
+ */
 use Icewind\SMB\KerberosTicket;
 
 require('vendor/autoload.php');

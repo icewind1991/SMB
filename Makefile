@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2018 Robin Appelman <robin@icewind.nl>
+# SPDX-License-Identifier: MIT
 .PHONY: tests
 
 all: vendor

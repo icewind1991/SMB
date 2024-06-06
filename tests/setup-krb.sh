@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# SPDX-FileCopyrightText: 2021 Robin Appelman <robin@icewind.nl>
+# SPDX-License-Identifier: MIT
+#
 
 function getContainerHealth {
   docker inspect --format "{{.State.Health.Status}}" $1

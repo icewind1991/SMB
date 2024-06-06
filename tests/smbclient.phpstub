@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2023 Robin Appelman <robin@icewind.nl>
+ * SPDX-License-Identifier: MIT
+ */
+
+/**
  * @generate-function-entries
  * @generate-legacy-arginfo
  */
