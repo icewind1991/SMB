@@ -35,6 +35,10 @@ jobs:
           - "7.3"
           - "7.4"
           - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4"
 
     services:
       samba:
@@ -50,7 +54,7 @@ jobs:
     steps:
       - name: Install packages
         run: |
-          sudo apt-get install smbclient
+          sudo apt-get install smbclient libsmbclient-dev
       - uses: actions/checkout@v3
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -227,7 +231,7 @@ jobs:
 
     steps:
       - name: krb5-dev
-        run: sudo apt-get install -y libkrb5-dev
+        run: sudo apt-get install -y libkrb5-dev libsmbclient-dev
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up php
