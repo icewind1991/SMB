@@ -23,7 +23,7 @@ abstract class AbstractShare implements IShare {
 	protected function verifyPath(string $path): void {
 		foreach ($this->forbiddenCharacters as $char) {
 			if (strpos($path, $char) !== false) {
-				throw new InvalidPathException('Invalid path, "' . $char . '" is not allowed');
+				throw new InvalidPathException("Invalid path \"$path\", \"$char\" is not allowed");
 			}
 		}
 	}
