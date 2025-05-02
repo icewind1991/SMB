@@ -343,7 +343,7 @@ class NativeState {
 	 *
 	 * @return false|int new file offset as measured from the start of the file on success.
 	 */
-	public function lseek($file, int $offset, int $whence = SEEK_SET, string $path = null) {
+	public function lseek($file, int $offset, int $whence = SEEK_SET, ?string $path = null) {
 		if (!$this->state) {
 			throw new ConnectionException("Not connected");
 		}
