@@ -7,7 +7,7 @@ name: CI
 jobs:
   php-cs-fixer:
     name: PHP-CS-Fixer
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Setup PHP
@@ -21,7 +21,7 @@ jobs:
           args: --diff --dry-run --allow-risky yes --stop-on-violation --using-cache=no --path-mode=intersection
 
   php-versions:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Unit tests
 
     strategy:
@@ -81,23 +81,22 @@ jobs:
           files: ./coverage.xml
 
   smb-versions:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Unit tests
 
     strategy:
       fail-fast: false
       matrix:
         client-version:
+          - "4.21.4"
+          - "4.20.4"
+          - "4.19.5"
           - "4.18.1"
           - "4.17.7"
           - "4.16.10"
           - "4.15.13"
           - "4.14.9"
           - "4.11.17"
-          - "4.10.18"
-          - "4.9.18"
-          - "4.8.12"
-          - "4.7.12"
         server-version:
           - "latest"
           - "4.9.4"
@@ -117,10 +116,10 @@ jobs:
     steps:
       - name: Setup smbclient
         run: |
-          sudo apt install libjansson4 libcap2 libbsd0 libreadline8 libicu66
+          sudo apt install libjansson4 libcap2 libbsd0 libreadline8 libicu70
           sudo mkdir -p /etc/samba /var/lib/samba/private
           echo "[global]\nclient min protocol = SMB2\nclient max protocol = SMB3" | sudo tee /etc/samba/smb.conf
-          sudo wget "https://github.com/icewind1991/smbclient-builder/releases/download/v0.1.2/smbclient-${{ matrix.client-version }}" -O /usr/local/bin/smbclient
+          sudo wget "https://github.com/icewind1991/smbclient-builder/releases/download/v0.2.0/smbclient-${{ matrix.client-version }}" -O /usr/local/bin/smbclient
           sudo chmod +x /usr/local/bin/smbclient
       - uses: actions/checkout@v3
       - name: Setup PHP
@@ -148,7 +147,7 @@ jobs:
           files: ./coverage.xml
 
   alpine-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Unit tests (alpine)
 
     services:
@@ -181,7 +180,7 @@ jobs:
           docker run --network "host" --rm -v $PWD:/smb icewind1991/smbclient-php-alpine /smb/vendor/bin/phpunit -c /smb/tests/phpunit.xml /smb/tests
 
   kerberos-sso:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Kerberos SSO tests
     steps:
       - uses: actions/checkout@v3
@@ -213,7 +212,7 @@ jobs:
           docker logs apache
 
   static-psalm-analysis:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Psalm static analysis
 
     strategy:
@@ -249,7 +248,7 @@ jobs:
 
   phpstan:
     name: PHPStan Static Analysis
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: krb5-dev
