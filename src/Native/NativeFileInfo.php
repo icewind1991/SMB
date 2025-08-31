@@ -65,6 +65,10 @@ class NativeFileInfo implements IFileInfo {
 	 *
 	 * Since the unix mask doesn't contain the proper hidden/archive/system flags we have to assume them
 	 * as false (except for `hidden` where we use the unix dotfile convention)
+	 * 
+	 * But on file, unix mask contain the proper hidden/archive/system flags with transfer.
+	 * hidden -> o+x, archive -> u+x, system -> g+x, 
+	 * refer: https://gitlab.com/samba-team/samba/-/blob/84b5440eb4f3c10e2729e916d097f5af07150dcd/source3/libsmb/libsmb_stat.c#L67
 	 */
 
 	protected function getMode(): int {
@@ -97,7 +101,11 @@ class NativeFileInfo implements IFileInfo {
 	public function isHidden(): bool {
 		$mode = $this->getMode();
 		if ($mode > 0x1000) {
-			return strlen($this->name) > 0 && $this->name[0] === '.';
+			if ($mode & 0x4000) { // is directory
+				return strlen($this->name) > 0 && $this->name[0] === '.';
+			} else {
+				return (bool)($mode & 0x1); // 0x01: hidden -> o+x
+			}	
 		} else {
 			return (bool)($mode & IFileInfo::MODE_HIDDEN);
 		}
@@ -106,7 +114,11 @@ class NativeFileInfo implements IFileInfo {
 	public function isSystem(): bool {
 		$mode = $this->getMode();
 		if ($mode > 0x1000) {
-			return false;
+			if ($mode & 0x4000) { // is directory
+				return false;
+			} else {
+				return (bool)($mode & 0x8); // 0x08: system -> g+x
+			}
 		} else {
 			return (bool)($mode & IFileInfo::MODE_SYSTEM);
 		}
@@ -115,7 +127,11 @@ class NativeFileInfo implements IFileInfo {
 	public function isArchived(): bool {
 		$mode = $this->getMode();
 		if ($mode > 0x1000) {
-			return false;
+			if ($mode & 0x4000) { // is directory
+				return false;
+			} else {
+				return (bool)($mode & 0x40); // 0x40: archive -> u+x
+			}
 		} else {
 			return (bool)($mode & IFileInfo::MODE_ARCHIVE);
 		}
